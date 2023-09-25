@@ -11,6 +11,9 @@ class VideoPlayer(Frame):
         self.tk_video.pack(expand=True, fill="both")
         self.tk_video.set_size((640, 480))
 
+        #self.tk_video.bind("<<Duration>>", self.on_duration_changed)
+        #self.tk_video.bind("<<SecondChanged>>", self.on_second_changed)
+
     def play(self):
         if self.video_path:
             self.tk_video.play()
@@ -21,7 +24,7 @@ class VideoPlayer(Frame):
 
     def seek(self, seconds):
         if self.video_path:
-            self.tk_video.seek(seconds * 1000)  # converting seconds to milliseconds
+            self.tk_video.seek(int(seconds))  # converting seconds to milliseconds
 
     def setVideoPath(self, video_path):
         self.video_path = video_path
