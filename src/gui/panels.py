@@ -11,8 +11,27 @@ class ConfigurationPanel(ttk.Frame):
 
         self.label = ttk.Label(self, text="Configuration Panel")
         self.label.pack(pady=20)
+        self.videoButton = ttk.Button(
+            self,
+            text='Load Video Playback'
+        )
+        self.videoButton.pack(
+            ipadx=20,
+            ipady=20,
+            expand=True
+        )
+        self.videoButton.place(x=415, y=240)
 
-        # TODO: Add more widgets and functionality for configuration
+        self.dataButton = ttk.Button(
+            self,
+            text='Load Flight Data'
+        )
+        self.dataButton.pack(
+            ipadx=20,
+            ipady=20,
+            expand=True
+        )
+        self.dataButton.place(x=425, y=280)
 
 class PlaybackPanel(ttk.Frame):
     """
