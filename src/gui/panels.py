@@ -3,18 +3,61 @@ import datetime
 from tkinter import ttk, filedialog
 from src.playback.video import VideoPlayer
 
+import tkinter as tk
+from tkinter import ttk, filedialog
+
+
 class ConfigurationPanel(ttk.Frame):
     """
     Panel for configuration settings like selecting telemetry data fields,
     specifying display gauges, etc.
     """
+
     def __init__(self, parent):
         super().__init__(parent)
-
         self.label = ttk.Label(self, text="Configuration Panel")
-        self.label.pack(pady=20)
+        self.label.pack(pady=10)
 
-        # TODO: Add more widgets and functionality for configuration
+        # Button to load video file
+        self.load_video_btn = ttk.Button(self, text="Load Video", command=self.load_video)
+        self.load_video_btn.pack(pady=5)
+
+        # Button to load CSV file
+        self.load_csv_btn = ttk.Button(self, text="Load CSV", command=self.load_csv)
+        self.load_csv_btn.pack(pady=5)
+
+        # Listbox to select multiple gauge types
+        self.gauge_label = ttk.Label(self, text="Select Gauge Types:")
+        self.gauge_label.pack(pady=5)
+        self.gauge_list = tk.Listbox(self, selectmode=tk.MULTIPLE, height=5, exportselection=0)
+        self.gauge_list.pack(pady=5)
+        self.gauges = ["Circle - 90°", "Circle - 180°", "Circle - 270°", "Circle - 360°", "Bar", "X-Plot", "X-by-Y-plot", "Character Display", "Text Display", "Clock", "Stopwatch", "Running Time", "On/off light"]
+        for gauge in self.gauges:
+            self.gauge_list.insert(tk.END, gauge)
+
+        # Button to confirm configuration
+        self.confirm_btn = ttk.Button(self, text="Confirm Configuration", command=self.confirm_config)
+        self.confirm_btn.pack(pady=10)
+
+    def load_video(self):
+        """Prompt the user to select a video file."""
+        video_path = filedialog.askopenfilename(filetypes=[("MP4 files", "*.mp4")], title="Select a Video File")
+        if video_path:  # If a file is selected
+            print(f"Video File Loaded: {video_path}")
+
+    def load_csv(self):
+        """Prompt the user to select a CSV file."""
+        csv_path = filedialog.askopenfilename(filetypes=[("CSV files", "*.csv")], title="Select a CSV File")
+        if csv_path:  # If a file is selected
+            print(f"CSV File Loaded: {csv_path}")
+
+    def confirm_config(self):
+        """Confirm the selected configuration settings."""
+        selected_gauges = [self.gauge_list.get(i) for i in self.gauge_list.curselection()]
+        if selected_gauges:
+            print(f"Selected Gauge Types: {', '.join(selected_gauges)}")
+        else:
+            print("No gauge type selected.")
 
 class PlaybackPanel(ttk.Frame):
     """
