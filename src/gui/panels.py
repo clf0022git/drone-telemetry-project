@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk, filedialog
 
 import csv
+import math
 
 # initializing the titles and rows list
 fields = []
@@ -31,6 +32,9 @@ class ConfigurationPanel(ttk.Frame):
         self.metricButton = ttk.Button(self, text="Swap from meters to feet", command=self.swap_metric)
         self.metricButton.pack(pady=10)
 
+        self.statisticsButton = ttk.Button(self, text="Produce statistics", command=self.calculateData)
+        self.statisticsButton.pack(pady=10)
+
     def load_csv(self):
         global fields
         global rows
@@ -57,6 +61,45 @@ class ConfigurationPanel(ttk.Frame):
 
             # printing the field names
             print('Field names are:' + ', '.join(field for field in fields))
+
+    def calculateData(self):
+        global fields
+        global rows
+        myData = []
+        valTotal = 0.0
+        enumTotal = 0.0
+        minimum = 0.0
+        maximum = 0.0
+        startSearch = 0
+        for row in rows:
+            myData.append(float(row[7]))
+        arrSize = len(myData)
+        for val in myData:
+            if startSearch == 0:
+                minimum = val
+                startSearch = 1
+            else:
+                if val < minimum:
+                    minimum = val
+        startSearch = 0
+        for val in myData:
+            if startSearch == 0:
+                maximum = val
+                startSearch = 1
+            else:
+                if val > maximum:
+                    maximum = val
+        for val in myData:
+            valTotal += val
+        median = valTotal/arrSize
+        for val in myData:
+            enumTotal += pow(val - median, 2)
+        standardDev = math.sqrt(enumTotal/arrSize)
+        print('\nMinimum: ', minimum, '\n')
+        print('\nMaximum: ', maximum, '\n')
+        print('\nMedian: ', median, '\n')
+        print('\nStandard Deviation: ', standardDev, '\n')
+
 
     def swap_metric(self):
         global fields
