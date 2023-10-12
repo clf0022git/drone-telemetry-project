@@ -91,13 +91,13 @@ class ConfigurationPanel(ttk.Frame):
                     maximum = val
         for val in myData:
             valTotal += val
-        median = valTotal/arrSize
+        average = valTotal/arrSize
         for val in myData:
-            enumTotal += pow(val - median, 2)
+            enumTotal += pow(val - average, 2)
         standardDev = math.sqrt(enumTotal/arrSize)
         print('\nMinimum: ', minimum, '\n')
         print('\nMaximum: ', maximum, '\n')
-        print('\nMedian: ', median, '\n')
+        print('\nMedian: ', average, '\n')
         print('\nStandard Deviation: ', standardDev, '\n')
 
 
