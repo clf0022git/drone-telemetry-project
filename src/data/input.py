@@ -8,3 +8,4 @@ class DataManager:
 
     def identify_gauges(self, datatype) -> list:
         """Use an if else tree to determine the kind of gauges for a specific type of data"""
+        pass
