@@ -6,6 +6,15 @@ from src.playback.video import VideoPlayer
 import tkinter as tk
 from tkinter import ttk, filedialog
 
+import csv
+
+class Field:
+    def __init__(self):
+        self.name = ""
+        self.value = None
+
+# Defines a list of entries that can be accessed by functions
+list_of_entries = []
 
 class ConfigurationPanel(ttk.Frame):
     """
@@ -50,6 +59,23 @@ class ConfigurationPanel(ttk.Frame):
         csv_path = filedialog.askopenfilename(filetypes=[("CSV files", "*.csv")], title="Select a CSV File")
         if csv_path:  # If a file is selected
             print(f"CSV File Loaded: {csv_path}")
+
+        with open(csv_path, 'r') as file:
+            csvreader = csv.reader(file, delimiter=",")
+            field_names = []
+            row = next(csvreader)
+            for j in range(len(row)):
+                field_names.append(row[j])
+            for row in csvreader:
+                entry = []
+                for i in range(len(row)):
+                    field = Field()
+                    field.value = row[i]
+                    field.name = field_names[i]
+                    entry.append(field)
+                list_of_entries.append(entry)
+
+        print(list_of_entries[0][0].name)
 
     def confirm_config(self):
         """Confirm the selected configuration settings."""
