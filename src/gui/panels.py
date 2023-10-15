@@ -6,15 +6,8 @@ from src.playback.video import VideoPlayer
 import tkinter as tk
 from tkinter import ttk, filedialog
 
-import csv
+import pandas as pd
 
-class Field:
-    def __init__(self):
-        self.name = ""
-        self.value = None
-
-# Defines a list of entries that can be accessed by functions
-list_of_entries = []
 
 class ConfigurationPanel(ttk.Frame):
     """
@@ -34,6 +27,34 @@ class ConfigurationPanel(ttk.Frame):
         # Button to load CSV file
         self.load_csv_btn = ttk.Button(self, text="Load CSV", command=self.load_csv)
         self.load_csv_btn.pack(pady=5)
+
+        # Frames that hold the fieldnames and their options
+        fieldnames_gauge_group = tk.Frame(self)
+        fieldnames_gauge_group.pack(pady=5, side=tk.TOP)
+        fieldnames_group = tk.Frame(fieldnames_gauge_group)
+        fieldnames_group.pack(side=tk.LEFT)
+        gauge_options_group = tk.Frame(fieldnames_gauge_group)
+        gauge_options_group.pack(side=tk.LEFT)
+
+        # Listbox to select one field
+        self.fieldnames_label = ttk.Label(fieldnames_group, text="Select Field:")
+        self.fieldnames_label.pack(pady=5)
+        self.fieldnames_list = tk.Listbox(fieldnames_group, selectmode=tk.SINGLE, height=5, exportselection=0)
+        self.fieldnames_list.pack(pady=5)
+        self.fieldnames = []
+        # Button to show gauges
+        self.show_gauges_btn = ttk.Button(fieldnames_group, text="Show Gauges", command=self.show_gauges)
+        self.show_gauges_btn.pack(pady=10)
+
+        # Listbox to show gauge options for a field
+        self.gauge_types_label = ttk.Label(gauge_options_group, text="Possible Gauges:")
+        self.gauge_types_label.pack(pady=5)
+        self.gauge_types_list = tk.Listbox(gauge_options_group, selectmode=tk.SINGLE, height=5, exportselection=0)
+        self.gauge_types_list.pack(pady=5)
+        self.gauge_types = []
+        # Button to select field with gauge
+        self.select_field_btn = ttk.Button(gauge_options_group, text="Select Field", command=self.select_field)
+        self.select_field_btn.pack(pady=10)
 
         # Listbox to select multiple gauge types
         self.gauge_label = ttk.Label(self, text="Select Gauge Types:")
@@ -60,22 +81,41 @@ class ConfigurationPanel(ttk.Frame):
         if csv_path:  # If a file is selected
             print(f"CSV File Loaded: {csv_path}")
 
-        with open(csv_path, 'r') as file:
-            csvreader = csv.reader(file, delimiter=",")
-            field_names = []
-            row = next(csvreader)
-            for j in range(len(row)):
-                field_names.append(row[j])
-            for row in csvreader:
-                entry = []
-                for i in range(len(row)):
-                    field = Field()
-                    field.value = row[i]
-                    field.name = field_names[i]
-                    entry.append(field)
-                list_of_entries.append(entry)
+        if not csv_path:
+            return
 
-        print(list_of_entries[0][0].name)
+        df = pd.read_csv(csv_path,
+                         dtype = {'CUSTOM.isPhoto': 'object',
+                                  'CUSTOM.hSpeed [m/s]': 'float64',
+                                  'CUSTOM.hSpeed.running_max [m/s]': 'float64',
+                                  'OSD.latitude': 'float64',
+                                  })
+        print(df)
+
+        for col in df.columns:
+            self.fieldnames.append(col)
+            print(col)
+
+        for field in self.fieldnames:
+            self.fieldnames_list.insert(tk.END, field)
+
+        i = 0
+        for dt in df.dtypes:
+            i = i + 1
+            print(i)
+            print(dt)
+
+    def show_gauges(self):
+        """Show the user the gauges that are available to them"""
+        selected_field = [self.fieldnames_list.get(i) for i in self.fieldnames_list.curselection()]
+        if selected_field:
+            print(f"Selected Field: {', '. join(selected_field)}")
+        else:
+            print("Please select a field.")
+
+    def select_field(self):
+        """Will have functionality to send selected fields to function"""
+        print("Field selected!")
 
     def confirm_config(self):
         """Confirm the selected configuration settings."""
