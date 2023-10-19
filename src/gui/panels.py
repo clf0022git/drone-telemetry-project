@@ -1,9 +1,7 @@
 import tkinter as tk
-from tkinter import ttk, filedialog
-from src.data.dataManager import get_statistics, swap_metric
+from tkinter import ttk
+from src.data.dataManager import DataProcessor
 
-import csv
-import math
 
 # initializing the titles and rows list
 fields = []
@@ -19,6 +17,7 @@ class ConfigurationPanel(ttk.Frame):
 
     def __init__(self, parent):
         super().__init__(parent)
+        self.data_processor = DataProcessor(fields, rows)
 
         self.label = ttk.Label(self, text="Configuration Panel")
         self.label.pack(pady=20)
@@ -28,41 +27,40 @@ class ConfigurationPanel(ttk.Frame):
         )
         self.videoButton.pack(pady=10)
 
-        self.dataButton = ttk.Button(self, text="Load CSV", command=self.load_csv)
+        self.dataButton = ttk.Button(
+            self,
+            text="Load CSV",
+            command=self.load_csv
+        )
         self.dataButton.pack(pady=10)
 
-        self.metricButton = ttk.Button(self, text="Swap from meters to feet", command=swap_metric(fields, rows, m_or_f))
+        self.metricButton = ttk.Button(
+            self,
+            text="Swap metrics",
+            command=self.metric_swap
+        )
         self.metricButton.pack(pady=10)
 
-        self.statisticsButton = ttk.Button(self, text="Produce statistics", command=get_statistics(rows))
+        self.statisticsButton = ttk.Button(
+            self,
+            text="Produce statistics",
+            command=self.data_processor.get_statistics
+        )
         self.statisticsButton.pack(pady=10)
 
     def load_csv(self):
         global fields
         global rows
-        del fields[:]
-        del rows[:]
-        """Prompt the user to select a CSV file."""
-        filename = filedialog.askopenfilename(filetypes=[("CSV files", "*.csv")], title="Select a CSV File")
-        if filename:  # If a file is selected
-            print(f"CSV File Loaded: {filename}")
-            # reading csv file
-            with open(filename, 'r') as csvfile:
-                # creating a csv reader object
-                csvreader = csv.reader(csvfile)
+        self.data_processor.load_csv()
+        fields = self.data_processor.fields
+        rows = self.data_processor.rows
 
-                # extracting field names through first row
-                fields = next(csvreader)
-
-                # extracting each data row one by one
-                for row in csvreader:
-                    rows.append(row)
-
-                # get total number of rows
-                print("Total no. of rows: %d" % csvreader.line_num)
-
-            # printing the field names
-            print('Field names are:' + ', '.join(field for field in fields))
+    def metric_swap(self):
+        global rows
+        print(f"{self.data_processor.rows}")
+        self.data_processor.swap_metric()
+        rows = self.data_processor.rows
+        print(f"First 6 rows after conversion: {rows[:6]}")
 
 
 class PlaybackPanel(ttk.Frame):

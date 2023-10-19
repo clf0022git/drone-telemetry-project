@@ -1,76 +1,91 @@
+from tkinter import filedialog
+
 import math
+import csv
 
 
-def get_statistics(rows):
-    """Error! float division by 0"""
-    my_data = []
-    val_total = 0.0
-    enum_total = 0.0
-    minimum = 0.0
-    maximum = 0.0
-    start_search = 0
-    for row in rows:
-        my_data.append(float(row[7]))
-    arr_size = len(my_data)
-    for val in my_data:
-        if start_search == 0:
-            minimum = val
-            start_search = 1
-        else:
-            if val < minimum:
-                minimum = val
-    start_search = 0
-    for val in my_data:
-        if start_search == 0:
-            maximum = val
-            start_search = 1
-        else:
-            if val > maximum:
-                maximum = val
-    for val in my_data:
-        val_total += val
-    average = val_total / arr_size
-    for val in my_data:
-        enum_total += pow(val - average, 2)
-    standard_dev = math.sqrt(enum_total / arr_size)
-    print('\nMinimum: ', minimum, '\n')
-    print('\nMaximum: ', maximum, '\n')
-    print('\nMedian: ', average, '\n')
-    print('\nStandard Deviation: ', standard_dev, '\n')
+class DataProcessor:
+    def __init__(self, fields, rows):
+        self.fields = fields
+        self.rows = rows
+        self.metric_indicator = 0  # default to 0 (meters)
 
+    def get_statistics(self):
+        """Calculate statistics for the given data."""
+        if not self.rows or not self.rows[0]:
+            print("No data available.")
+            return None
 
-def swap_metric(fields, rows, m_or_f):
-    """Check what metric is already in use and swap to the other one"""
-    """Error! Does not display changes"""
-    if m_or_f == 0:  # case for the units being in meters
-        for row in rows:
-            i = 0
-            while i < len(row):
-                index = fields[i].find('[m')
-                if index != -1 and row[i] != '':
-                    row[i] = str(float(row[i]) * 39.76)
-                i += 1
-        # printing first 6 rows
-        print('\nFirst 6 rows are:\n')
-        for row in rows[:6]:
-            # parsing each column of a row
-            for col in row:
-                print("%10s" % col, end=" "),
-            print('\n')
-        m_or_f = 1
-    else:
-        for row in rows:
-            i = 0
-            while i < len(row):
-                index = fields[i].find('[m')
-                if index != -1 and row[i] != '':
-                    row[i] = str(float(row[i]) / 39.76)
-                i += 1
-        # printing first 6 rows
-        print('\nFirst 6 rows are:\n')
-        for row in rows[:6]:
-            # parsing each column of a row
-            for col in row:
-                print("%10s" % col, end=" "),
-            print('\n')
-        m_or_f = 0
+        # Extract relevant data.
+        my_data = [float(row[7]) for row in self.rows]  # Assumes data is in the 8th column
+
+        # Calculate statistics.
+        minimum = min(my_data)
+        maximum = max(my_data)
+        average = sum(my_data) / len(my_data)
+        variance = sum((val - average) ** 2 for val in my_data) / len(my_data)
+        standard_dev = math.sqrt(variance)
+
+        # Compile statistics in a dictionary.
+        statistics = {
+            'Minimum': minimum,
+            'Maximum': maximum,
+            'Average': average,
+            'Standard Deviation': standard_dev
+        }
+
+        print(f"Statistics: {statistics}")
+        return statistics
+
+    def swap_metric(self):
+        """Swap units between meters and inches in the dataset."""
+        if not self.rows:
+            print("No data available to convert.")
+            return None
+
+        conversion_factor = 39.3701  # accurate conversion factor from meters to inches
+
+        if self.metric_indicator == 0:  # units are in meters, convert to inches
+            self.metric_indicator = 1
+            conversion = lambda x: x * conversion_factor
+        else:  # units are in inches, convert to meters
+            self.metric_indicator = 0
+            conversion = lambda x: x / conversion_factor
+
+        for row in self.rows:
+            for i, field in enumerate(self.fields):
+                if '[m' in field and row[i]:
+                    row[i] = str(conversion(float(row[i])))
+
+        return self.rows  # returns updated rows
+
+    def load_csv(self):
+        """Prompt the user to select a CSV file."""
+        filename = filedialog.askopenfilename(filetypes=[("CSV files", "*.csv")], title="Select a CSV File")
+        if filename:  # If a file is selected
+            print(f"CSV File Loaded: {filename}")
+            # reading csv file
+            with open(filename, 'r') as csvfile:
+                # creating a csv reader object
+                csvreader = csv.reader(csvfile)
+
+                # extracting field names through first row
+                self.fields = next(csvreader)
+
+                # extracting each data row one by one
+                for row in csvreader:
+                    self.rows.append(row)
+
+                # get total number of rows
+                print("Total no. of rows: %d" % csvreader.line_num)
+
+            # printing the field names
+            print('Field names are:' + ', '.join(field for field in self.fields))
+
+# Example usage:
+# fields_example = ['Field1', 'Field2[m]', ...]  # Replace with actual fields
+# rows_example = [...]  # Replace with actual rows data
+
+# processor = DataProcessor(fields_example, rows_example)
+# statistics = processor.get_statistics()
+# updated_rows = processor.swap_metric()
