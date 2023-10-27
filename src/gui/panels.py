@@ -44,16 +44,19 @@ class ConfigurationPanel(ttk.Frame):
         self.speed_label.pack(pady=5)
 
         # Using radio buttons for playback speed options
+        self.speed_frame = ttk.Frame(self)
+        self.speed_frame.pack(pady=5)
+
         self.playback_speed = tk.IntVar(value=1)  # default speed 1X
-        self.speed_1x = ttk.Radiobutton(self, text="1X", variable=self.playback_speed, value=1,
+        self.speed_1x = ttk.Radiobutton(self.speed_frame, text="1X", variable=self.playback_speed, value=1,
                                         command=self.set_playback_speed)
-        self.speed_1x.pack(anchor='w', padx=20)
-        self.speed_5x = ttk.Radiobutton(self, text="5X", variable=self.playback_speed, value=5,
+        self.speed_1x.grid(row=0, column=0, padx=5, pady=2)
+        self.speed_5x = ttk.Radiobutton(self.speed_frame, text="5X", variable=self.playback_speed, value=5,
                                         command=self.set_playback_speed)
-        self.speed_5x.pack(anchor='w', padx=20)
-        self.speed_10x = ttk.Radiobutton(self, text="10X", variable=self.playback_speed, value=10,
+        self.speed_5x.grid(row=1, column=0, padx=5, pady=2)
+        self.speed_10x = ttk.Radiobutton(self.speed_frame, text="10X", variable=self.playback_speed, value=10,
                                          command=self.set_playback_speed)
-        self.speed_10x.pack(anchor='w', padx=20)
+        self.speed_10x.grid(row=2, column=0, padx=5, pady=2)
 
     def load_video(self):
         """Prompt the user to select a video file."""
