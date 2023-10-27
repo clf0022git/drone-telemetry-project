@@ -13,11 +13,12 @@ class ConfigurationPanel(ttk.Frame):
     specifying display gauges, etc.
     """
 
-    def __init__(self, parent, playback_panel):
+    def __init__(self, parent, playback_panel, stats_panel):
         super().__init__(parent)
         self.label = ttk.Label(self, text="Configuration Panel")
         self.label.pack(pady=10)
         self.playback_panel = playback_panel
+        self.stats_panel = stats_panel
 
         # Button to load video file
         self.load_video_btn = ttk.Button(self, text="Load Video", command=self.load_video)
