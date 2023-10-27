@@ -80,7 +80,7 @@ class ConfigurationPanel(ttk.Frame):
         speed = self.playback_speed.get()
         print(f"Setting playback speed to: {speed}X")
         if self.playback_panel.video_player:
-            self.playback_panel.video_player.set_speed(speed)  # Assuming video player has a set_speed method
+            self.playback_panel.video_player.set_speed(speed)
 
 
 class PlaybackPanel(ttk.Frame):
