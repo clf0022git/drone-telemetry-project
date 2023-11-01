@@ -1,5 +1,7 @@
 import sys
+import traceback
 from src.gui.window import MainWindow
+
 
 def main():
     """
@@ -12,6 +14,7 @@ def main():
         root.mainloop()
     except Exception as e:
         print(f"An error occurred: {e}", file=sys.stderr)
+        traceback.print_exc(file=sys.stderr)
         sys.exit(1)
 
 
