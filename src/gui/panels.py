@@ -2,9 +2,12 @@ import tkinter as tk
 import datetime
 from tkinter import ttk, filedialog
 from src.playback.video import VideoPlayer
+from src.data.input import DataManager
 
 import tkinter as tk
 from tkinter import ttk, filedialog
+
+import pandas as pd
 
 
 class ConfigurationPanel(ttk.Frame):
@@ -15,6 +18,10 @@ class ConfigurationPanel(ttk.Frame):
 
     def __init__(self, parent, playback_panel, stats_panel):
         super().__init__(parent)
+
+        # Instantiate a DataManager object
+        self.data_manager = DataManager()
+
         self.label = ttk.Label(self, text="Configuration Panel")
         self.label.pack(pady=10)
         self.playback_panel = playback_panel
@@ -28,12 +35,42 @@ class ConfigurationPanel(ttk.Frame):
         self.load_csv_btn = ttk.Button(self, text="Load CSV", command=self.load_csv)
         self.load_csv_btn.pack(pady=5)
 
+        # Frames that hold the fieldnames and their options
+        self.fieldnames_gauge_group = tk.Frame(self)
+        self.fieldnames_gauge_group.pack(pady=5, side=tk.TOP)
+        self.fieldnames_group = tk.Frame(self.fieldnames_gauge_group)
+        self.fieldnames_group.pack(side=tk.LEFT)
+        self.gauge_options_group = tk.Frame(self.fieldnames_gauge_group)
+        self.gauge_options_group.pack(side=tk.LEFT)
+
+        # Listbox to select one field
+        self.fieldnames_label = ttk.Label(self.fieldnames_group, text="Select Field:")
+        self.fieldnames_label.pack(pady=5)
+        self.fieldnames_list = tk.Listbox(self.fieldnames_group, selectmode=tk.SINGLE, height=5, exportselection=0)
+        self.fieldnames_list.pack(pady=5)
+        self.fieldnames = []
+        # Button to show gauges
+        self.show_gauges_btn = ttk.Button(self.fieldnames_group, text="Show Gauges", command=self.show_gauges)
+        self.show_gauges_btn.pack(pady=10)
+
+        # Listbox to show gauge options for a field
+        self.gauge_types_label = ttk.Label(self.gauge_options_group, text="Possible Gauges:")
+        self.gauge_types_label.pack(pady=5)
+        self.gauge_types_list = tk.Listbox(self.gauge_options_group, selectmode=tk.SINGLE, height=5, exportselection=0)
+        self.gauge_types_list.pack(pady=5)
+        self.gauge_types = []
+        # Button to select field with gauge
+        self.select_field_btn = ttk.Button(self.gauge_options_group, text="Select Field", command=self.select_field)
+        self.select_field_btn.pack(pady=10)
+
         # Listbox to select multiple gauge types
         self.gauge_label = ttk.Label(self, text="Select Gauge Types:")
         self.gauge_label.pack(pady=5)
         self.gauge_list = tk.Listbox(self, selectmode=tk.MULTIPLE, height=5, exportselection=0)
         self.gauge_list.pack(pady=5)
-        self.gauges = ["Circle - 90°", "Circle - 180°", "Circle - 270°", "Circle - 360°", "Bar", "X-Plot", "X-by-Y-plot", "Character Display", "Text Display", "Clock", "Stopwatch", "Running Time", "On/off light"]
+        self.gauges = ["Circle - 90°", "Circle - 180°", "Circle - 270°", "Circle - 360°", "Bar", "X-Plot",
+                       "X-by-Y-plot", "Character Display", "Text Display", "Clock", "Stopwatch", "Running Time",
+                       "On/off light"]
         for gauge in self.gauges:
             self.gauge_list.insert(tk.END, gauge)
 
@@ -72,6 +109,36 @@ class ConfigurationPanel(ttk.Frame):
         if csv_path:  # If a file is selected
             print(f"CSV File Loaded: {csv_path}")
 
+        if not csv_path:
+            return
+
+        self.data_manager.parse(csv_path)
+        self.fieldnames_list = self.data_manager.load_fields(self.fieldnames_list)
+
+    def show_gauges(self):
+        """Show the user the gauges that are available to them"""
+        selected_field = None
+        self.gauge_types_list.delete(0, 'end')  # clear list before each call to update
+
+        selected_field = [self.fieldnames_list.get(i) for i in self.fieldnames_list.curselection()]
+
+        if selected_field:
+            print(f"Selected Field: {', '.join(selected_field)}")
+            # add the elements to the gauge_types listbox
+            self.gauge_types_list.insert(0, *self.data_manager.identify_gauges(selected_field))
+        else:
+            print("Please select a field.")
+
+    def select_field(self):
+        """Will have functionality to send selected fields to function"""
+        selected_gauge = [self.gauge_types_list.get(i) for i in self.gauge_types_list.curselection()]
+
+        if selected_gauge:
+            print(f"Selected Gauge: {', '.join(selected_gauge)}")
+        else:
+            print("Please select a gauge.")
+
+
     def confirm_config(self):
         """Confirm the selected configuration settings."""
         selected_gauges = [self.gauge_list.get(i) for i in self.gauge_list.curselection()]
@@ -80,11 +147,14 @@ class ConfigurationPanel(ttk.Frame):
         else:
             print("No gauge type selected.")
 
+
+
     def set_playback_speed(self):
         speed = self.playback_speed.get()
         print(f"Setting playback speed to: {speed}X")
         if self.playback_panel.video_player:
             self.playback_panel.video_player.set_speed(speed)
+
 
 
 class PlaybackPanel(ttk.Frame):
@@ -98,11 +168,31 @@ class PlaybackPanel(ttk.Frame):
         self.label = ttk.Label(self, text="Playback Panel")
         self.label.pack(pady=20)
 
+        # TODO: Add widgets for video playback, gauges, playback controls, etc.
+
+        # Prompt user for video file
+        # video_path = filedialog.askopenfilename(
+        #     filetypes=[("MP4 files", "*.mp4")],
+        #     title="Select a Video File"
+        # )
+        # if not video_path:  # if no file is selected, return
+        #     return
+
+        # Video Player
+        self.video_player = VideoPlayer(self, None)
+        self.video_player.pack(fill="both", expand=True)
+
+        # Seek Bar
+        # self.seek_bar = ttk.Scale(self, orient="horizontal", command=self.on_seek)
+        # self.seek_bar.pack(fill="x")
+        # self.update_seek_bar()  # Start updating the seek bar
+
         # Video Player (initialization postponed until a video is selected)
         self.video_player = None
         self.video_path = None
 
         self.current_time = 0
+
 
         # Playback Controls
         control_frame = ttk.Frame(self)
@@ -115,6 +205,7 @@ class PlaybackPanel(ttk.Frame):
         self.end_time.pack(side="right")
 
         self.progress_value = tk.IntVar(control_frame)
+
         self.progress_slider = tk.Scale(control_frame, variable=self.progress_value, from_=0, to=0, orient="horizontal")
         self.progress_slider.pack(side="left", fill="x", expand=True)
 
@@ -182,6 +273,7 @@ class StatisticsPanel(ttk.Frame):
     """
     Panel for displaying statistics of selected telemetry data fields.
     """
+
     def __init__(self, parent):
         super().__init__(parent)
 
@@ -191,4 +283,3 @@ class StatisticsPanel(ttk.Frame):
         # TODO: Add widgets to display statistics like min, max, average, etc.
 
 # Additional panels can be added here...
-
