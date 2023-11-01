@@ -15,6 +15,7 @@ from tkinter import ttk, filedialog
 
 import pandas as pd
 
+
 class ConfigurationPanel(ttk.Frame):
     """
     Panel for configuration settings like selecting telemetry data fields,
@@ -43,6 +44,70 @@ class ConfigurationPanel(ttk.Frame):
         
         self.metricButton = ttk.Button(self, text="Swap from meters to feet", command=self.swap_metric)
         self.metricButton.pack(pady=10)
+
+        # Frames that hold the fieldnames and their options
+        self.fieldnames_gauge_group = tk.Frame(self)
+        self.fieldnames_gauge_group.pack(pady=5, side=tk.TOP)
+        self.fieldnames_group = tk.Frame(self.fieldnames_gauge_group)
+        self.fieldnames_group.pack(side=tk.LEFT)
+        self.gauge_options_group = tk.Frame(self.fieldnames_gauge_group)
+        self.gauge_options_group.pack(side=tk.LEFT)
+
+        # Listbox to select one field
+        self.fieldnames_label = ttk.Label(self.fieldnames_group, text="Select Field:")
+        self.fieldnames_label.pack(pady=5)
+        self.fieldnames_list = tk.Listbox(self.fieldnames_group, selectmode=tk.SINGLE, height=5, exportselection=0)
+        self.fieldnames_list.pack(pady=5)
+        self.fieldnames = []
+        # Button to show gauges
+        self.show_gauges_btn = ttk.Button(self.fieldnames_group, text="Show Gauges", command=self.show_gauges)
+        self.show_gauges_btn.pack(pady=10)
+
+        # Listbox to show gauge options for a field
+        self.gauge_types_label = ttk.Label(self.gauge_options_group, text="Possible Gauges:")
+        self.gauge_types_label.pack(pady=5)
+        self.gauge_types_list = tk.Listbox(self.gauge_options_group, selectmode=tk.SINGLE, height=5, exportselection=0)
+        self.gauge_types_list.pack(pady=5)
+        self.gauge_types = []
+        # Button to select field with gauge
+        self.select_field_btn = ttk.Button(self.gauge_options_group, text="Select Field", command=self.select_field)
+        self.select_field_btn.pack(pady=10)
+
+        # Listbox to select multiple gauge types
+        self.gauge_label = ttk.Label(self, text="Select Gauge Types:")
+        self.gauge_label.pack(pady=5)
+        self.gauge_list = tk.Listbox(self, selectmode=tk.MULTIPLE, height=5, exportselection=0)
+        self.gauge_list.pack(pady=5)
+        self.gauges = ["Circle - 90°", "Circle - 180°", "Circle - 270°", "Circle - 360°", "Bar", "X-Plot",
+                       "X-by-Y-plot", "Character Display", "Text Display", "Clock", "Stopwatch", "Running Time",
+                       "On/off light"]
+        for gauge in self.gauges:
+            self.gauge_list.insert(tk.END, gauge)
+
+        # Button to confirm configuration
+        self.confirm_btn = ttk.Button(self, text="Confirm Configuration", command=self.confirm_config)
+        self.confirm_btn.pack(pady=10)
+
+        self.speed_label = ttk.Label(self, text="Playback Speed:")
+        self.speed_label.pack(pady=5)
+
+        # Using radio buttons for playback speed options
+        self.speed_frame = ttk.Frame(self)
+        self.speed_frame.pack(pady=5)
+
+        self.playback_speed = tk.IntVar(value=1)  # default speed 1X
+        self.speed_1x = ttk.Radiobutton(self.speed_frame, text="1X", variable=self.playback_speed, value=1,
+                                        command=self.set_playback_speed)
+        self.speed_1x.grid(row=0, column=0, padx=5, pady=2)
+        self.speed_5x = ttk.Radiobutton(self.speed_frame, text="5X", variable=self.playback_speed, value=5,
+                                        command=self.set_playback_speed)
+        self.speed_5x.grid(row=1, column=0, padx=5, pady=2)
+        self.speed_10x = ttk.Radiobutton(self.speed_frame, text="10X", variable=self.playback_speed, value=10,
+                                         command=self.set_playback_speed)
+        self.speed_10x.grid(row=2, column=0, padx=5, pady=2)
+        self.speed_1x_backwards = ttk.Radiobutton(self.speed_frame, text="1X backwards", variable=self.playback_speed,
+                                                  value=-1, command=self.set_playback_speed)
+        self.speed_1x_backwards.grid(row=3, column=0, padx=5, pady=2)
 
     def load_csv(self):
         global fields
@@ -109,67 +174,6 @@ class ConfigurationPanel(ttk.Frame):
                 print('\n')
             m_or_f = 0
 
-        # Frames that hold the fieldnames and their options
-        self.fieldnames_gauge_group = tk.Frame(self)
-        self.fieldnames_gauge_group.pack(pady=5, side=tk.TOP)
-        self.fieldnames_group = tk.Frame(self.fieldnames_gauge_group)
-        self.fieldnames_group.pack(side=tk.LEFT)
-        self.gauge_options_group = tk.Frame(self.fieldnames_gauge_group)
-        self.gauge_options_group.pack(side=tk.LEFT)
-
-        # Listbox to select one field
-        self.fieldnames_label = ttk.Label(self.fieldnames_group, text="Select Field:")
-        self.fieldnames_label.pack(pady=5)
-        self.fieldnames_list = tk.Listbox(self.fieldnames_group, selectmode=tk.SINGLE, height=5, exportselection=0)
-        self.fieldnames_list.pack(pady=5)
-        self.fieldnames = []
-        # Button to show gauges
-        self.show_gauges_btn = ttk.Button(self.fieldnames_group, text="Show Gauges", command=self.show_gauges)
-        self.show_gauges_btn.pack(pady=10)
-
-        # Listbox to show gauge options for a field
-        self.gauge_types_label = ttk.Label(self.gauge_options_group, text="Possible Gauges:")
-        self.gauge_types_label.pack(pady=5)
-        self.gauge_types_list = tk.Listbox(self.gauge_options_group, selectmode=tk.SINGLE, height=5, exportselection=0)
-        self.gauge_types_list.pack(pady=5)
-        self.gauge_types = []
-        # Button to select field with gauge
-        self.select_field_btn = ttk.Button(self.gauge_options_group, text="Select Field", command=self.select_field)
-        self.select_field_btn.pack(pady=10)
-
-        # Listbox to select multiple gauge types
-        self.gauge_label = ttk.Label(self, text="Select Gauge Types:")
-        self.gauge_label.pack(pady=5)
-        self.gauge_list = tk.Listbox(self, selectmode=tk.MULTIPLE, height=5, exportselection=0)
-        self.gauge_list.pack(pady=5)
-        self.gauges = ["Circle - 90°", "Circle - 180°", "Circle - 270°", "Circle - 360°", "Bar", "X-Plot",
-                       "X-by-Y-plot", "Character Display", "Text Display", "Clock", "Stopwatch", "Running Time",
-                       "On/off light"]
-        for gauge in self.gauges:
-            self.gauge_list.insert(tk.END, gauge)
-
-        # Button to confirm configuration
-        self.confirm_btn = ttk.Button(self, text="Confirm Configuration", command=self.confirm_config)
-        self.confirm_btn.pack(pady=10)
-
-        self.speed_label = ttk.Label(self, text="Playback Speed:")
-        self.speed_label.pack(pady=5)
-
-        # Using radio buttons for playback speed options
-        self.speed_frame = ttk.Frame(self)
-        self.speed_frame.pack(pady=5)
-
-        self.playback_speed = tk.IntVar(value=1)  # default speed 1X
-        self.speed_1x = ttk.Radiobutton(self.speed_frame, text="1X", variable=self.playback_speed, value=1,
-                                        command=self.set_playback_speed)
-        self.speed_1x.grid(row=0, column=0, padx=5, pady=2)
-        self.speed_5x = ttk.Radiobutton(self.speed_frame, text="5X", variable=self.playback_speed, value=5,
-                                        command=self.set_playback_speed)
-        self.speed_5x.grid(row=1, column=0, padx=5, pady=2)
-        self.speed_10x = ttk.Radiobutton(self.speed_frame, text="10X", variable=self.playback_speed, value=10,
-                                         command=self.set_playback_speed)
-        self.speed_10x.grid(row=2, column=0, padx=5, pady=2)
-
     def load_video(self):
         """Prompt the user to select a video file."""
         video_path = filedialog.askopenfilename(filetypes=[("MP4 files", "*.mp4")], title="Select a Video File")
@@ -212,7 +216,6 @@ class ConfigurationPanel(ttk.Frame):
         else:
             print("Please select a gauge.")
 
-
     def confirm_config(self):
         """Confirm the selected configuration settings."""
         selected_gauges = [self.gauge_list.get(i) for i in self.gauge_list.curselection()]
@@ -220,8 +223,6 @@ class ConfigurationPanel(ttk.Frame):
             print(f"Selected Gauge Types: {', '.join(selected_gauges)}")
         else:
             print("No gauge type selected.")
-
-
 
     def set_playback_speed(self):
         speed = self.playback_speed.get()
@@ -252,8 +253,8 @@ class PlaybackPanel(ttk.Frame):
         #     return
 
         # Video Player
-        self.video_player = VideoPlayer(self, None)
-        self.video_player.pack(fill="both", expand=True)
+        #self.video_player = VideoPlayer(self, None)
+        #self.video_player.pack(fill="both", expand=True)
 
         # Seek Bar
         # self.seek_bar = ttk.Scale(self, orient="horizontal", command=self.on_seek)
