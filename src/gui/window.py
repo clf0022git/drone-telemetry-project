@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 from src.gui.panels import ConfigurationPanel, PlaybackPanel, StatisticsPanel
 
+
 class MainWindow(tk.Tk):
     def __init__(self):
         super().__init__()
@@ -16,13 +17,13 @@ class MainWindow(tk.Tk):
         self.notebook.pack(pady=20, padx=20, expand=True, fill=tk.BOTH)
 
         # Adding panels to the notebook as separate tabs
-        self.config_panel = ConfigurationPanel(self.notebook)
-        self.notebook.add(self.config_panel, text="Configuration")
 
         self.playback_panel = PlaybackPanel(self.notebook)
-        self.notebook.add(self.playback_panel, text="Playback")
-
         self.stats_panel = StatisticsPanel(self.notebook)
+        self.config_panel = ConfigurationPanel(self.notebook, self.playback_panel, self.stats_panel)
+
+        self.notebook.add(self.config_panel, text="Configuration")
+        self.notebook.add(self.playback_panel, text="Playback")
         self.notebook.add(self.stats_panel, text="Statistics")
 
     def create_frames(self):

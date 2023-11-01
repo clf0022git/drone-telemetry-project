@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module external.linked.project.id="DronePlayback:main" external.linked.project.path="$MODULE_DIR$/../.." external.root.project.path="$MODULE_DIR$/../.." external.system.id="GRADLE" external.system.module.group="com.droneplayback" external.system.module.type="sourceSet" external.system.module.version="1.0-SNAPSHOT" type="JAVA_MODULE" version="4">
+  <component name="NewModuleRootManager">
+    <output url="file://$MODULE_DIR$/../../build/classes/java/main" />
+    <exclude-output />
+    <content url="file://$MODULE_DIR$/../../src/main">
+      <sourceFolder url="file://$MODULE_DIR$/../../src/main/java" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/../../src/main/resources" type="java-resource" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="Gradle: org.openjfx:javafx-fxml:win:16" level="project" />
+    <orderEntry type="library" name="Gradle: org.openjfx:javafx-web:win:16" level="project" />
+    <orderEntry type="library" name="Gradle: org.openjfx:javafx-media:16" level="project" />
+    <orderEntry type="library" name="Gradle: org.openjfx:javafx-media:win:16" level="project" />
+    <orderEntry type="library" name="Gradle: org.openjfx:javafx-controls:16" level="project" />
+    <orderEntry type="library" name="Gradle: org.openjfx:javafx-controls:win:16" level="project" />
+    <orderEntry type="library" name="Gradle: org.openjfx:javafx-graphics:16" level="project" />
+    <orderEntry type="library" name="Gradle: org.openjfx:javafx-graphics:win:16" level="project" />
+    <orderEntry type="library" name="Gradle: org.openjfx:javafx-base:16" level="project" />
+    <orderEntry type="library" name="Gradle: org.openjfx:javafx-base:win:16" level="project" />
+    <orderEntry type="library" name="Gradle: org.controlsfx:controlsfx:11.1.0" level="project" />
+    <orderEntry type="library" name="Gradle: eu.hansolo:tilesfx:11.48" level="project" />
+  </component>
+</module>
