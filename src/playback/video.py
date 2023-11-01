@@ -143,6 +143,10 @@ class VideoPlayer(tk.Frame):
 
     def pause(self):
         """Method to pause the video."""
+        if self.do_backwards:
+            self.pause_backward()
+            return
+
         self.player.pause()
 
     def seek(self, seconds):
@@ -162,6 +166,8 @@ class VideoPlayer(tk.Frame):
         if speed_multiplier == -1:
             self.do_backwards = True
             return
+        else:
+            self.do_backwards = False
 
         self.player.set_rate(speed_multiplier)
 

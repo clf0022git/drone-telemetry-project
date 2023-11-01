@@ -22,7 +22,6 @@ class ConfigurationPanel(ttk.Frame):
     specifying display gauges, etc.
     """
 
-
     def __init__(self, parent, playback_panel, stats_panel):
         super().__init__(parent)
 
