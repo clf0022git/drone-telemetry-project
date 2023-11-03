@@ -235,8 +235,8 @@ class PlaybackPanel(ttk.Frame):
         #     return
 
         # Video Player
-        self.video_player = VideoPlayer(self, None)
-        self.video_player.pack(fill="both", expand=True)
+        #self.video_player = VideoPlayer(self, None)
+        #self.video_player.pack(fill="both", expand=True)
 
         # Seek Bar
         # self.seek_bar = ttk.Scale(self, orient="horizontal", command=self.on_seek)
