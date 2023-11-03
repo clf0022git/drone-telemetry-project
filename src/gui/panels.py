@@ -49,13 +49,29 @@ class ConfigurationPanel(ttk.Frame):
         self.fieldnames_gauge_group.pack(pady=5, side=tk.TOP)
         self.fieldnames_group = tk.Frame(self.fieldnames_gauge_group)
         self.fieldnames_group.pack(side=tk.LEFT)
+        self.datatypes_group = tk.Frame(self.fieldnames_gauge_group)
+        self.datatypes_group.pack(side=tk.LEFT)
         self.gauge_options_group = tk.Frame(self.fieldnames_gauge_group)
         self.gauge_options_group.pack(side=tk.LEFT)
+
+        # Combobox that allows changing datatypes
+        self.current_datatype_label = ttk.Label(self.datatypes_group, text="Current Datatype:")
+        self.current_datatype_label.pack(pady=5)
+        self.current_datatype_text = ttk.Label(self.datatypes_group, text="No item selected.")
+        self.current_datatype_text.pack(pady=5)
+
+        self.datatypes_label = ttk.Label(self.datatypes_group, text="Change Datatype:")
+        self.datatypes_label.pack(pady=5)
+        self.available_datatypes = ["object", "bool", "int64", "float64"]
+        self.datatype_combo = ttk.Combobox(self.datatypes_group, value=self.available_datatypes, width=10)
+        self.datatype_combo.current(0)
+        self.datatype_combo.pack(pady=5)
+        self.datatype_combo.bind("<<ComboboxSelected>>", self.change_datatype)
 
         # Listbox to select one field
         self.fieldnames_label = ttk.Label(self.fieldnames_group, text="Select Field:")
         self.fieldnames_label.pack(pady=5)
-        self.fieldnames_list = tk.Listbox(self.fieldnames_group, selectmode=tk.SINGLE, height=5, exportselection=0)
+        self.fieldnames_list = tk.Listbox(self.fieldnames_group, selectmode=tk.SINGLE, height=5, exportselection=0, width=30)
         self.fieldnames_list.pack(pady=5)
         self.fieldnames = []
         # Button to show gauges
@@ -65,7 +81,7 @@ class ConfigurationPanel(ttk.Frame):
         # Listbox to show gauge options for a field
         self.gauge_types_label = ttk.Label(self.gauge_options_group, text="Possible Gauges:")
         self.gauge_types_label.pack(pady=5)
-        self.gauge_types_list = tk.Listbox(self.gauge_options_group, selectmode=tk.SINGLE, height=5, exportselection=0)
+        self.gauge_types_list = tk.Listbox(self.gauge_options_group, selectmode=tk.SINGLE, height=5, exportselection=0, width=30)
         self.gauge_types_list.pack(pady=5)
         self.gauge_types = []
         # Button to select field with gauge
@@ -173,6 +189,15 @@ class ConfigurationPanel(ttk.Frame):
                 print('\n')
             m_or_f = 0
 
+        # Defines a frame for user selections to be placed into
+        self.user_selection_frame = tk.Frame(self)
+        self.user_selection_frame.pack(pady=5, side=tk.TOP)
+        self.user_selection_list = tk.Listbox(self.user_selection_frame, selectmode=tk.SINGLE, height=5, exportselection=0, width=30)
+        self.user_selection_list.pack(pady=5)
+        # Button to select field with gauge
+        self.select_field_btn = ttk.Button(self.user_selection_frame, text="Remove Field", command=self.remove_field)
+        self.select_field_btn.pack(pady=10)
+
     def load_video(self):
         """Prompt the user to select a video file."""
         video_path = filedialog.askopenfilename(filetypes=[("MP4 files", "*.mp4")], title="Select a Video File")
@@ -190,7 +215,7 @@ class ConfigurationPanel(ttk.Frame):
             return
 
         self.data_manager.parse(csv_path)
-        self.fieldnames_list = self.data_manager.load_fields(self.fieldnames_list)
+        self.fieldnames_list = self.data_manager.load_fields(self.fieldnames_list, self.current_datatype_text)
 
     def show_gauges(self):
         """Show the user the gauges that are available to them"""
@@ -202,18 +227,50 @@ class ConfigurationPanel(ttk.Frame):
         if selected_field:
             print(f"Selected Field: {', '.join(selected_field)}")
             # add the elements to the gauge_types listbox
-            self.gauge_types_list.insert(0, *self.data_manager.identify_gauges(selected_field))
+            self.gauge_types_list.insert(0, *self.data_manager.identify_gauges(selected_field, self.datatype_combo))
+            # Functionality to ask user about the type of the data probably in between identifying gauges and
+            # updating the list
+
         else:
             print("Please select a field.")
 
+    def remove_field(self):
+        k = 0
+        selected_field = [self.user_selection_list.get(i) for i in self.user_selection_list.curselection()]
+
+        for j, element in enumerate(self.user_selection_list.curselection()):
+            k = j
+
+        if selected_field:
+            print(f"Selected Gauge: {', '.join(selected_field)}")
+            self.user_selection_list.delete(0, 'end')  # clear list before each call to update
+            self.user_selection_list.insert(0, *self.data_manager.delete_selection(k))
+
+        else:
+            print("Please select a field to remove.")
+
     def select_field(self):
-        """Will have functionality to send selected fields to function"""
+        """Will call functionality to send selected fields to function"""
         selected_gauge = [self.gauge_types_list.get(i) for i in self.gauge_types_list.curselection()]
 
         if selected_gauge:
             print(f"Selected Gauge: {', '.join(selected_gauge)}")
+            self.user_selection_list.delete(0, 'end')  # clear list before each call to update
+            gt_list = self.data_manager.confirm_selection(selected_gauge)
+            if len(gt_list) <= 10:
+                self.user_selection_list.insert(0, *gt_list)
+                # Functionality to ask user about the type of the data probably in between identifying gauges and
+                # updating the list
+            else:
+                print("You already have ten fields selected!")
+                self.user_selection_list.insert(0, *gt_list)
+
         else:
             print("Please select a gauge.")
+
+    def change_datatype(self, e):
+        self.gauge_types_list.delete(0, 'end')
+        self.gauge_types_list.insert(0, *self.data_manager.check_datatype(self.datatype_combo.get()))
 
     def confirm_config(self):
         """Confirm the selected configuration settings."""
