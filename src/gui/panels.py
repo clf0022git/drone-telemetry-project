@@ -113,10 +113,20 @@ class ConfigurationPanel(ttk.Frame):
         self.data_manager.swap_metric()
 
     def get_statistics(self):
+
+        file = filedialog.asksaveasfilename(defaultextension=".txt",
+                                            filetypes=[("Text files", "*.txt"), ("All files", "*.*")])
+        if not file:
+            return None
+
+        output_file = open(file, "w")
+        output_file.write("")
+
+        output_file.close()
+
         for element in self.data_manager.data_file.columns:
             if self.data_manager.data_file[element].dtype == "int64" or self.data_manager.data_file[element].dtype == "float64":
-                print(element)
-                self.data_processor.calc_statistics(self.data_manager.data_file[element])
+                self.data_processor.calc_statistics(self.data_manager.data_file[element], element, file)
 
     def load_video(self):
         """Prompt the user to select a video file."""
