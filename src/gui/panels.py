@@ -201,7 +201,7 @@ class ConfigurationPanel(ttk.Frame):
 
     def load_video(self):
         """Prompt the user to select a video file."""
-        video_path = filedialog.askopenfilename(filetypes=[("MP4 files", "*.mp4")], title="Select a Video File")
+        video_path = filedialog.askopenfilename(filetypes=[("MOV files", "*.mov"), ("MP4 files", "*.mp4"), ("All files", "*.*")], title="Select a Video File")
         if video_path:  # If a file is selected
             print(f"Video File Loaded: {video_path}")
             self.playback_panel.set_video_path(video_path)
