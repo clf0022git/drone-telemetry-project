@@ -299,25 +299,6 @@ class PlaybackPanel(ttk.Frame):
         self.label = ttk.Label(self, text="Playback Panel")
         self.label.pack(pady=20)
 
-        # TODO: Add widgets for video playback, gauges, playback controls, etc.
-
-        # Prompt user for video file
-        # video_path = filedialog.askopenfilename(
-        #     filetypes=[("MP4 files", "*.mp4")],
-        #     title="Select a Video File"
-        # )
-        # if not video_path:  # if no file is selected, return
-        #     return
-
-        # Video Player
-        #self.video_player = VideoPlayer(self, None)
-        #self.video_player.pack(fill="both", expand=True)
-
-        # Seek Bar
-        # self.seek_bar = ttk.Scale(self, orient="horizontal", command=self.on_seek)
-        # self.seek_bar.pack(fill="x")
-        # self.update_seek_bar()  # Start updating the seek bar
-
         # Video Player (initialization postponed until a video is selected)
         self.video_player = None
         self.video_path = None
