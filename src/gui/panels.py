@@ -1,3 +1,5 @@
+import tkinter as tk
+import pandas as pd
 import csv
 import time
 
@@ -10,11 +12,6 @@ import datetime
 from tkinter import ttk, filedialog
 from src.playback.video import VideoPlayer
 from src.data.input import DataManager
-
-import tkinter as tk
-from tkinter import ttk, filedialog
-
-import pandas as pd
 
 
 class ConfigurationPanel(ttk.Frame):
@@ -41,7 +38,7 @@ class ConfigurationPanel(ttk.Frame):
         # Button to load CSV file
         self.load_csv_btn = ttk.Button(self, text="Load CSV", command=self.load_csv)
         self.load_csv_btn.pack(pady=5)
-        
+
         self.metricButton = ttk.Button(self, text="Swap from meters to feet", command=self.swap_metric)
         self.metricButton.pack(pady=10)
 
@@ -72,7 +69,8 @@ class ConfigurationPanel(ttk.Frame):
         # Listbox to select one field
         self.fieldnames_label = ttk.Label(self.fieldnames_group, text="Select Field:")
         self.fieldnames_label.pack(pady=5)
-        self.fieldnames_list = tk.Listbox(self.fieldnames_group, selectmode=tk.SINGLE, height=5, exportselection=0, width=30)
+        self.fieldnames_list = tk.Listbox(self.fieldnames_group, selectmode=tk.SINGLE, height=5, exportselection=0,
+                                          width=30)
         self.fieldnames_list.pack(pady=5)
         self.fieldnames = []
         # Button to show gauges
@@ -82,27 +80,23 @@ class ConfigurationPanel(ttk.Frame):
         # Listbox to show gauge options for a field
         self.gauge_types_label = ttk.Label(self.gauge_options_group, text="Possible Gauges:")
         self.gauge_types_label.pack(pady=5)
-        self.gauge_types_list = tk.Listbox(self.gauge_options_group, selectmode=tk.SINGLE, height=5, exportselection=0, width=30)
+        self.gauge_types_list = tk.Listbox(self.gauge_options_group, selectmode=tk.SINGLE, height=5, exportselection=0,
+                                           width=30)
         self.gauge_types_list.pack(pady=5)
         self.gauge_types = []
         # Button to select field with gauge
         self.select_field_btn = ttk.Button(self.gauge_options_group, text="Select Field", command=self.select_field)
         self.select_field_btn.pack(pady=10)
 
-        # Listbox to select multiple gauge types
-        self.gauge_label = ttk.Label(self, text="Select Gauge Types:")
-        self.gauge_label.pack(pady=5)
-        self.gauge_list = tk.Listbox(self, selectmode=tk.MULTIPLE, height=5, exportselection=0)
-        self.gauge_list.pack(pady=5)
-        self.gauges = ["Circle - 90°", "Circle - 180°", "Circle - 270°", "Circle - 360°", "Bar", "X-Plot",
-                       "X-by-Y-plot", "Character Display", "Text Display", "Clock", "Stopwatch", "Running Time",
-                       "On/off light"]
-        for gauge in self.gauges:
-            self.gauge_list.insert(tk.END, gauge)
-
-        # Button to confirm configuration
-        self.confirm_btn = ttk.Button(self, text="Confirm Configuration", command=self.confirm_config)
-        self.confirm_btn.pack(pady=10)
+        # Defines a frame for user selections to be placed into
+        self.user_selection_frame = tk.Frame(self)
+        self.user_selection_frame.pack(pady=5, side=tk.TOP)
+        self.user_selection_list = tk.Listbox(self.user_selection_frame, selectmode=tk.SINGLE, height=5,
+                                              exportselection=0, width=30)
+        self.user_selection_list.pack(pady=5)
+        # Button to select field with gauge
+        self.select_field_btn = ttk.Button(self.user_selection_frame, text="Remove Field", command=self.remove_field)
+        self.select_field_btn.pack(pady=10)
 
         self.speed_label = ttk.Label(self, text="Playback Speed:")
         self.speed_label.pack(pady=5)
@@ -124,33 +118,6 @@ class ConfigurationPanel(ttk.Frame):
         self.speed_1x_backwards = ttk.Radiobutton(self.speed_frame, text="1X backwards", variable=self.playback_speed,
                                                   value=-1, command=self.set_playback_speed)
         self.speed_1x_backwards.grid(row=3, column=0, padx=5, pady=2)
-
-    def load_csv(self):
-        global fields
-        global rows
-        del fields[:]
-        del rows[:]
-        """Prompt the user to select a CSV file."""
-        filename = filedialog.askopenfilename(filetypes=[("CSV files", "*.csv")], title="Select a CSV File")
-        if filename:  # If a file is selected
-            print(f"CSV File Loaded: {filename}")
-            # reading csv file
-            with open(filename, 'r') as csvfile:
-                # creating a csv reader object
-                csvreader = csv.reader(csvfile)
-
-                # extracting field names through first row
-                fields = next(csvreader)
-
-                # extracting each data row one by one
-                for row in csvreader:
-                    rows.append(row)
-
-                # get total number of rows
-                print("Total no. of rows: %d" % csvreader.line_num)
-
-            # printing the field names
-            print('Field names are:' + ', '.join(field for field in fields))
 
     def swap_metric(self):
         global fields
@@ -193,7 +160,8 @@ class ConfigurationPanel(ttk.Frame):
         # Defines a frame for user selections to be placed into
         self.user_selection_frame = tk.Frame(self)
         self.user_selection_frame.pack(pady=5, side=tk.TOP)
-        self.user_selection_list = tk.Listbox(self.user_selection_frame, selectmode=tk.SINGLE, height=5, exportselection=0, width=30)
+        self.user_selection_list = tk.Listbox(self.user_selection_frame, selectmode=tk.SINGLE, height=5,
+                                              exportselection=0, width=30)
         self.user_selection_list.pack(pady=5)
         # Button to select field with gauge
         self.select_field_btn = ttk.Button(self.user_selection_frame, text="Remove Field", command=self.remove_field)
@@ -269,17 +237,9 @@ class ConfigurationPanel(ttk.Frame):
         else:
             print("Please select a gauge.")
 
-    def change_datatype(self, e):
+    def change_datatype(self):
         self.gauge_types_list.delete(0, 'end')
         self.gauge_types_list.insert(0, *self.data_manager.check_datatype(self.datatype_combo.get()))
-
-    def confirm_config(self):
-        """Confirm the selected configuration settings."""
-        selected_gauges = [self.gauge_list.get(i) for i in self.gauge_list.curselection()]
-        if selected_gauges:
-            print(f"Selected Gauge Types: {', '.join(selected_gauges)}")
-        else:
-            print("No gauge type selected.")
 
     def set_playback_speed(self):
         speed = self.playback_speed.get()
@@ -304,7 +264,7 @@ class PlaybackPanel(ttk.Frame):
         self.video_path = None
 
         self.current_time = 0
-
+        
         self.is_seeking = False
 
         # Control panel
@@ -343,7 +303,7 @@ class PlaybackPanel(ttk.Frame):
     def set_video_path(self, video_path):
         self.video_path = video_path
         if self.video_path:  # if a file is selected
-            #self.video_path = video_path
+            # self.video_path = video_path
             if self.video_player is None:
                 self.video_player = VideoPlayer(self, self.video_path)
                 self.video_player.pack(fill="both", expand=True)
