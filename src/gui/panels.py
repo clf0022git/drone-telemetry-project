@@ -1,20 +1,22 @@
 import csv
+import sys
 import time
+import os
+import traceback
+import datetime
+from tkinter import ttk, filedialog
+from src.playback.video import VideoPlayer
+from src.data.input import DataManager
+from moviepy.editor import VideoFileClip
+from moviepy.video.fx.time_mirror import time_mirror
+import tkinter as tk
+from tkinter import ttk, filedialog
+import pandas as pd
 
 # initializing the titles and rows list
 fields = []
 rows = []
 m_or_f = 0  # 0 = f and 1 = m
-
-import datetime
-from tkinter import ttk, filedialog
-from src.playback.video import VideoPlayer
-from src.data.input import DataManager
-
-import tkinter as tk
-from tkinter import ttk, filedialog
-
-import pandas as pd
 
 
 class ConfigurationPanel(ttk.Frame):
@@ -121,9 +123,13 @@ class ConfigurationPanel(ttk.Frame):
         self.speed_10x = ttk.Radiobutton(self.speed_frame, text="10X", variable=self.playback_speed, value=10,
                                          command=self.set_playback_speed)
         self.speed_10x.grid(row=2, column=0, padx=5, pady=2)
-        self.speed_1x_backwards = ttk.Radiobutton(self.speed_frame, text="1X backwards", variable=self.playback_speed,
-                                                  value=-1, command=self.set_playback_speed)
-        self.speed_1x_backwards.grid(row=3, column=0, padx=5, pady=2)
+        # self.speed_1x_backwards = ttk.Radiobutton(self.speed_frame, text="1X backwards", variable=self.playback_speed,
+        #                                           value=-1, command=self.set_playback_speed)
+        # self.speed_1x_backwards.grid(row=3, column=0, padx=5, pady=2)
+
+        # Button to reverse video
+        self.reverse_video_btn = ttk.Button(self.speed_frame, text="Reverse Video", command=self.playback_panel.reverse_video)
+        self.reverse_video_btn.grid(row=0, column=1, rowspan=4, padx=5, pady=2)
 
     def load_csv(self):
         global fields
@@ -307,6 +313,8 @@ class PlaybackPanel(ttk.Frame):
 
         self.is_seeking = False
 
+        self.is_video_reversed = False
+
         # Control panel
         control_panel = ttk.Frame(self)
         control_panel.pack(side="bottom", fill="x")
@@ -356,6 +364,9 @@ class PlaybackPanel(ttk.Frame):
             self.play_button.config(state=tk.NORMAL)
             self.pause_button.config(state=tk.NORMAL)
 
+            if '_reversed' not in self.video_path:
+                self.is_video_reversed = False
+
     def play_video(self):
         if self.video_player:
             self.video_player.play()
@@ -393,6 +404,41 @@ class PlaybackPanel(ttk.Frame):
 
         # Schedule the update_ui method to be called after 500ms
         self.after(500, self.update_ui)
+
+    def reverse_video(self):
+        if not self.video_path:
+            print("No video loaded to reverse")
+            return
+
+        # Determine the file extension and reversed file name
+        base, ext = os.path.splitext(self.video_path)
+        if ext.lower() not in ['.mp4', '.mov']:
+            print("Unsupported file format for reversing")
+            return
+
+        reversed_video_path = f"{base}_reversed{ext}"
+
+        # Check if the reversed video file already exists
+        if os.path.exists(reversed_video_path):
+            print(f"Reversed video already exists: {reversed_video_path}")
+            self.is_video_reversed = True
+            self.set_video_path(reversed_video_path)
+        else:
+            try:
+                # Load the video file
+                clip = VideoFileClip(self.video_path)
+                # Reverse the clip
+                reversed_clip = clip.fx(time_mirror)
+                # Write the reversed video file to disk
+                reversed_clip.write_videofile(reversed_video_path)
+                # Replace the old video path with the new reversed video path
+                self.is_video_reversed = True
+                self.set_video_path(reversed_video_path)
+                print(f"Reversed video saved to {reversed_video_path}")
+            except Exception as e:
+                self.is_video_reversed = False
+                print(f"An error occurred while reversing the video: {e}")
+                traceback.print_exc(file=sys.stderr)
 
 
 class StatisticsPanel(ttk.Frame):
