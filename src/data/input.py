@@ -26,6 +26,7 @@ class DataManager:
         # print(self.data_file["CUSTOM.updateTime"])
         self.data_file["CUSTOM.updateTime"] = self.data_file["CUSTOM.updateTime"].round('s')
         self.remove_duplicates()
+        print("Parsed!")
 
     # Function to find duplicate entries in the datafile
     # Method only works for data files with a delineated "CUSTOM.updateTime" column
