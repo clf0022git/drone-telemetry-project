@@ -1,9 +1,17 @@
 import tkinter as tk
 import pandas as pd
+import csv
+
+# initializing the titles and rows list
+fields = []
+rows = []
+m_or_f = 0  # 0 = f and 1 = m
+
 import datetime
 from tkinter import ttk, filedialog
 from src.playback.video import VideoPlayer
 from src.data.input import DataManager
+
 
 class ConfigurationPanel(ttk.Frame):
     """
@@ -29,6 +37,9 @@ class ConfigurationPanel(ttk.Frame):
         # Button to load CSV file
         self.load_csv_btn = ttk.Button(self, text="Load CSV", command=self.load_csv)
         self.load_csv_btn.pack(pady=5)
+
+        self.metricButton = ttk.Button(self, text="Swap from meters to feet", command=self.swap_metric)
+        self.metricButton.pack(pady=10)
 
         # Frames that hold the fieldnames and their options
         self.fieldnames_gauge_group = tk.Frame(self)
@@ -57,7 +68,8 @@ class ConfigurationPanel(ttk.Frame):
         # Listbox to select one field
         self.fieldnames_label = ttk.Label(self.fieldnames_group, text="Select Field:")
         self.fieldnames_label.pack(pady=5)
-        self.fieldnames_list = tk.Listbox(self.fieldnames_group, selectmode=tk.SINGLE, height=5, exportselection=0, width=30)
+        self.fieldnames_list = tk.Listbox(self.fieldnames_group, selectmode=tk.SINGLE, height=5, exportselection=0,
+                                          width=30)
         self.fieldnames_list.pack(pady=5)
         self.fieldnames = []
         # Button to show gauges
@@ -67,7 +79,8 @@ class ConfigurationPanel(ttk.Frame):
         # Listbox to show gauge options for a field
         self.gauge_types_label = ttk.Label(self.gauge_options_group, text="Possible Gauges:")
         self.gauge_types_label.pack(pady=5)
-        self.gauge_types_list = tk.Listbox(self.gauge_options_group, selectmode=tk.SINGLE, height=5, exportselection=0, width=30)
+        self.gauge_types_list = tk.Listbox(self.gauge_options_group, selectmode=tk.SINGLE, height=5, exportselection=0,
+                                           width=30)
         self.gauge_types_list.pack(pady=5)
         self.gauge_types = []
         # Button to select field with gauge
@@ -106,11 +119,80 @@ class ConfigurationPanel(ttk.Frame):
         self.speed_10x = ttk.Radiobutton(self.speed_frame, text="10X", variable=self.playback_speed, value=10,
                                          command=self.set_playback_speed)
         self.speed_10x.grid(row=2, column=0, padx=5, pady=2)
+        self.speed_1x_backwards = ttk.Radiobutton(self.speed_frame, text="1X backwards", variable=self.playback_speed,
+                                                  value=-1, command=self.set_playback_speed)
+        self.speed_1x_backwards.grid(row=3, column=0, padx=5, pady=2)
+
+    def load_csv(self):
+        global fields
+        global rows
+        del fields[:]
+        del rows[:]
+        """Prompt the user to select a CSV file."""
+        filename = filedialog.askopenfilename(filetypes=[("CSV files", "*.csv")], title="Select a CSV File")
+        if filename:  # If a file is selected
+            print(f"CSV File Loaded: {filename}")
+            # reading csv file
+            with open(filename, 'r') as csvfile:
+                # creating a csv reader object
+                csvreader = csv.reader(csvfile)
+
+                # extracting field names through first row
+                fields = next(csvreader)
+
+                # extracting each data row one by one
+                for row in csvreader:
+                    rows.append(row)
+
+                # get total number of rows
+                print("Total no. of rows: %d" % csvreader.line_num)
+
+            # printing the field names
+            print('Field names are:' + ', '.join(field for field in fields))
+
+    def swap_metric(self):
+        global fields
+        global rows
+        global m_or_f
+        """Check what metric is already in use and swap to the other one"""
+        if m_or_f == 0:  # case for the units being in meters
+            for row in rows:
+                i = 0
+                while i < len(row):
+                    index = fields[i].find('[m')
+                    if index != -1 and row[i] != '':
+                        row[i] = str(float(row[i]) * 39.76)
+                    i += 1
+            # printing first 6 rows
+            print('\nFirst 6 rows are:\n')
+            for row in rows[:6]:
+                # parsing each column of a row
+                for col in row:
+                    print("%10s" % col, end=" "),
+                print('\n')
+            m_or_f = 1
+        else:
+            for row in rows:
+                i = 0
+                while i < len(row):
+                    index = fields[i].find('[m')
+                    if index != -1 and row[i] != '':
+                        row[i] = str(float(row[i]) / 39.76)
+                    i += 1
+            # printing first 6 rows
+            print('\nFirst 6 rows are:\n')
+            for row in rows[:6]:
+                # parsing each column of a row
+                for col in row:
+                    print("%10s" % col, end=" "),
+                print('\n')
+            m_or_f = 0
 
         # Defines a frame for user selections to be placed into
         self.user_selection_frame = tk.Frame(self)
         self.user_selection_frame.pack(pady=5, side=tk.TOP)
-        self.user_selection_list = tk.Listbox(self.user_selection_frame, selectmode=tk.SINGLE, height=5, exportselection=0, width=30)
+        self.user_selection_list = tk.Listbox(self.user_selection_frame, selectmode=tk.SINGLE, height=5,
+                                              exportselection=0, width=30)
         self.user_selection_list.pack(pady=5)
         # Button to select field with gauge
         self.select_field_btn = ttk.Button(self.user_selection_frame, text="Remove Field", command=self.remove_field)
@@ -198,14 +280,11 @@ class ConfigurationPanel(ttk.Frame):
         else:
             print("No gauge type selected.")
 
-
-
     def set_playback_speed(self):
         speed = self.playback_speed.get()
         print(f"Setting playback speed to: {speed}X")
         if self.playback_panel.video_player:
             self.playback_panel.video_player.set_speed(speed)
-
 
 
 class PlaybackPanel(ttk.Frame):
@@ -230,8 +309,8 @@ class PlaybackPanel(ttk.Frame):
         #     return
 
         # Video Player
-        #self.video_player = VideoPlayer(self, None)
-        #self.video_player.pack(fill="both", expand=True)
+        # self.video_player = VideoPlayer(self, None)
+        # self.video_player.pack(fill="both", expand=True)
 
         # Seek Bar
         # self.seek_bar = ttk.Scale(self, orient="horizontal", command=self.on_seek)
@@ -243,7 +322,6 @@ class PlaybackPanel(ttk.Frame):
         self.video_path = None
 
         self.current_time = 0
-
 
         # Playback Controls
         control_frame = ttk.Frame(self)
@@ -266,8 +344,8 @@ class PlaybackPanel(ttk.Frame):
         self.pause_button = ttk.Button(control_frame, text="Pause", command=self.pause_video)
         self.pause_button.pack(side="left", padx=5)
 
-        #self.set_video_button = ttk.Button(control_frame, text="Set Video", command=self.set_video_path)
-        #self.set_video_button.pack(side="left", padx=5)
+        # self.set_video_button = ttk.Button(control_frame, text="Set Video", command=self.set_video_path)
+        # self.set_video_button.pack(side="left", padx=5)
 
         # Set initial state of control buttons
         self.play_button.config(state=tk.DISABLED)
@@ -276,7 +354,7 @@ class PlaybackPanel(ttk.Frame):
     def set_video_path(self, video_path):
         self.video_path = video_path
         if self.video_path:  # if a file is selected
-            #self.video_path = video_path
+            # self.video_path = video_path
             if self.video_player is None:
                 self.video_player = VideoPlayer(self, self.video_path)
                 self.video_player.pack(fill="both", expand=True)
@@ -289,7 +367,7 @@ class PlaybackPanel(ttk.Frame):
             self.play_button.config(state=tk.NORMAL)
             self.pause_button.config(state=tk.NORMAL)
 
-            #self.update_progress_slider()
+            # self.update_progress_slider()
 
     def play_video(self):
         if self.video_player:
@@ -306,18 +384,18 @@ class PlaybackPanel(ttk.Frame):
 
     def on_second_changed(self, current_time):
         """Update the UI when the video time changes."""
-        #self.progress_value.set(datetime.timedelta(seconds=current_time))
+        # self.progress_value.set(datetime.timedelta(seconds=current_time))
         self.start_time["text"] = str(datetime.timedelta(seconds=current_time))
         self.update_progress_slider(current_time)
 
     def update_progress_slider(self, current_time):
         """Update the progress slider based on the current video time."""
         if self.video_player:
-            #current_time = self.video_player.get_current_time()  # Retrieve current time from the video player
+            # current_time = self.video_player.get_current_time()  # Retrieve current time from the video player
             self.progress_slider.set(current_time)  # Update slider position
 
             # Schedule the `update_progress_slider` to run again after 1000ms (1 second)
-            #self.after(1000, self.update_progress_slider)
+            # self.after(1000, self.update_progress_slider)
 
 
 class StatisticsPanel(ttk.Frame):

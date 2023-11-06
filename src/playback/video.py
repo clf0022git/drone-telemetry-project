@@ -32,12 +32,22 @@ class VideoPlayer(tk.Frame):
 
         self.video_length = self.player.get_length()
 
+        self.playing_backward = False
+        self.paused_backward = False
+        self.backward_timer_running = False
+
+        self.do_backwards = False
+
         # Add play button
         # self.play_button = tk.Button(self.master, text="Play", command=self.play)
         # self.play_button.pack(side=tk.BOTTOM)
 
     def play(self):
         """Method to play the video."""
+        if self.do_backwards:
+            self.play_backward()
+            return
+
         if not self.player.is_playing():
             self.player.play()
             #self.play_button.configure(text="Pause")
@@ -46,6 +56,43 @@ class VideoPlayer(tk.Frame):
             self.player.pause()
             #self.play_button.configure(text="Play")
             self.stop_time_update_timer()  # Stop the timer when the video is paused
+
+    def play_backward(self):
+        """Method to start or resume backward playback."""
+        if not self.playing_backward:
+            # If we aren't already playing backward
+            self.playing_backward = True
+            self.pause()  # Pause regular playback
+            if not self.paused_backward:
+                # If not resuming from a paused state, seek to the end
+                end_time = self.player.get_length() // 1000  # Get video length in seconds
+                self.seek(end_time - 1)  # Seek to the end of the video
+            self.paused_backward = False  # Reset this flag as we are no longer paused
+            if not self.backward_timer_running:
+                self.seek_backward_by_second()  # Start the backward playback
+        else:
+            # If already playing backward, then pause it
+            self.pause_backward()
+
+    def pause_backward(self):
+        """Method to pause backward playback."""
+        if self.playing_backward:
+            self.paused_backward = True  # Set the paused state flag
+            self.playing_backward = False  # Indicate that we're not actively playing backward
+            self.backward_timer_running = False  # Indicate the backward timer is not running
+
+    def stop_backward_playback(self):
+        """Method to stop backward playback."""
+        self.playing_backward = False
+
+    def seek_backward_by_second(self):
+        """Decrement video time by one second."""
+        if self.playing_backward:
+            self.backward_timer_running = True  # Indicate the backward timer is running
+            current_time = self.player.get_time() // 1000  # Convert to seconds
+            if current_time > 0:  # If not reached the start of the video
+                self.seek(current_time - 1)  # Decrement by one second
+                self.master.after(1000, self.seek_backward_by_second)  # Repeat after 1 second
 
     def start_time_update_timer(self):
         """Starts a timer to periodically check for time updates."""
@@ -59,6 +106,14 @@ class VideoPlayer(tk.Frame):
 
     def check_time_update(self):
         """Check if the video time has been updated."""
+        if self.playing_backward:
+            # If playing backward, just check the current time without triggering events
+            current_time = self.player.get_time()  # Get current video time in milliseconds
+            if current_time is not None:  # Could be None if the video hasn't started yet
+                current_time = current_time // 1000  # Convert to seconds
+                self.last_time = current_time
+            return  # Exit early if playing backward
+
         if self.timer_running:
             current_time = self.player.get_time()  # Get current video time in milliseconds
             if current_time is not None:  # Could be None if the video hasn't started yet
@@ -88,6 +143,10 @@ class VideoPlayer(tk.Frame):
 
     def pause(self):
         """Method to pause the video."""
+        if self.do_backwards:
+            self.pause_backward()
+            return
+
         self.player.pause()
 
     def seek(self, seconds):
@@ -104,6 +163,12 @@ class VideoPlayer(tk.Frame):
         """Method to adjust the video playback speed."""
         # set_rate() accepts a float for the speed multiplier.
         # 1.0 is normal speed, less than 1.0 is slower, greater than 1.0 is faster.
+        if speed_multiplier == -1:
+            self.do_backwards = True
+            return
+        else:
+            self.do_backwards = False
+
         self.player.set_rate(speed_multiplier)
 
 
