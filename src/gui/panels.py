@@ -1,6 +1,7 @@
 import tkinter as tk
 import pandas as pd
 import csv
+import time
 
 import datetime
 from tkinter import ttk, filedialog
@@ -171,7 +172,7 @@ class ConfigurationPanel(ttk.Frame):
 
     def load_video(self):
         """Prompt the user to select a video file."""
-        video_path = filedialog.askopenfilename(filetypes=[("MP4 files", "*.mp4")], title="Select a Video File")
+        video_path = filedialog.askopenfilename(filetypes=[("MOV files", "*.mov"), ("MP4 files", "*.mp4"), ("All files", "*.*")], title="Select a Video File")
         if video_path:  # If a file is selected
             print(f"Video File Loaded: {video_path}")
             self.playback_panel.set_video_path(video_path)
@@ -265,58 +266,46 @@ class PlaybackPanel(ttk.Frame):
         self.label = ttk.Label(self, text="Playback Panel")
         self.label.pack(pady=20)
 
-        # TODO: Add widgets for video playback, gauges, playback controls, etc.
-
-        # Prompt user for video file
-        # video_path = filedialog.askopenfilename(
-        #     filetypes=[("MP4 files", "*.mp4")],
-        #     title="Select a Video File"
-        # )
-        # if not video_path:  # if no file is selected, return
-        #     return
-
-        # Video Player
-        # self.video_player = VideoPlayer(self, None)
-        # self.video_player.pack(fill="both", expand=True)
-
-        # Seek Bar
-        # self.seek_bar = ttk.Scale(self, orient="horizontal", command=self.on_seek)
-        # self.seek_bar.pack(fill="x")
-        # self.update_seek_bar()  # Start updating the seek bar
-
         # Video Player (initialization postponed until a video is selected)
         self.video_player = None
         self.video_path = None
 
         self.current_time = 0
+        
+        self.is_seeking = False
 
-        # Playback Controls
-        control_frame = ttk.Frame(self)
-        control_frame.pack(fill="x")  # fill in the x direction
+        # Control panel
+        control_panel = ttk.Frame(self)
+        control_panel.pack(side="bottom", fill="x")
 
-        self.start_time = ttk.Label(control_frame, text=str(datetime.timedelta(seconds=0)))
-        self.start_time.pack(side="left")
+        # Current time label
+        self.current_time_label = ttk.Label(control_panel, text="00:00")
+        self.current_time_label.pack(side="left")
 
-        self.end_time = ttk.Label(control_frame, text=str(datetime.timedelta(seconds=0)))
-        self.end_time.pack(side="right")
+        # Seek bar
+        self.seek_var = tk.DoubleVar()
+        self.seek_bar = ttk.Scale(control_panel, variable=self.seek_var, from_=0, to=100, orient="horizontal",
+                                  command=self.start_seek)
+        self.seek_bar.pack(side="left", fill="x", expand=True)
+        self.seek_bar.bind("<ButtonRelease-1>", self.stop_seek)
 
-        self.progress_value = tk.IntVar(control_frame)
+        # Total time label
+        self.total_time_label = ttk.Label(control_panel, text="00:00")
+        self.total_time_label.pack(side="right")
 
-        self.progress_slider = tk.Scale(control_frame, variable=self.progress_value, from_=0, to=0, orient="horizontal")
-        self.progress_slider.pack(side="left", fill="x", expand=True)
+        # Play button
+        self.play_button = ttk.Button(control_panel, text="Play", command=self.play_video)
+        self.play_button.pack(side="left")
 
-        self.play_button = ttk.Button(control_frame, text="Play", command=self.play_video)
-        self.play_button.pack(side="left", padx=5)
-
-        self.pause_button = ttk.Button(control_frame, text="Pause", command=self.pause_video)
-        self.pause_button.pack(side="left", padx=5)
-
-        # self.set_video_button = ttk.Button(control_frame, text="Set Video", command=self.set_video_path)
-        # self.set_video_button.pack(side="left", padx=5)
+        # Pause button
+        self.pause_button = ttk.Button(control_panel, text="Pause", command=self.pause_video)
+        self.pause_button.pack(side="left")
 
         # Set initial state of control buttons
         self.play_button.config(state=tk.DISABLED)
         self.pause_button.config(state=tk.DISABLED)
+
+        self.update_ui()
 
     def set_video_path(self, video_path):
         self.video_path = video_path
@@ -325,8 +314,8 @@ class PlaybackPanel(ttk.Frame):
             if self.video_player is None:
                 self.video_player = VideoPlayer(self, self.video_path)
                 self.video_player.pack(fill="both", expand=True)
-                self.video_player.bind_event("second-changed", self.on_second_changed)
-                self.video_player.bind_event("duration-changed", self.on_duration_changed)
+                # self.video_player.bind_event("second-changed", self.on_second_changed)
+                # self.video_player.bind_event("duration-changed", self.on_duration_changed)
             else:
                 self.video_player.set_video_path(self.video_path)
 
@@ -334,35 +323,43 @@ class PlaybackPanel(ttk.Frame):
             self.play_button.config(state=tk.NORMAL)
             self.pause_button.config(state=tk.NORMAL)
 
-            # self.update_progress_slider()
-
     def play_video(self):
         if self.video_player:
             self.video_player.play()
+            self.seek_bar["to"] = self.video_player.player.get_length() / 1000
 
     def pause_video(self):
         if self.video_player:
             self.video_player.pause()
 
-    def on_duration_changed(self, duration):
-        """Update the UI when the video duration is available."""
-        self.end_time["text"] = str(datetime.timedelta(milliseconds=duration))
-        self.progress_slider["to"] = duration / 1000  # converting ms to s
+    def start_seek(self, event):
+        self.is_seeking = True
 
-    def on_second_changed(self, current_time):
-        """Update the UI when the video time changes."""
-        # self.progress_value.set(datetime.timedelta(seconds=current_time))
-        self.start_time["text"] = str(datetime.timedelta(seconds=current_time))
-        self.update_progress_slider(current_time)
+    def stop_seek(self, event):
+        self.video_player.player.set_time(int(self.seek_var.get() * 1000))  # Seconds to milliseconds
+        self.is_seeking = False
 
-    def update_progress_slider(self, current_time):
-        """Update the progress slider based on the current video time."""
-        if self.video_player:
-            # current_time = self.video_player.get_current_time()  # Retrieve current time from the video player
-            self.progress_slider.set(current_time)  # Update slider position
+    def update_ui(self):
+        """Update the UI every 500ms."""
+        if self.video_player and self.video_player.player.is_playing():
+            # Get the current and total time of the video
+            current_time = self.video_player.player.get_time() / 1000  # Milliseconds to seconds
+            total_time = self.video_player.player.get_length() / 1000  # Milliseconds to seconds
 
-            # Schedule the `update_progress_slider` to run again after 1000ms (1 second)
-            # self.after(1000, self.update_progress_slider)
+            # Set the total time once if it's not already set
+            if self.seek_bar['to'] != total_time:
+                self.seek_bar['to'] = total_time
+                self.total_time_label['text'] = time.strftime('%H:%M:%S', time.gmtime(total_time))
+
+            # Update the current time label
+            self.current_time_label['text'] = time.strftime('%H:%M:%S', time.gmtime(current_time))
+
+            # Update seek bar position only if the user is not seeking
+            if not self.is_seeking:
+                self.seek_var.set(current_time)
+
+        # Schedule the update_ui method to be called after 500ms
+        self.after(500, self.update_ui)
 
 
 class StatisticsPanel(ttk.Frame):
