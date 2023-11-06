@@ -2,15 +2,15 @@ import tkinter as tk
 import pandas as pd
 import csv
 
-# initializing the titles and rows list
-fields = []
-rows = []
-m_or_f = 0  # 0 = f and 1 = m
-
 import datetime
 from tkinter import ttk, filedialog
 from src.playback.video import VideoPlayer
 from src.data.input import DataManager
+
+# initializing the titles and rows list
+fields = []
+rows = []
+m_or_f = 0  # 0 = f and 1 = m
 
 
 class ConfigurationPanel(ttk.Frame):
@@ -97,6 +97,17 @@ class ConfigurationPanel(ttk.Frame):
         self.select_field_btn = ttk.Button(self.user_selection_frame, text="Remove Field", command=self.remove_field)
         self.select_field_btn.pack(pady=10)
 
+        # Combobox that allows timestamp specification
+        self.timestamp_label = ttk.Label(self, text="Change Time Between Entries:")
+        self.timestamp_label.pack(pady=5, side=tk.TOP)
+        self.timestamp_default_label = ttk.Label(self, text="Default - 1 sec")
+        self.timestamp_default_label.pack(pady=5, side=tk.TOP)
+        self.available_timestamps = ["1", "2", "3", "5"]
+        self.timestamp_combo = ttk.Combobox(self, value=self.available_timestamps, width=10)
+        self.timestamp_combo.current(0)
+        self.timestamp_combo.pack(pady=5, side=tk.TOP)
+        self.timestamp_combo.bind("<<ComboboxSelected>>", self.change_timestamp)
+
         self.speed_label = ttk.Label(self, text="Playback Speed:")
         self.speed_label.pack(pady=5)
 
@@ -117,6 +128,7 @@ class ConfigurationPanel(ttk.Frame):
         self.speed_1x_backwards = ttk.Radiobutton(self.speed_frame, text="1X backwards", variable=self.playback_speed,
                                                   value=-1, command=self.set_playback_speed)
         self.speed_1x_backwards.grid(row=3, column=0, padx=5, pady=2)
+
 
     def swap_metric(self):
         global fields
@@ -156,15 +168,6 @@ class ConfigurationPanel(ttk.Frame):
                 print('\n')
             m_or_f = 0
 
-        # Defines a frame for user selections to be placed into
-        self.user_selection_frame = tk.Frame(self)
-        self.user_selection_frame.pack(pady=5, side=tk.TOP)
-        self.user_selection_list = tk.Listbox(self.user_selection_frame, selectmode=tk.SINGLE, height=5,
-                                              exportselection=0, width=30)
-        self.user_selection_list.pack(pady=5)
-        # Button to select field with gauge
-        self.select_field_btn = ttk.Button(self.user_selection_frame, text="Remove Field", command=self.remove_field)
-        self.select_field_btn.pack(pady=10)
 
     def load_video(self):
         """Prompt the user to select a video file."""
@@ -236,9 +239,13 @@ class ConfigurationPanel(ttk.Frame):
         else:
             print("Please select a gauge.")
 
-    def change_datatype(self):
+    def change_datatype(self,e):
         self.gauge_types_list.delete(0, 'end')
         self.gauge_types_list.insert(0, *self.data_manager.check_datatype(self.datatype_combo.get()))
+
+    def change_timestamp(self,e):
+        self.data_manager.set_timestamp(self.timestamp_combo.get())
+        print(self.timestamp_combo.get())
 
     def set_playback_speed(self):
         speed = self.playback_speed.get()

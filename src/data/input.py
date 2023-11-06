@@ -16,6 +16,7 @@ class DataManager:
         self.user_selected_gauges_list = []
         self.user_selected_gauges_label_list = []
         self.label = ''
+        self.timestamp_value = 1
 
     def parse(self, csv_path):
         """Handles the code for parsing the file"""
@@ -191,7 +192,7 @@ class DataManager:
     # Creates a list of labels that show what the user has selected so far and
     # displays them to the screen
     def confirm_selection(self, selected_gauge) -> list:
-        current_saved_gauge = TemporaryGauge(self.current_selected_field, selected_gauge)
+        current_saved_gauge = TemporaryGauge(self.current_selected_field, selected_gauge, self.timestamp_value)
         self.user_selected_gauges_list.append(current_saved_gauge)
 
         gauge_name_list = []
@@ -216,11 +217,15 @@ class DataManager:
 
         return gauge_name_list
 
+    def set_timestamp(self, current_timestamp):
+        self.timestamp_value = current_timestamp
+
 
 class TemporaryGauge:
     """Stores a gauge's related information after a user completes a selection"""
 
-    def __init__(self, f_name, g_name):
+    def __init__(self, f_name, g_name, t_stamp):
         self.id = None
         self.field_name = f_name
         self.gauge_name = g_name
+        self.timestamp_value = t_stamp
