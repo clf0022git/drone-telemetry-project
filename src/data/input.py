@@ -43,7 +43,7 @@ class DataManager:
         self.data_file = self.data_file.reset_index(drop=True)
         # print(len(self.data_file))
 
-    def load_fields(self, fieldnames_list, datatype_label) -> list:
+    def load_fields(self, fieldnames_list, datatype_label):
         self.datatype_label = datatype_label
         fieldnames = []
 
@@ -54,15 +54,7 @@ class DataManager:
         for field in fieldnames:
             fieldnames_list.insert(tk.END, field)
 
-        ''' 
-        # define iterator i for debugging
-        i = 0
-        for dt in self.data_file.dtypes:
-            i = i + 1
-            print(i)
-            print(dt)
-        '''
-        return fieldnames_list
+        return fieldnames_list, fieldnames
 
     def check_datatype(self, combo_value) -> list:
 

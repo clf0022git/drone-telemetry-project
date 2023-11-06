@@ -18,7 +18,7 @@ class MainWindow(tk.Tk):
 
         # Adding panels to the notebook as separate tabs
 
-        self.playback_panel = PlaybackPanel(self.notebook)
+        self.playback_panel = PlaybackPanel(self.notebook,)
         self.stats_panel = StatisticsPanel(self.notebook)
         self.config_panel = ConfigurationPanel(self.notebook, self.playback_panel, self.stats_panel)
 
