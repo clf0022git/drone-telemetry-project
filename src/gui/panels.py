@@ -1,14 +1,9 @@
 import tkinter as tk
+import pandas as pd
 import datetime
 from tkinter import ttk, filedialog
 from src.playback.video import VideoPlayer
 from src.data.input import DataManager
-
-import tkinter as tk
-from tkinter import ttk, filedialog
-
-import pandas as pd
-
 
 class ConfigurationPanel(ttk.Frame):
     """
