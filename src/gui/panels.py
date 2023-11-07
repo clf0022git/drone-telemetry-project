@@ -271,6 +271,8 @@ class PlaybackPanel(ttk.Frame):
         self.current_time = 0
         
         self.is_seeking = False
+        
+        self.is_video_reversed = False
 
         # Control panel
         control_panel = ttk.Frame(self)
