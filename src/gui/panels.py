@@ -116,19 +116,13 @@ class ConfigurationPanel(ttk.Frame):
         self.speed_frame = ttk.Frame(self)
         self.speed_frame.pack(pady=5)
 
-        self.playback_speed = tk.IntVar(value=1)  # default speed 1X
-        self.speed_1x = ttk.Radiobutton(self.speed_frame, text="1X", variable=self.playback_speed, value=1,
-                                        command=self.set_playback_speed)
-        self.speed_1x.grid(row=0, column=0, padx=5, pady=2)
-        self.speed_5x = ttk.Radiobutton(self.speed_frame, text="5X", variable=self.playback_speed, value=5,
-                                        command=self.set_playback_speed)
-        self.speed_5x.grid(row=1, column=0, padx=5, pady=2)
-        self.speed_10x = ttk.Radiobutton(self.speed_frame, text="10X", variable=self.playback_speed, value=10,
-                                         command=self.set_playback_speed)
-        self.speed_10x.grid(row=2, column=0, padx=5, pady=2)
-        self.speed_1x_backwards = ttk.Radiobutton(self.speed_frame, text="1X backwards", variable=self.playback_speed,
-                                                  value=-1, command=self.set_playback_speed)
-        self.speed_1x_backwards.grid(row=3, column=0, padx=5, pady=2)
+        self.playback_speed_list = ['1X', '5X', '10X', '1X backwards']
+        self.playback_speed = tk.StringVar(value=self.playback_speed_list[0])
+
+        self.speed_combobox = ttk.Combobox(self.speed_frame, textvariable=self.playback_speed,
+                                           values=self.playback_speed_list, state='readonly')
+        self.speed_combobox.grid(row=0, column=0, padx=5, pady=2)
+        self.speed_combobox.bind('<<ComboboxSelected>>', self.set_playback_speed)
 
 
     def swap_metric(self):
@@ -248,8 +242,12 @@ class ConfigurationPanel(ttk.Frame):
         self.data_manager.set_timestamp(self.timestamp_combo.get())
         print(self.timestamp_combo.get())
 
-    def set_playback_speed(self):
-        speed = self.playback_speed.get()
+    def set_playback_speed(self, event=None):
+        speed_str = self.playback_speed.get()
+        if speed_str == '1X backwards':
+            speed = -1
+        else:
+            speed = int(speed_str[:-1])
         print(f"Setting playback speed to: {speed}X")
         if self.playback_panel.video_player:
             self.playback_panel.video_player.set_speed(speed)
