@@ -17,6 +17,8 @@ class DataManager:
         self.user_selected_gauges_label_list = []
         self.label = ''
         self.timestamp_value = 1
+        self.metric_indicator = 0  # default to 0 (meters)
+
 
     def parse(self, csv_path):
         """Handles the code for parsing the file"""
@@ -219,13 +221,50 @@ class DataManager:
 
     def set_timestamp(self, current_timestamp):
         self.timestamp_value = current_timestamp
+        
+    def swap_metric(self):
+        """Check what metric is already in use and swap to the other one"""
+        if self.metric_indicator == 0:  # case for the units being in meters
+            for element in self.data_file.columns:
+                index = element.find('[m')
+                if index != -1:
+                    i = 0
+                    while i < len(self.data_file[element]):
+                        if self.data_file.at[i, element] != '':
+                            data = self.data_file.at[i, element]
+                            self.data_file.at[i, element] = data * 39.76
+                        i += 1
+            # printing a field's data
+            print('\nFirst 6 rows in CUSTOM.distance [m]:\n')
+            for data in self.data_file['CUSTOM.distance [m]'][:6]:
+                print("%10s" % data, end=" "),
+                print('\n')
+            self.metric_indicator = 1
+        else:
+            for element in self.data_file.columns:
+                index = element.find('[m')
+                if index != -1:
+                    i = 0
+                    while i < len(self.data_file[element]):
+                        if self.data_file.at[i, element] != '':
+                            data = self.data_file.at[i, element]
+                            self.data_file.at[i, element] = data / 39.76
+                        i += 1
+            # printing a field's data
+            print('\nFirst 6 rows in CUSTOM.distance [m]:\n')
+            for data in self.data_file['CUSTOM.distance [m]'][:6]:
+                print("%10s" % data, end=" "),
+                print('\n')
+            self.metric_indicator = 0
 
 
 class TemporaryGauge:
     """Stores a gauge's related information after a user completes a selection"""
-
+    
     def __init__(self, f_name, g_name, t_stamp):
         self.id = None
         self.field_name = f_name
         self.gauge_name = g_name
         self.timestamp_value = t_stamp
+        return gauge_names
+
