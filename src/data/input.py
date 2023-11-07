@@ -266,5 +266,4 @@ class TemporaryGauge:
         self.field_name = f_name
         self.gauge_name = g_name
         self.timestamp_value = t_stamp
-        return gauge_names
 
