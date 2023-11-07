@@ -221,9 +221,13 @@ class DataManager:
 
         for i, element in enumerate(self.user_selected_gauges_list):
             if i == index:
+                print("deleting")
+                print(index)
                 self.user_selected_gauges_list.remove(element)
 
         gauge_name_list = []
+        timestamp_string = "Timestamp: " + str(self.timestamp_value) + " second(s)"
+        gauge_name_list.append(timestamp_string)
 
         for element in self.user_selected_gauges_list:
             gauge_name_list.append(element.field_name[0])
