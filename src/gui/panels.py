@@ -389,6 +389,7 @@ class PlaybackPanel(ttk.Frame):
         self.start_time["text"] = str(datetime.timedelta(seconds=current_time))
         self.update_progress_slider(current_time)
 
+
     def update_progress_slider(self, current_time):
         """Update the progress slider based on the current video time."""
         if self.video_player:
