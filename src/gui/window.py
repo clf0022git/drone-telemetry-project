@@ -24,7 +24,7 @@ class MainWindow(tk.Tk):
 
         self.notebook.add(self.config_panel, text="Configuration")
         self.notebook.add(self.playback_panel, text="Playback")
-        self.notebook.add(self.stats_panel, text="Statistics")
+        #self.notebook.add(self.stats_panel, text="Statistics")
 
     def create_frames(self):
         # (If there's any additional frame creation logic, it goes here)
