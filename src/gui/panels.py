@@ -36,7 +36,7 @@ class ConfigurationPanel(ttk.Frame):
         # Button to load CSV file
         self.load_csv_btn = ttk.Button(self, text="Load CSV", command=self.load_csv)
         self.load_csv_btn.pack(pady=5)
-        
+
         self.metricButton = ttk.Button(self, text="Swap between meters and feet", command=self.swap_metric)
         self.metricButton.pack(pady=5)
 
@@ -130,25 +130,29 @@ class ConfigurationPanel(ttk.Frame):
 
     def get_statistics(self):
 
-        file = filedialog.asksaveasfilename(defaultextension=".txt",
-                                            filetypes=[("Text files", "*.txt"), ("All files", "*.*")])
-        if not file:
+        if len(self.data_manager.user_selected_gauges_list) == 0:
+            print("No fields selected")
             return None
+
+        file = "C:/Users/caleb/Documents/CS_499/Output_Data/Statistics.txt"
 
         output_file = open(file, "w")
         output_file.write("")
 
         output_file.close()
 
-
-        for element in self.data_manager.data_file.columns:
-            if self.data_manager.data_file[element].dtype == "int64" or self.data_manager.data_file[element].dtype == "float64":
-                self.data_processor.calc_statistics(self.data_manager.data_file[element], element, file)
-
+        for element in self.data_manager.user_selected_gauges_list:
+            field = element.field_name[0]
+            print(element.field_name[0])
+            if self.data_manager.data_file[field].dtype == "int64" or self.data_manager.data_file[
+                field].dtype == "float64":
+                self.data_processor.calc_statistics(self.data_manager.data_file[field], field, file)
 
     def load_video(self):
         """Prompt the user to select a video file."""
-        video_path = filedialog.askopenfilename(filetypes=[("MOV files", "*.mov"), ("MP4 files", "*.mp4"), ("All files", "*.*")], title="Select a Video File")
+        video_path = filedialog.askopenfilename(
+            filetypes=[("MOV files", "*.mov"), ("MP4 files", "*.mp4"), ("All files", "*.*")],
+            title="Select a Video File")
         if video_path:  # If a file is selected
             print(f"Video File Loaded: {video_path}")
             self.playback_panel.set_video_path(video_path)
@@ -216,11 +220,11 @@ class ConfigurationPanel(ttk.Frame):
         else:
             print("Please select a gauge.")
 
-    def change_datatype(self,e):
+    def change_datatype(self, e):
         self.gauge_types_list.delete(0, 'end')
         self.gauge_types_list.insert(0, *self.data_manager.check_datatype(self.datatype_combo.get()))
 
-    def change_timestamp(self,e):
+    def change_timestamp(self, e):
         self.data_manager.set_timestamp(self.timestamp_combo.get())
         print(self.timestamp_combo.get())
 
@@ -251,9 +255,9 @@ class PlaybackPanel(ttk.Frame):
         self.video_path = None
 
         self.current_time = 0
-        
+
         self.is_seeking = False
-        
+
         self.is_video_reversed = False
 
         # Control panel
