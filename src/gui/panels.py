@@ -26,16 +26,16 @@ class ConfigurationPanel(ttk.Frame):
         # Instantiate a DataManager object
         self.data_manager = DataManager()
 
-        self.label = ttk.Label(self, font=("Roboto Black",14), text="Configuration Panel")
+        self.label = ttk.Label(self, font=("Roboto Black", 14), text="Configuration Panel")
         self.label.pack(pady=10)
         self.playback_panel = playback_panel
         self.stats_panel = stats_panel
 
         # Styles for tkinter widgets
         button_style = ttk.Style()
-        button_style.configure("TButton", font=("Roboto Light",8))
-        button_style.configure("TLabel", font=("Roboto Light",8))
-        button_style.configure("TRadiobutton", font=("Roboto Light",8))
+        button_style.configure("TButton", font=("Roboto Light", 8))
+        button_style.configure("TLabel", font=("Roboto Light", 8))
+        button_style.configure("TRadiobutton", font=("Roboto Light", 8))
 
         # Button to load video file
         self.load_video_btn = ttk.Button(self, text="Load Video", command=self.load_video)
@@ -60,7 +60,7 @@ class ConfigurationPanel(ttk.Frame):
         self.user_selection_group.pack(side=tk.LEFT)
 
         # Combobox that allows timestamp specification
-        self.timestamp_label = ttk.Label(self.timestamp_group,font=("Roboto Light",10), text="Timestamp:")
+        self.timestamp_label = ttk.Label(self.timestamp_group, font=("Roboto Light", 10), text="Timestamp:")
         self.timestamp_label.pack(pady=5, side=tk.TOP)
         self.timestamp_default_label = ttk.Label(self.timestamp_group,
                                                  text="Default - 1 sec / Data Entry")
@@ -70,17 +70,18 @@ class ConfigurationPanel(ttk.Frame):
         self.timestamp_combo.current(0)
         self.timestamp_combo.pack(pady=5, side=tk.TOP)
         self.timestamp_combo.bind("<<ComboboxSelected>>", self.change_timestamp)
-        self.timestamp_combo.configure(font=("Roboto Light",8))
+        self.timestamp_combo.configure(font=("Roboto Light", 8))
 
         # Listbox to select one field
-        self.fieldnames_label = ttk.Label(self.fieldnames_group, font=("Roboto Light",10), text="Available Fields:")
+        self.fieldnames_label = ttk.Label(self.fieldnames_group, font=("Roboto Light", 10), text="Available Fields:")
         self.fieldnames_label.pack(pady=5)
         self.fieldnames_entry_box = ttk.Entry(self.fieldnames_group, font=("Roboto Light", 10))
         self.fieldnames_entry_box.pack(pady=5)
         self.fieldnames_entry_box.bind("<KeyRelease>", self.search_fields)
-        self.fieldnames_list = tk.Listbox(self.fieldnames_group, selectmode=tk.SINGLE, height=5, exportselection=0,width=30)
+        self.fieldnames_list = tk.Listbox(self.fieldnames_group, selectmode=tk.SINGLE, height=5, exportselection=0,
+                                          width=30)
         self.fieldnames_list.pack(pady=5)
-        self.fieldnames_list.configure(font=("Roboto Light",8))
+        self.fieldnames_list.configure(font=("Roboto Light", 8))
         self.fieldnames = []
         self.fieldnames_searched = []
 
@@ -89,27 +90,28 @@ class ConfigurationPanel(ttk.Frame):
         self.show_gauges_btn.pack(pady=10)
 
         # Combobox that allows changing datatypes
-        self.current_datatype_label = ttk.Label(self.datatypes_group, font=("Roboto Light",10), text="Current Datatype:")
+        self.current_datatype_label = ttk.Label(self.datatypes_group, font=("Roboto Light", 10),
+                                                text="Current Datatype:")
         self.current_datatype_label.pack(pady=5)
         self.current_datatype_text = ttk.Label(self.datatypes_group, text="No item selected.")
         self.current_datatype_text.pack(pady=5)
 
-        self.datatypes_label = ttk.Label(self.datatypes_group, font=("Roboto Light",10), text="Change Datatype:")
+        self.datatypes_label = ttk.Label(self.datatypes_group, font=("Roboto Light", 10), text="Change Datatype:")
         self.datatypes_label.pack(pady=5)
         self.available_datatypes = ["object", "bool", "int64", "float64"]
         self.datatype_combo = ttk.Combobox(self.datatypes_group, value=self.available_datatypes, width=10)
         self.datatype_combo.current(0)
         self.datatype_combo.pack(pady=5)
         self.datatype_combo.bind("<<ComboboxSelected>>", self.change_datatype)
-        self.datatype_combo.configure(font=("Roboto Light",8))
+        self.datatype_combo.configure(font=("Roboto Light", 8))
 
         # Listbox to show gauge options for a field
-        self.gauge_types_label = ttk.Label(self.gauge_options_group, font=("Roboto Light",10), text="Possible Gauges:")
+        self.gauge_types_label = ttk.Label(self.gauge_options_group, font=("Roboto Light", 10), text="Possible Gauges:")
         self.gauge_types_label.pack(pady=5)
         self.gauge_types_list = tk.Listbox(self.gauge_options_group, selectmode=tk.SINGLE, height=5, exportselection=0,
                                            width=30)
         self.gauge_types_list.pack(pady=5)
-        self.gauge_types_list.configure(font=("Roboto Light",8))
+        self.gauge_types_list.configure(font=("Roboto Light", 8))
         self.gauge_types = []
 
         # Button to select field with gauge
@@ -117,18 +119,19 @@ class ConfigurationPanel(ttk.Frame):
         self.select_field_btn.pack(pady=10)
 
         # Defines a listbox for user selections to be placed into
-        self.user_selection_label = ttk.Label(self.user_selection_group, font=("Roboto Light",10), text="Current Selections:")
+        self.user_selection_label = ttk.Label(self.user_selection_group, font=("Roboto Light", 10),
+                                              text="Current Selections:")
         self.user_selection_label.pack(pady=5)
         self.user_selection_list = tk.Listbox(self.user_selection_group, selectmode=tk.SINGLE, height=5,
                                               exportselection=0, width=30)
         self.user_selection_list.pack(pady=5)
-        self.user_selection_list.configure(font=("Roboto Light",8))
+        self.user_selection_list.configure(font=("Roboto Light", 8))
 
         # Button to select field with gauge
         self.select_field_btn = ttk.Button(self.user_selection_group, text="Remove Choice", command=self.remove_field)
         self.select_field_btn.pack(pady=10)
 
-        self.speed_label = ttk.Label(self, font=("Roboto Light",10), text="Playback Speed:")
+        self.speed_label = ttk.Label(self, font=("Roboto Light", 10), text="Playback Speed:")
         self.speed_label.pack(pady=5)
 
         # Using radio buttons for playback speed options
@@ -153,7 +156,6 @@ class ConfigurationPanel(ttk.Frame):
         # Should probably support indication for which system your currently in
         self.metricButton = ttk.Button(self, text="Swap from meters to feet", command=self.swap_metric)
         self.metricButton.pack(pady=10)
-
 
     def swap_metric(self):
         global fields
@@ -193,10 +195,11 @@ class ConfigurationPanel(ttk.Frame):
                 print('\n')
             m_or_f = 0
 
-
     def load_video(self):
         """Prompt the user to select a video file."""
-        video_path = filedialog.askopenfilename(filetypes=[("MOV files", "*.mov"), ("MP4 files", "*.mp4"), ("All files", "*.*")], title="Select a Video File")
+        video_path = filedialog.askopenfilename(
+            filetypes=[("MOV files", "*.mov"), ("MP4 files", "*.mp4"), ("All files", "*.*")],
+            title="Select a Video File")
         if video_path:  # If a file is selected
             print(f"Video File Loaded: {video_path}")
             self.playback_panel.set_video_path(video_path)
@@ -211,7 +214,8 @@ class ConfigurationPanel(ttk.Frame):
             return
 
         self.data_manager.parse(csv_path)
-        self.fieldnames_list, self.fieldnames = self.data_manager.load_fields(self.fieldnames_list, self.current_datatype_text)
+        self.fieldnames_list, self.fieldnames = self.data_manager.load_fields(self.fieldnames_list,
+                                                                              self.current_datatype_text)
         print(self.fieldnames_list)
 
     def update_field_list(self, new_list):
@@ -258,13 +262,14 @@ class ConfigurationPanel(ttk.Frame):
         for j, element in enumerate(self.user_selection_list.curselection()):
             k = j
 
-        if selected_field:
+        if selected_field and k != 0:
             print(f"Selected Gauge: {', '.join(selected_field)}")
             self.user_selection_list.delete(0, 'end')  # clear list before each call to update
             self.user_selection_list.insert(0, *self.data_manager.delete_selection(k))
 
         else:
             print("Please select a field to remove.")
+            print("It cannot be the timestamp field.")
 
     def select_field(self):
         """Will call functionality to send selected fields to function"""
@@ -273,7 +278,8 @@ class ConfigurationPanel(ttk.Frame):
         if selected_gauge:
             print(f"Selected Gauge: {', '.join(selected_gauge)}")
             self.user_selection_list.delete(0, 'end')  # clear list before each call to update
-            gt_list = self.data_manager.confirm_selection(selected_gauge)
+            gt_list = self.data_manager.confirm_selection(selected_gauge, self.fieldnames_gauge_group,
+                                                          self.user_selection_list)
             if len(gt_list) <= 10:
                 self.user_selection_list.insert(0, *gt_list)
                 # Functionality to ask user about the type of the data probably in between identifying gauges and
@@ -308,7 +314,7 @@ class PlaybackPanel(ttk.Frame):
     def __init__(self, parent):
         super().__init__(parent)
 
-        self.label = ttk.Label(self, font=("Roboto Black",14), text="Playback Panel")
+        self.label = ttk.Label(self, font=("Roboto Black", 14), text="Playback Panel")
         self.label.pack(pady=10)
 
         # Video Player (initialization postponed until a video is selected)
@@ -316,7 +322,7 @@ class PlaybackPanel(ttk.Frame):
         self.video_path = None
 
         self.current_time = 0
-        
+
         self.is_seeking = False
 
         # Control panel
@@ -415,7 +421,7 @@ class StatisticsPanel(ttk.Frame):
     def __init__(self, parent):
         super().__init__(parent)
 
-        self.label = ttk.Label(self, font=("Roboto Black",14), text="Statistics Panel")
+        self.label = ttk.Label(self, font=("Roboto Black", 14), text="Statistics Panel")
         self.label.pack(pady=10)
 
         # TODO: Add widgets to display statistics like min, max, average, etc.
