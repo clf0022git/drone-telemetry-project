@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 from src.gui.panels import ConfigurationPanel, PlaybackPanel, StatisticsPanel
+from src.data.input import DataManager
 
 
 class MainWindow(tk.Tk):
@@ -29,6 +30,18 @@ class MainWindow(tk.Tk):
     def create_frames(self):
         # (If there's any additional frame creation logic, it goes here)
         pass
+
+
+class GaugeWindow(tk.Toplevel):
+    def __init__(self):
+        super().__init__()
+
+        # Window properties
+        self.title("Telemetry Data Gauges")
+        self.geometry("300x300")
+        self.configure(bg="white")
+        self.playback_panel = PlaybackPanel
+        self.config_panel = ConfigurationPanel
 
 if __name__ == "__main__":
     app = MainWindow()
