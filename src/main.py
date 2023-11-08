@@ -1,7 +1,7 @@
 import sys
 import traceback
 from src.gui.window import MainWindow
-
+from src.gui.window import gaugeWindow
 
 def main():
     """
@@ -11,7 +11,9 @@ def main():
     """
     try:
         root = MainWindow()
+        second = gaugeWindow()
         root.mainloop()
+        second.mainloop()
     except Exception as e:
         print(f"An error occurred: {e}", file=sys.stderr)
         traceback.print_exc(file=sys.stderr)

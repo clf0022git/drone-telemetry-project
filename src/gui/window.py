@@ -30,6 +30,17 @@ class MainWindow(tk.Tk):
         # (If there's any additional frame creation logic, it goes here)
         pass
 
+
+class gaugeWindow(tk.Tk):
+    def __init__(self):
+        super().__init__()
+
+        # Window properties
+        self.title("Telemetry Data Gauges")
+        self.geometry("1000x700")
+        self.configure(bg="white")
+
+
 if __name__ == "__main__":
     app = MainWindow()
     app.mainloop()
