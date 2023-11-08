@@ -259,17 +259,20 @@ class ConfigurationPanel(ttk.Frame):
         k = 0
         selected_field = [self.user_selection_list.get(i) for i in self.user_selection_list.curselection()]
 
-        for j, element in enumerate(self.user_selection_list.curselection()):
-            k = j
+        for element in self.user_selection_list.curselection():
+            if element != 0:
+                k = element - 1
+            else:
+                print("you cannot select the timestamp field.")
+                return
 
-        if selected_field and k != 0:
+        if selected_field:
             print(f"Selected Gauge: {', '.join(selected_field)}")
             self.user_selection_list.delete(0, 'end')  # clear list before each call to update
             self.user_selection_list.insert(0, *self.data_manager.delete_selection(k))
 
         else:
             print("Please select a field to remove.")
-            print("It cannot be the timestamp field.")
 
     def select_field(self):
         """Will call functionality to send selected fields to function"""
