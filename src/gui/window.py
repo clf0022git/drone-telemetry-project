@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 from src.gui.panels import ConfigurationPanel, PlaybackPanel, StatisticsPanel
+from src.data.input import DataManager
 
 
 class MainWindow(tk.Tk):
@@ -39,6 +40,11 @@ class gaugeWindow(tk.Tk):
         self.title("Telemetry Data Gauges")
         self.geometry("1000x700")
         self.configure(bg="white")
+        self.playback_panel = PlaybackPanel
+        self.config_panel = ConfigurationPanel
+
+    #def drawGauges(self):
+
 
 
 if __name__ == "__main__":

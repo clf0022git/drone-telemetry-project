@@ -11,9 +11,10 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib import style
 import matplotlib.animation as animation
 import pandas as pd
-
-#class GaugeCreator:
-
+from src.data.input import DataManager
+class GaugeCreator:
+   def __init__(self):
+      self.name = "yes"
 #This class contains all the functions for producing a line graph
 class LineGraph:
    def __init__(self, fieldName1, fieldName2, fieldBool, dataSet1, dataSet2, time_inc, window):
