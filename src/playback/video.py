@@ -38,6 +38,8 @@ class VideoPlayer(tk.Frame):
 
         self.do_backwards = False
 
+        self.last_duration = None
+
         # Add play button
         # self.play_button = tk.Button(self.master, text="Play", command=self.play)
         # self.play_button.pack(side=tk.BOTTOM)
@@ -68,11 +70,17 @@ class VideoPlayer(tk.Frame):
                 end_time = self.player.get_length() // 1000  # Get video length in seconds
                 self.seek(end_time - 1)  # Seek to the end of the video
             self.paused_backward = False  # Reset this flag as we are no longer paused
-            if not self.backward_timer_running:
-                self.seek_backward_by_second()  # Start the backward playback
+            self.initialize_rendering()
+            # if not self.backward_timer_running:
+            #     self.seek_backward_by_second()  # Start the backward playback
         else:
             # If already playing backward, then pause it
             self.pause_backward()
+
+    def initialize_rendering(self):
+        """Method to play the video forward briefly to initialize rendering."""
+        self.player.play()
+        self.master.after(100, self.play_backward)  # After a short delay, call `play_backward`
 
     def pause_backward(self):
         """Method to pause backward playback."""
@@ -99,6 +107,7 @@ class VideoPlayer(tk.Frame):
         if not self.timer_running:
             self.timer_running = True
             self.check_time_update()
+            self.check_duration_update()
 
     def stop_time_update_timer(self):
         """Stops the timer that checks for time updates."""
@@ -127,6 +136,18 @@ class VideoPlayer(tk.Frame):
 
             # Check again after 200 milliseconds
             self.master.after(200, self.check_time_update)
+
+    def check_duration_update(self):
+        """Check if the video duration has been updated."""
+        current_duration = self.player.get_length()  # Get current video duration in milliseconds
+        print(current_duration)
+        if current_duration != self.last_duration:  # Check if the duration has changed
+            self.trigger_event("duration-changed", current_duration // 1000)  # Convert to seconds and trigger event
+            self.last_duration = current_duration  # Update last known duration
+
+        # If the video is playing, continue to check the duration
+        if self.player.is_playing():
+            self.master.after(1000, self.check_duration_update)  # Check again after 1 second
 
     def bind_event(self, event, handler):
         """Bind an event to a handler function."""
@@ -158,6 +179,7 @@ class VideoPlayer(tk.Frame):
         self.video_path = video_path
         self.media = self.instance.media_new(self.video_path)
         self.player.set_media(self.media)
+        self.check_duration_update()
 
     def set_speed(self, speed_multiplier):
         """Method to adjust the video playback speed."""

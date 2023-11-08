@@ -16,6 +16,14 @@ class DataManager:
         self.user_selected_gauges_list = []
         self.user_selected_gauges_label_list = []
         self.label = ''
+        self.timestamp_value = 1
+        self.additional_frame_group = None
+        self.additional_listbox = None
+        self.additional_label = None
+        self.additional_btn = None
+        self.remove_additional_btn = None
+        self.user_selection_replacement_list = None
+        self.current_gauge_temp = None # Holds temporary gauge when 2nd field needs to be selected
 
     def parse(self, csv_path):
         """Handles the code for parsing the file"""
@@ -26,6 +34,7 @@ class DataManager:
         # print(self.data_file["CUSTOM.updateTime"])
         self.data_file["CUSTOM.updateTime"] = self.data_file["CUSTOM.updateTime"].round('s')
         self.remove_duplicates()
+        print("Parsed!")
 
     # Function to find duplicate entries in the datafile
     # Method only works for data files with a delineated "CUSTOM.updateTime" column
@@ -41,7 +50,7 @@ class DataManager:
         self.data_file = self.data_file.reset_index(drop=True)
         # print(len(self.data_file))
 
-    def load_fields(self, fieldnames_list, datatype_label) -> list:
+    def load_fields(self, fieldnames_list, datatype_label):
         self.datatype_label = datatype_label
         fieldnames = []
 
@@ -52,15 +61,7 @@ class DataManager:
         for field in fieldnames:
             fieldnames_list.insert(tk.END, field)
 
-        ''' 
-        # define iterator i for debugging
-        i = 0
-        for dt in self.data_file.dtypes:
-            i = i + 1
-            print(i)
-            print(dt)
-        '''
-        return fieldnames_list
+        return fieldnames_list, fieldnames
 
     def check_datatype(self, combo_value) -> list:
 
@@ -189,14 +190,28 @@ class DataManager:
 
     # Creates a list of labels that show what the user has selected so far and
     # displays them to the screen
-    def confirm_selection(self, selected_gauge) -> list:
-        current_saved_gauge = TemporaryGauge(self.current_selected_field, selected_gauge)
+    def confirm_selection(self, selected_gauge, gauge_group_frame, user_selection_list) -> list:
+        gauge_name_list = []
+        timestamp_string = "Timestamp: " + str(self.timestamp_value) + " second(s)"
+        gauge_name_list.append(timestamp_string)
+
+        current_saved_gauge = TemporaryGauge(self.current_selected_field, selected_gauge[0], self.timestamp_value)
+        self.current_gauge_temp = current_saved_gauge
+        print(selected_gauge)
+
+        if selected_gauge[0] == "X-by-Y-plot":
+            for element in self.user_selected_gauges_list:
+                if len(gauge_name_list) <= 11:
+                    gauge_name_list.append(element.field_name[0])
+
+            self.user_selection_replacement_list = user_selection_list
+            self.instantiate_second_field(gauge_group_frame)
+            return gauge_name_list
+
         self.user_selected_gauges_list.append(current_saved_gauge)
 
-        gauge_name_list = []
-
         for i, element in enumerate(self.user_selected_gauges_list):
-            if len(gauge_name_list) <= 10:
+            if len(gauge_name_list) <= 11:
                 element.id = i
                 gauge_name_list.append(element.field_name[0])
 
@@ -206,20 +221,102 @@ class DataManager:
 
         for i, element in enumerate(self.user_selected_gauges_list):
             if i == index:
+                print("deleting")
+                print(index)
                 self.user_selected_gauges_list.remove(element)
 
         gauge_name_list = []
+        timestamp_string = "Timestamp: " + str(self.timestamp_value) + " second(s)"
+        gauge_name_list.append(timestamp_string)
 
         for element in self.user_selected_gauges_list:
             gauge_name_list.append(element.field_name[0])
 
         return gauge_name_list
 
+    def set_timestamp(self, current_timestamp):
+        self.timestamp_value = current_timestamp
+
+    def instantiate_second_field(self, frame_group):
+        self.additional_frame_group = tk.Frame(frame_group)
+        self.additional_frame_group.pack(side=tk.LEFT)
+        self.additional_frame_group.pack(padx=10)
+
+        # Create listbox
+        self.additional_label = ttk.Label(self.additional_frame_group, font=("Roboto Light", 10),
+                                          text="Possible Gauges:")
+        self.additional_label.pack(pady=5)
+        self.additional_listbox = tk.Listbox(self.additional_frame_group, selectmode=tk.SINGLE, height=5,
+                                             exportselection=0, width=30)
+        self.additional_listbox.pack(pady=5)
+        self.additional_listbox.configure(font=("Roboto Light", 8))
+
+        # Button to select second input
+        self.additional_btn = ttk.Button(self.additional_frame_group, text="Select 2nd Field",
+                                         command=self.select_second)
+        self.additional_btn.pack(pady=10)
+
+        # Button to deny second input
+        self.remove_additional_btn = ttk.Button(self.additional_frame_group, text="No 2nd Field",
+                                                command=self.remove_second)
+        self.remove_additional_btn.pack(pady=10)
+
+        fieldnames = []
+
+        for col in self.data_file.columns:
+            fieldnames.append(col)
+
+        for field in fieldnames:
+            self.additional_listbox.insert(tk.END, field)
+
+    def delete_second_field(self):
+        self.additional_frame_group.destroy()
+
+    def select_second(self):
+        gauge_name_list = []
+        timestamp_string = "Timestamp: " + str(self.timestamp_value) + " second(s)"
+        gauge_name_list.append(timestamp_string)
+
+        current_saved_gauge = self.current_gauge_temp
+        selected_gauge = [self.additional_listbox.get(i) for i in self.additional_listbox.curselection()]
+
+        dtype_bool = self.data_file[selected_gauge[0]].dtype == "int64" or self.data_file[selected_gauge[0]].dtype == "float64"
+        print("This datatype: ")
+        print(self.data_file[selected_gauge[0]].dtype)
+        if selected_gauge and dtype_bool:
+            print(f"Selected Gauge: {', '.join(selected_gauge)}")
+            self.user_selection_replacement_list.delete(0, 'end')
+
+            current_saved_gauge.set_second_field(selected_gauge[0])
+            self.user_selected_gauges_list.append(current_saved_gauge)
+
+            for i, element in enumerate(self.user_selected_gauges_list):
+                if len(gauge_name_list) <= 11:
+                    element.id = i
+                    gauge_name_list.append(element.field_name[0])
+
+            if len(gauge_name_list) <= 11:
+                self.user_selection_replacement_list.insert(0, *gauge_name_list)
+            else:
+                print("You already have ten field selected!")
+                self.user_selection_replacement_list.insert(0, *gauge_name_list)
+            self.remove_second()
+        else:
+            print("Please select a field that is an integer or float.")
+
+    def remove_second(self):
+        self.delete_second_field()
+
 
 class TemporaryGauge:
     """Stores a gauge's related information after a user completes a selection"""
 
-    def __init__(self, f_name, g_name):
+    def __init__(self, f_name, g_name, t_stamp):
         self.id = None
         self.field_name = f_name
+        self.second_field_name = ""
         self.gauge_name = g_name
+        self.timestamp_value = t_stamp
+
+    def set_second_field(self, second_field):
+        self.second_field_name = second_field
