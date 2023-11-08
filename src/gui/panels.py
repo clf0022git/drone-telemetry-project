@@ -1,19 +1,17 @@
+import tkinter as tk
+import pandas as pd
 import csv
-
-# initializing the titles and rows list
-fields = []
-rows = []
-m_or_f = 0  # 0 = f and 1 = m
+import time
 
 import datetime
 from tkinter import ttk, filedialog
 from src.playback.video import VideoPlayer
 from src.data.input import DataManager
 
-import tkinter as tk
-from tkinter import ttk, filedialog
-
-import pandas as pd
+# initializing the titles and rows list
+fields = []
+rows = []
+m_or_f = 0  # 0 = f and 1 = m
 
 
 class ConfigurationPanel(ttk.Frame):
@@ -28,10 +26,16 @@ class ConfigurationPanel(ttk.Frame):
         # Instantiate a DataManager object
         self.data_manager = DataManager()
 
-        self.label = ttk.Label(self, text="Configuration Panel")
+        self.label = ttk.Label(self, font=("Roboto Black", 14), text="Configuration Panel")
         self.label.pack(pady=10)
         self.playback_panel = playback_panel
         self.stats_panel = stats_panel
+
+        # Styles for tkinter widgets
+        button_style = ttk.Style()
+        button_style.configure("TButton", font=("Roboto Light", 8))
+        button_style.configure("TLabel", font=("Roboto Light", 8))
+        button_style.configure("TRadiobutton", font=("Roboto Light", 8))
 
         # Button to load video file
         self.load_video_btn = ttk.Button(self, text="Load Video", command=self.load_video)
@@ -40,116 +44,112 @@ class ConfigurationPanel(ttk.Frame):
         # Button to load CSV file
         self.load_csv_btn = ttk.Button(self, text="Load CSV", command=self.load_csv)
         self.load_csv_btn.pack(pady=5)
-        
-        self.metricButton = ttk.Button(self, text="Swap from meters to feet", command=self.swap_metric)
-        self.metricButton.pack(pady=10)
 
         # Frames that hold the fieldnames and their options
         self.fieldnames_gauge_group = tk.Frame(self)
         self.fieldnames_gauge_group.pack(pady=5, side=tk.TOP)
+        self.timestamp_group = tk.Frame(self.fieldnames_gauge_group)
+        self.timestamp_group.pack(padx=10, side=tk.LEFT)
         self.fieldnames_group = tk.Frame(self.fieldnames_gauge_group)
-        self.fieldnames_group.pack(side=tk.LEFT)
+        self.fieldnames_group.pack(padx=10, side=tk.LEFT)
         self.datatypes_group = tk.Frame(self.fieldnames_gauge_group)
-        self.datatypes_group.pack(side=tk.LEFT)
+        self.datatypes_group.pack(padx=10, side=tk.LEFT)
         self.gauge_options_group = tk.Frame(self.fieldnames_gauge_group)
-        self.gauge_options_group.pack(side=tk.LEFT)
+        self.gauge_options_group.pack(padx=10, side=tk.LEFT)
+        self.user_selection_group = tk.Frame(self.fieldnames_gauge_group)
+        self.user_selection_group.pack(side=tk.LEFT)
+
+        # Combobox that allows timestamp specification
+        self.timestamp_label = ttk.Label(self.timestamp_group, font=("Roboto Light", 10), text="Timestamp:")
+        self.timestamp_label.pack(pady=5, side=tk.TOP)
+        self.timestamp_default_label = ttk.Label(self.timestamp_group,
+                                                 text="Default - 1 sec / Data Entry")
+        self.timestamp_default_label.pack(pady=5, side=tk.TOP)
+        self.available_timestamps = ["1", "2", "3", "5"]
+        self.timestamp_combo = ttk.Combobox(self.timestamp_group, value=self.available_timestamps, width=10)
+        self.timestamp_combo.current(0)
+        self.timestamp_combo.pack(pady=5, side=tk.TOP)
+        self.timestamp_combo.bind("<<ComboboxSelected>>", self.change_timestamp)
+        self.timestamp_combo.configure(font=("Roboto Light", 8))
+
+        # Listbox to select one field
+        self.fieldnames_label = ttk.Label(self.fieldnames_group, font=("Roboto Light", 10), text="Available Fields:")
+        self.fieldnames_label.pack(pady=5)
+        self.fieldnames_entry_box = ttk.Entry(self.fieldnames_group, font=("Roboto Light", 10))
+        self.fieldnames_entry_box.pack(pady=5)
+        self.fieldnames_entry_box.bind("<KeyRelease>", self.search_fields)
+        self.fieldnames_list = tk.Listbox(self.fieldnames_group, selectmode=tk.SINGLE, height=5, exportselection=0,
+                                          width=30)
+        self.fieldnames_list.pack(pady=5)
+        self.fieldnames_list.configure(font=("Roboto Light", 8))
+        self.fieldnames = []
+        self.fieldnames_searched = []
+
+        # Button to show gauges
+        self.show_gauges_btn = ttk.Button(self.fieldnames_group, text="Select Field", command=self.show_gauges)
+        self.show_gauges_btn.pack(pady=10)
 
         # Combobox that allows changing datatypes
-        self.current_datatype_label = ttk.Label(self.datatypes_group, text="Current Datatype:")
+        self.current_datatype_label = ttk.Label(self.datatypes_group, font=("Roboto Light", 10),
+                                                text="Current Datatype:")
         self.current_datatype_label.pack(pady=5)
         self.current_datatype_text = ttk.Label(self.datatypes_group, text="No item selected.")
         self.current_datatype_text.pack(pady=5)
 
-        self.datatypes_label = ttk.Label(self.datatypes_group, text="Change Datatype:")
+        self.datatypes_label = ttk.Label(self.datatypes_group, font=("Roboto Light", 10), text="Change Datatype:")
         self.datatypes_label.pack(pady=5)
         self.available_datatypes = ["object", "bool", "int64", "float64"]
         self.datatype_combo = ttk.Combobox(self.datatypes_group, value=self.available_datatypes, width=10)
         self.datatype_combo.current(0)
         self.datatype_combo.pack(pady=5)
         self.datatype_combo.bind("<<ComboboxSelected>>", self.change_datatype)
-
-        # Listbox to select one field
-        self.fieldnames_label = ttk.Label(self.fieldnames_group, text="Select Field:")
-        self.fieldnames_label.pack(pady=5)
-        self.fieldnames_list = tk.Listbox(self.fieldnames_group, selectmode=tk.SINGLE, height=5, exportselection=0, width=30)
-        self.fieldnames_list.pack(pady=5)
-        self.fieldnames = []
-        # Button to show gauges
-        self.show_gauges_btn = ttk.Button(self.fieldnames_group, text="Show Gauges", command=self.show_gauges)
-        self.show_gauges_btn.pack(pady=10)
+        self.datatype_combo.configure(font=("Roboto Light", 8))
 
         # Listbox to show gauge options for a field
-        self.gauge_types_label = ttk.Label(self.gauge_options_group, text="Possible Gauges:")
+        self.gauge_types_label = ttk.Label(self.gauge_options_group, font=("Roboto Light", 10), text="Possible Gauges:")
         self.gauge_types_label.pack(pady=5)
-        self.gauge_types_list = tk.Listbox(self.gauge_options_group, selectmode=tk.SINGLE, height=5, exportselection=0, width=30)
+        self.gauge_types_list = tk.Listbox(self.gauge_options_group, selectmode=tk.SINGLE, height=5, exportselection=0,
+                                           width=30)
         self.gauge_types_list.pack(pady=5)
+        self.gauge_types_list.configure(font=("Roboto Light", 8))
         self.gauge_types = []
+
         # Button to select field with gauge
-        self.select_field_btn = ttk.Button(self.gauge_options_group, text="Select Field", command=self.select_field)
+        self.select_field_btn = ttk.Button(self.gauge_options_group, text="Select Gauge", command=self.select_field)
         self.select_field_btn.pack(pady=10)
 
-        # Listbox to select multiple gauge types
-        self.gauge_label = ttk.Label(self, text="Select Gauge Types:")
-        self.gauge_label.pack(pady=5)
-        self.gauge_list = tk.Listbox(self, selectmode=tk.MULTIPLE, height=5, exportselection=0)
-        self.gauge_list.pack(pady=5)
-        self.gauges = ["Circle - 90°", "Circle - 180°", "Circle - 270°", "Circle - 360°", "Bar", "X-Plot",
-                       "X-by-Y-plot", "Character Display", "Text Display", "Clock", "Stopwatch", "Running Time",
-                       "On/off light"]
-        for gauge in self.gauges:
-            self.gauge_list.insert(tk.END, gauge)
+        # Defines a listbox for user selections to be placed into
+        self.user_selection_label = ttk.Label(self.user_selection_group, font=("Roboto Light", 10),
+                                              text="Current Selections:")
+        self.user_selection_label.pack(pady=5)
+        self.user_selection_list = tk.Listbox(self.user_selection_group, selectmode=tk.SINGLE, height=5,
+                                              exportselection=0, width=30)
+        self.user_selection_list.pack(pady=5)
+        self.user_selection_list.configure(font=("Roboto Light", 8))
 
-        # Button to confirm configuration
-        self.confirm_btn = ttk.Button(self, text="Confirm Configuration", command=self.confirm_config)
-        self.confirm_btn.pack(pady=10)
+        # Button to select field with gauge
+        self.select_field_btn = ttk.Button(self.user_selection_group, text="Remove Choice", command=self.remove_field)
+        self.select_field_btn.pack(pady=10)
 
-        self.speed_label = ttk.Label(self, text="Playback Speed:")
+        self.speed_label = ttk.Label(self, font=("Roboto Light", 10), text="Playback Speed:")
         self.speed_label.pack(pady=5)
 
         # Using radio buttons for playback speed options
         self.speed_frame = ttk.Frame(self)
         self.speed_frame.pack(pady=5)
 
-        self.playback_speed = tk.IntVar(value=1)  # default speed 1X
-        self.speed_1x = ttk.Radiobutton(self.speed_frame, text="1X", variable=self.playback_speed, value=1,
-                                        command=self.set_playback_speed)
-        self.speed_1x.grid(row=0, column=0, padx=5, pady=2)
-        self.speed_5x = ttk.Radiobutton(self.speed_frame, text="5X", variable=self.playback_speed, value=5,
-                                        command=self.set_playback_speed)
-        self.speed_5x.grid(row=1, column=0, padx=5, pady=2)
-        self.speed_10x = ttk.Radiobutton(self.speed_frame, text="10X", variable=self.playback_speed, value=10,
-                                         command=self.set_playback_speed)
-        self.speed_10x.grid(row=2, column=0, padx=5, pady=2)
-        self.speed_1x_backwards = ttk.Radiobutton(self.speed_frame, text="1X backwards", variable=self.playback_speed,
-                                                  value=-1, command=self.set_playback_speed)
-        self.speed_1x_backwards.grid(row=3, column=0, padx=5, pady=2)
+        self.playback_speed_list = ['1X', '5X', '10X', '1X backwards']
+        self.playback_speed = tk.StringVar(value=self.playback_speed_list[0])
 
-    def load_csv(self):
-        global fields
-        global rows
-        del fields[:]
-        del rows[:]
-        """Prompt the user to select a CSV file."""
-        filename = filedialog.askopenfilename(filetypes=[("CSV files", "*.csv")], title="Select a CSV File")
-        if filename:  # If a file is selected
-            print(f"CSV File Loaded: {filename}")
-            # reading csv file
-            with open(filename, 'r') as csvfile:
-                # creating a csv reader object
-                csvreader = csv.reader(csvfile)
+        self.speed_combobox = ttk.Combobox(self.speed_frame, textvariable=self.playback_speed,
+                                           values=self.playback_speed_list, state='readonly')
+        self.speed_combobox.grid(row=0, column=0, padx=5, pady=2)
+        self.speed_combobox.bind('<<ComboboxSelected>>', self.set_playback_speed)
 
-                # extracting field names through first row
-                fields = next(csvreader)
-
-                # extracting each data row one by one
-                for row in csvreader:
-                    rows.append(row)
-
-                # get total number of rows
-                print("Total no. of rows: %d" % csvreader.line_num)
-
-            # printing the field names
-            print('Field names are:' + ', '.join(field for field in fields))
+        # Button for changing between measurement systems
+        # Should probably support indication for which system your currently in
+        self.metricButton = ttk.Button(self, text="Swap from meters to feet", command=self.swap_metric)
+        self.metricButton.pack(pady=10)
 
     def swap_metric(self):
         global fields
@@ -189,18 +189,11 @@ class ConfigurationPanel(ttk.Frame):
                 print('\n')
             m_or_f = 0
 
-        # Defines a frame for user selections to be placed into
-        self.user_selection_frame = tk.Frame(self)
-        self.user_selection_frame.pack(pady=5, side=tk.TOP)
-        self.user_selection_list = tk.Listbox(self.user_selection_frame, selectmode=tk.SINGLE, height=5, exportselection=0, width=30)
-        self.user_selection_list.pack(pady=5)
-        # Button to select field with gauge
-        self.select_field_btn = ttk.Button(self.user_selection_frame, text="Remove Field", command=self.remove_field)
-        self.select_field_btn.pack(pady=10)
-
     def load_video(self):
         """Prompt the user to select a video file."""
-        video_path = filedialog.askopenfilename(filetypes=[("MP4 files", "*.mp4")], title="Select a Video File")
+        video_path = filedialog.askopenfilename(
+            filetypes=[("MOV files", "*.mov"), ("MP4 files", "*.mp4"), ("All files", "*.*")],
+            title="Select a Video File")
         if video_path:  # If a file is selected
             print(f"Video File Loaded: {video_path}")
             self.playback_panel.set_video_path(video_path)
@@ -215,7 +208,28 @@ class ConfigurationPanel(ttk.Frame):
             return
 
         self.data_manager.parse(csv_path)
-        self.fieldnames_list = self.data_manager.load_fields(self.fieldnames_list, self.current_datatype_text)
+        self.fieldnames_list, self.fieldnames = self.data_manager.load_fields(self.fieldnames_list,
+                                                                              self.current_datatype_text)
+        print(self.fieldnames_list)
+
+    def update_field_list(self, new_list):
+        """Used by search_fields to update the listbox while the user is searching"""
+        self.fieldnames_list.delete(0, tk.END)
+        for field in new_list:
+            self.fieldnames_list.insert(tk.END, field)
+
+    def search_fields(self, e):
+        """Called when user types in the fieldnames_entry_box to search for a specific field"""
+        user_typed_input = self.fieldnames_entry_box.get()
+
+        if user_typed_input == '':
+            self.fieldnames_searched = self.fieldnames
+        else:
+            self.fieldnames_searched = []
+            for field in self.fieldnames:
+                if user_typed_input.lower() in field.lower():
+                    self.fieldnames_searched.append(field)
+                    self.update_field_list(self.fieldnames_searched)
 
     def show_gauges(self):
         """Show the user the gauges that are available to them"""
@@ -235,11 +249,16 @@ class ConfigurationPanel(ttk.Frame):
             print("Please select a field.")
 
     def remove_field(self):
+        """Removes one of the user's selections from their choices that they've picked so far"""
         k = 0
         selected_field = [self.user_selection_list.get(i) for i in self.user_selection_list.curselection()]
 
-        for j, element in enumerate(self.user_selection_list.curselection()):
-            k = j
+        for element in self.user_selection_list.curselection():
+            if element != 0:
+                k = element - 1
+            else:
+                print("you cannot select the timestamp field.")
+                return
 
         if selected_field:
             print(f"Selected Gauge: {', '.join(selected_field)}")
@@ -256,7 +275,8 @@ class ConfigurationPanel(ttk.Frame):
         if selected_gauge:
             print(f"Selected Gauge: {', '.join(selected_gauge)}")
             self.user_selection_list.delete(0, 'end')  # clear list before each call to update
-            gt_list = self.data_manager.confirm_selection(selected_gauge)
+            gt_list = self.data_manager.confirm_selection(selected_gauge, self.fieldnames_gauge_group,
+                                                          self.user_selection_list)
             if len(gt_list) <= 10:
                 self.user_selection_list.insert(0, *gt_list)
                 # Functionality to ask user about the type of the data probably in between identifying gauges and
@@ -272,16 +292,16 @@ class ConfigurationPanel(ttk.Frame):
         self.gauge_types_list.delete(0, 'end')
         self.gauge_types_list.insert(0, *self.data_manager.check_datatype(self.datatype_combo.get()))
 
-    def confirm_config(self):
-        """Confirm the selected configuration settings."""
-        selected_gauges = [self.gauge_list.get(i) for i in self.gauge_list.curselection()]
-        if selected_gauges:
-            print(f"Selected Gauge Types: {', '.join(selected_gauges)}")
-        else:
-            print("No gauge type selected.")
+    def change_timestamp(self, e):
+        self.data_manager.set_timestamp(self.timestamp_combo.get())
+        print(self.timestamp_combo.get())
 
-    def set_playback_speed(self):
-        speed = self.playback_speed.get()
+    def set_playback_speed(self, event=None):
+        speed_str = self.playback_speed.get()
+        if speed_str == '1X backwards':
+            speed = -1
+        else:
+            speed = int(speed_str[:-1])
         print(f"Setting playback speed to: {speed}X")
         if self.playback_panel.video_player:
             self.playback_panel.video_player.set_speed(speed)
@@ -295,27 +315,8 @@ class PlaybackPanel(ttk.Frame):
     def __init__(self, parent):
         super().__init__(parent)
 
-        self.label = ttk.Label(self, text="Playback Panel")
-        self.label.pack(pady=20)
-
-        # TODO: Add widgets for video playback, gauges, playback controls, etc.
-
-        # Prompt user for video file
-        # video_path = filedialog.askopenfilename(
-        #     filetypes=[("MP4 files", "*.mp4")],
-        #     title="Select a Video File"
-        # )
-        # if not video_path:  # if no file is selected, return
-        #     return
-
-        # Video Player
-        #self.video_player = VideoPlayer(self, None)
-        #self.video_player.pack(fill="both", expand=True)
-
-        # Seek Bar
-        # self.seek_bar = ttk.Scale(self, orient="horizontal", command=self.on_seek)
-        # self.seek_bar.pack(fill="x")
-        # self.update_seek_bar()  # Start updating the seek bar
+        self.label = ttk.Label(self, font=("Roboto Black", 14), text="Playback Panel")
+        self.label.pack(pady=10)
 
         # Video Player (initialization postponed until a video is selected)
         self.video_player = None
@@ -323,44 +324,52 @@ class PlaybackPanel(ttk.Frame):
 
         self.current_time = 0
 
+        self.is_seeking = False
+        
+        self.is_video_reversed = False
 
-        # Playback Controls
-        control_frame = ttk.Frame(self)
-        control_frame.pack(fill="x")  # fill in the x direction
+        # Control panel
+        control_panel = ttk.Frame(self)
+        control_panel.pack(side="bottom", fill="x")
 
-        self.start_time = ttk.Label(control_frame, text=str(datetime.timedelta(seconds=0)))
-        self.start_time.pack(side="left")
+        # Current time label
+        self.current_time_label = ttk.Label(control_panel, text="00:00")
+        self.current_time_label.pack(side="left")
 
-        self.end_time = ttk.Label(control_frame, text=str(datetime.timedelta(seconds=0)))
-        self.end_time.pack(side="right")
+        # Seek bar
+        self.seek_var = tk.DoubleVar()
+        self.seek_bar = ttk.Scale(control_panel, variable=self.seek_var, from_=0, to=100, orient="horizontal",
+                                  command=self.start_seek)
+        self.seek_bar.pack(side="left", fill="x", expand=True)
+        self.seek_bar.bind("<ButtonRelease-1>", self.stop_seek)
 
-        self.progress_value = tk.IntVar(control_frame)
+        # Total time label
+        self.total_time_label = ttk.Label(control_panel, text="00:00")
+        self.total_time_label.pack(side="right")
 
-        self.progress_slider = tk.Scale(control_frame, variable=self.progress_value, from_=0, to=0, orient="horizontal")
-        self.progress_slider.pack(side="left", fill="x", expand=True)
+        # Play button
+        self.play_button = ttk.Button(control_panel, text="Play", command=self.play_video)
+        self.play_button.pack(side="left")
 
-        self.play_button = ttk.Button(control_frame, text="Play", command=self.play_video)
-        self.play_button.pack(side="left", padx=5)
-
-        self.pause_button = ttk.Button(control_frame, text="Pause", command=self.pause_video)
-        self.pause_button.pack(side="left", padx=5)
-
-        #self.set_video_button = ttk.Button(control_frame, text="Set Video", command=self.set_video_path)
-        #self.set_video_button.pack(side="left", padx=5)
+        # Pause button
+        self.pause_button = ttk.Button(control_panel, text="Pause", command=self.pause_video)
+        self.pause_button.pack(side="left")
 
         # Set initial state of control buttons
         self.play_button.config(state=tk.DISABLED)
         self.pause_button.config(state=tk.DISABLED)
 
+        self.update_ui()
+
     def set_video_path(self, video_path):
         self.video_path = video_path
         if self.video_path:  # if a file is selected
-            #self.video_path = video_path
+            # self.video_path = video_path
             if self.video_player is None:
                 self.video_player = VideoPlayer(self, self.video_path)
                 self.video_player.pack(fill="both", expand=True)
-                self.video_player.bind_event("second-changed", self.on_second_changed)
-                self.video_player.bind_event("duration-changed", self.on_duration_changed)
+                # self.video_player.bind_event("second-changed", self.on_second_changed)
+                # self.video_player.bind_event("duration-changed", self.on_duration_changed)
             else:
                 self.video_player.set_video_path(self.video_path)
 
@@ -368,36 +377,43 @@ class PlaybackPanel(ttk.Frame):
             self.play_button.config(state=tk.NORMAL)
             self.pause_button.config(state=tk.NORMAL)
 
-            #self.update_progress_slider()
-
     def play_video(self):
         if self.video_player:
             self.video_player.play()
+            self.seek_bar["to"] = self.video_player.player.get_length() / 1000
 
     def pause_video(self):
         if self.video_player:
             self.video_player.pause()
 
-    def on_duration_changed(self, duration):
-        """Update the UI when the video duration is available."""
-        self.end_time["text"] = str(datetime.timedelta(milliseconds=duration))
-        self.progress_slider["to"] = duration / 1000  # converting ms to s
+    def start_seek(self, event):
+        self.is_seeking = True
 
-    def on_second_changed(self, current_time):
-        """Update the UI when the video time changes."""
-        #self.progress_value.set(datetime.timedelta(seconds=current_time))
-        self.start_time["text"] = str(datetime.timedelta(seconds=current_time))
-        self.update_progress_slider(current_time)
+    def stop_seek(self, event):
+        self.video_player.player.set_time(int(self.seek_var.get() * 1000))  # Seconds to milliseconds
+        self.is_seeking = False
 
+    def update_ui(self):
+        """Update the UI every 500ms."""
+        if self.video_player and self.video_player.player.is_playing():
+            # Get the current and total time of the video
+            current_time = self.video_player.player.get_time() / 1000  # Milliseconds to seconds
+            total_time = self.video_player.player.get_length() / 1000  # Milliseconds to seconds
 
-    def update_progress_slider(self, current_time):
-        """Update the progress slider based on the current video time."""
-        if self.video_player:
-            #current_time = self.video_player.get_current_time()  # Retrieve current time from the video player
-            self.progress_slider.set(current_time)  # Update slider position
+            # Set the total time once if it's not already set
+            if self.seek_bar['to'] != total_time:
+                self.seek_bar['to'] = total_time
+                self.total_time_label['text'] = time.strftime('%H:%M:%S', time.gmtime(total_time))
 
-            # Schedule the `update_progress_slider` to run again after 1000ms (1 second)
-            #self.after(1000, self.update_progress_slider)
+            # Update the current time label
+            self.current_time_label['text'] = time.strftime('%H:%M:%S', time.gmtime(current_time))
+
+            # Update seek bar position only if the user is not seeking
+            if not self.is_seeking:
+                self.seek_var.set(current_time)
+
+        # Schedule the update_ui method to be called after 500ms
+        self.after(500, self.update_ui)
 
 
 class StatisticsPanel(ttk.Frame):
@@ -408,8 +424,8 @@ class StatisticsPanel(ttk.Frame):
     def __init__(self, parent):
         super().__init__(parent)
 
-        self.label = ttk.Label(self, text="Statistics Panel")
-        self.label.pack(pady=20)
+        self.label = ttk.Label(self, font=("Roboto Black", 14), text="Statistics Panel")
+        self.label.pack(pady=10)
 
         # TODO: Add widgets to display statistics like min, max, average, etc.
 
