@@ -32,20 +32,16 @@ class MainWindow(tk.Tk):
         pass
 
 
-class gaugeWindow(tk.Tk):
+class GaugeWindow(tk.Toplevel):
     def __init__(self):
         super().__init__()
 
         # Window properties
         self.title("Telemetry Data Gauges")
-        self.geometry("1000x700")
+        self.geometry("300x300")
         self.configure(bg="white")
         self.playback_panel = PlaybackPanel
         self.config_panel = ConfigurationPanel
-
-    #def drawGauges(self):
-
-
 
 if __name__ == "__main__":
     app = MainWindow()

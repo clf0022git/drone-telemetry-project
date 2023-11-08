@@ -10,43 +10,134 @@ from matplotlib import pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib import style
 import matplotlib.animation as animation
-import pandas as pd
 from src.data.input import DataManager
+#from src.gui.window import GaugeWindow
+
+#Manager class for the gauges
 class GaugeCreator:
    def __init__(self):
       self.name = "yes"
+   def drawGauges(self, data_manager: DataManager):
+      for element in data_manager.user_selected_gauges_list:
+         increment = 0
+         match element.gauge_name:
+            #Case for getting data and drawing the x-by-y plot
+            case "X-by-Y-plot":
+               data_list1 = []
+               data_list2 = []
+               for element_first_field in data_manager.data_file[element.field_name[increment]]:
+                  data_list1.append(element_first_field)
+               if (element.second_field_name != ""):
+                  for element_second_field in data_manager.data_file[element.second_field_name]:
+                     data_list2.append(element_second_field)
+                  graph1 = LineGraph(element.field_name[increment], element.second_field_name, data_list1, data_list2, element.timestamp_value)
+                  graph1.create_x_by_y_Graph()
+               else:
+                  graph1 = LineGraph(element.field_name[increment], element.second_field_name, data_list1, data_list2, element.timestamp_value)
+                  graph1.create_x_Graph()
+            #Case for getting the data and drawing the bar graph
+            case "Bar-Graph":
+               data_list1 = []
+               for element_first_field in data_manager.data_file[element.field_name[increment]]:
+                  data_list1.append(element_first_field)
+               bar_graph = BarGraph(element.field_name[increment], data_list1, element.timestamp_value)
+               bar_graph.createBarGraph()
+            #Case for getting the data and drawing  the 90 degree circle graph
+            case "Circle - 90°":
+               data_list1 = []
+               for element_first_field in data_manager.data_file[element.field_name[increment]]:
+                  data_list1.append(element_first_field)
+               gauge_circle_90 = circle_gauge(element.field_name[increment], data_list1, element.timestamp_value)
+               fig = gauge_circle_90.draw_circular_gauge(0, 90, self.name)
+               fig.show()
+            #Case for getting the data and drawing  the 180 degree circle graph
+            case "Circle - 180°":
+               data_list1 = []
+               for element_first_field in data_manager.data_file[element.field_name[increment]]:
+                  data_list1.append(element_first_field)
+               gauge_circle_180 = circle_gauge(element.field_name[increment], data_list1, element.timestamp_value)
+               fig = gauge_circle_180.draw_circular_gauge(0, 180, self.name)
+               fig.show()
+            #Case for getting the data and drawing  the 270 degree circle graph
+            case "Circle - 270°":
+               data_list1 = []
+               for element_first_field in data_manager.data_file[element.field_name[increment]]:
+                  data_list1.append(element_first_field)
+               gauge_circle_270 = circle_gauge(element.field_name[increment], data_list1, element.timestamp_value)
+               fig = gauge_circle_270.draw_circular_gauge(0, 270, self.name)
+               fig.show()
+            #Case for getting the data and drawing  the 360 degree circle graph
+            case "Circle - 360°":
+               data_list1 = []
+               for element_first_field in data_manager.data_file[element.field_name[increment]]:
+                  data_list1.append(element_first_field)
+               #circle_window = GaugeWindow()
+               gauge_circle_360 = circle_gauge(element.field_name[increment], data_list1, element.timestamp_value)
+               fig = gauge_circle_360.draw_circular_gauge(0, 360, self.name)
+               fig.show()
+            #Case for getting data and drawing  the text display
+            case "Text Display":
+               data_list1 = []
+               for element_first_field in data_manager.data_file[element.field_name[increment]]:
+                  data_list1.append(element_first_field)
+            #Case for getting the data and drawing the number/character display
+            case "Number or Character Display":
+               data_list1 = []
+               for element_first_field in data_manager.data_file[element.field_name[increment]]:
+                  data_list1.append(element_first_field)
+            #Case for drawing the clock
+            case "Clock":
+               text = "insert"
+            #Case for drawing the stopwatch
+            case "Stopwatch":
+               text = "insert"
+            #Case for drawing the running time gauge
+            case "Running Time":
+               text = "insert"
+            #Case for drawing the on/off light
+            case "On/off light":
+               data_list1 = []
+               for element_first_field in data_manager.data_file[element.field_name[increment]]:
+                  data_list1.append(element_first_field)
+            case _:
+               print("Gauge not found")
+         increment += 1
 #This class contains all the functions for producing a line graph
 class LineGraph:
-   def __init__(self, fieldName1, fieldName2, fieldBool, dataSet1, dataSet2, time_inc, window):
-      self.name = fieldName2        #Name of the first data field being used
+   def __init__(self, fieldName1, fieldName2, dataSet1, dataSet2, time_inc):
+      self.name = fieldName1        #Name of the first data field being used
       self.name2 = fieldName2       #Name of the second data field being used
-      self.dataSet1 = []            #data field that will make up the y-values of the graph
-      self.dataSet2 = []            #data field that will make up the x-values of the graph
+      self.dataSet1 = [0]            #data field that will make up the y-values of the graph
+      self.dataSet2 = [0]           #data field that will make up the x-values of the graph
       self.time = [0]               #Establish start time for animated graph
       self.update_time = time_inc   #Update value for the time array
       self.update_data1 = dataSet1  #Used to append data to dataSet1 for animation
-      self.secondField = fieldBool  #Bool used to check if there is a second user-data field
-      if (fieldBool != True):
-         self.update_data2=self.update_time
-      self.update_data2 = dataSet2  #Used to append data to dataSet1 for animation
+      if (len(dataSet2) == 0):
+         self.dataSet2 = self.time
+      #else:
+      #   self.update_data2 = dataSet2  # Used to append data to dataSet1 for animation
       self.update_inc = 0
-      self.window = window
 
    #Function for drawing the base version of the graph
    #Can be used for x-graphs and x-by-y graphs
-   def createlineGraph(self):
-      #plt.plot(self.start_time, self.data, linewidth=5)
-      data = {self.dataSet1, self.dataSet2}
-      dataframe = pd.DataFrame(data)
-      figure = plt.figure(figsize=(2,2))
-      line_plot = figure.add_subplot(1, 1, 1)
-      line_plot.setylabel(self.name)
-      line_plot.setxlabel(self.name2)
-      lineGraph = FigureCanvasTkAgg(line_plot,self.window)
-      lineGraph.get_tk_widget().pack(side=tk.LEFT, fill =tk.BOTH)
-      dataframe = data[[self.name, self.name2]].groupby(self.name).sum()
-      dataframe.plot(kind='line', legend='false', ax=line_plot, color='r', marker='o', fontsize=10)
-      line_plot.set_title(self.name + ' over ' + self.name2)
+   def create_x_by_y_Graph(self):
+      fig = plt.figure()
+      ax1 = fig.add_subplot(1, 1, 1)
+      ax1.plot(self.dataSet2, self.dataSet1, marker='o', color='blue')
+      plt.xlabel(self.name2)
+      plt.ylabel(self.name)
+      plt.title(self.name + " over " + self.name2)
+      plt.show()
+
+   def create_x_Graph(self):
+      fig = plt.figure()
+      ax1 = fig.add_subplot(1, 1, 1)
+      ax1.plot(self.dataSet2, self.dataSet1, marker='o', color='blue')
+      plt.xlabel("Time")
+      plt.ylabel(self.name)
+      plt.title(self.name + " over time")
+      plt.show()
+
    def animate_graph(self, graph, time):
       self.time.append(self.update_time + self.time[self.update_inc])
       self.dataSet1.append(self.update_data1[self.update_inc])
@@ -77,11 +168,16 @@ class BarGraph:
 
    #This will create an empty bar graph
    def createBarGraph(self):
-      fig = plt.bar(self.name, self.data, color='blue')
+      '''fig = plt.bar(self.name, self.data, color='blue')
       ax = fig.add_subplot(1,1,1)
       plt.title(self.name + ' over time')
       plt.ylabel(self.name)
       plt.xlabel("Time")
+      plt.show()'''
+      fig = plt.figure()
+      plt.bar(self.name, self.data, color='blue')
+      plt.xlabel(self.name)
+      plt.title(self.name)
       plt.show()
 
    def animate_graph(self, ax):
@@ -137,11 +233,10 @@ class OF_light:
 
 #This class will create a customizable circle gauge
 class circle_gauge:
-   def __init__(self, name, data, metric, max, time_inc):
+   def __init__(self, name, data, time_inc):
       self.name = name  # Name of the data metric being used
       self.data = []  # Data is the array of values for a data metric (column of values) combed from the csv file
       self.time = [0]  # Establish start time for animated graph
-      self.dtype = metric
       self.update_time = time_inc
       self.update_data = data
       self.update_inc = 0
@@ -217,8 +312,8 @@ class circle_gauge:
       )
       return fig
 
-   fig = draw_circular_gauge(180, -120, "300")
-   fig.show()
+   #fig = draw_circular_gauge(180, -120, "300")
+   #fig.show()
 
 #This class will create a stopwatch
 class stopWatch:

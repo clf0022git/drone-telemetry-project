@@ -7,6 +7,7 @@ import datetime
 from tkinter import ttk, filedialog
 from src.playback.video import VideoPlayer
 from src.data.input import DataManager
+from src.config.gauges import *
 
 # initializing the titles and rows list
 fields = []
@@ -130,6 +131,10 @@ class ConfigurationPanel(ttk.Frame):
         # Button to select field with gauge
         self.select_field_btn = ttk.Button(self.user_selection_group, text="Remove Choice", command=self.remove_field)
         self.select_field_btn.pack(pady=10)
+
+        # Button to select field with gauge
+        self.generate_gauges_btn = ttk.Button(self, text="Generate Gauges", command=self.generate_gauges)
+        self.generate_gauges_btn.pack(pady=10, side=tk.TOP)
 
         self.speed_label = ttk.Label(self, font=("Roboto Light", 10), text="Playback Speed:")
         self.speed_label.pack(pady=5)
@@ -295,6 +300,12 @@ class ConfigurationPanel(ttk.Frame):
     def change_timestamp(self, e):
         self.data_manager.set_timestamp(self.timestamp_combo.get())
         print(self.timestamp_combo.get())
+
+    def generate_gauges(self):
+        print("button works")
+        gauge_creator = GaugeCreator()
+        #for items in self.data_manager.user_selected_gauges_list:
+        gauge_creator.drawGauges(self.data_manager)
 
     def set_playback_speed(self, event=None):
         speed_str = self.playback_speed.get()
