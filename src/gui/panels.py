@@ -292,11 +292,13 @@ class ConfigurationPanel(ttk.Frame):
         is_reversed = 'reversed' in self.playback_panel.video_player.video_path
 
         if speed_str == '1X backwards':
-            speed = -1
+            speed = 1
+            backwards = 'backwards'
             if self.playback_panel.video_player and not is_reversed:
                 self.playback_panel.reverse_video()
         else:
             speed = int(speed_str[:-1])
+            backwards = ''
 
             # If the current video is reversed and the new speed is not '1X backwards', switch to original
             if is_reversed and speed_str != '1X backwards':
@@ -309,7 +311,7 @@ class ConfigurationPanel(ttk.Frame):
                 else:
                     print(f"Original video file does not exist: {original_video_path}")
 
-        print(f"Setting playback speed to: {speed}X")
+        print(f"Setting playback speed to: {speed}X {backwards}")
 
         if self.playback_panel.video_player:
             self.playback_panel.video_player.set_speed(speed)
