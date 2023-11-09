@@ -304,6 +304,7 @@ class ConfigurationPanel(ttk.Frame):
                 original_video_path = self.playback_panel.video_player.video_path.replace('_reversed', '')
                 print(original_video_path)
                 if os.path.exists(original_video_path):
+                    self.playback_panel.is_video_reversed = False
                     self.playback_panel.set_video_path(original_video_path)
                 else:
                     print(f"Original video file does not exist: {original_video_path}")
