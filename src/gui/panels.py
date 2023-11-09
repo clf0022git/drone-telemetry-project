@@ -42,9 +42,15 @@ class ConfigurationPanel(ttk.Frame):
         # Button to load CSV file
         self.load_csv_btn = ttk.Button(self, text="Load CSV", command=self.load_csv)
         self.load_csv_btn.pack(pady=5)
-        
-        self.metricButton = ttk.Button(self, text="Swap between meters and feet", command=self.swap_metric)
-        self.metricButton.pack(pady=5)
+
+        self.metric_group = tk.Frame(self)
+        self.metric_group.pack(pady=5, side=tk.TOP)
+
+        self.metricButton = ttk.Button(self.metric_group, text="Swap between meters and feet", command=self.swap_metric)
+        self.metricButton.pack(pady=5, side=tk.LEFT)
+
+        self.metric_label = ttk.Label(self.metric_group, font=("Roboto Light", 10), text="Current Metric: Meters")
+        self.metric_label.pack(pady=5, side=tk.RIGHT)
 
         self.statisticsButton = ttk.Button(self, text="Get Statistics", command=self.get_statistics)
         self.statisticsButton.pack(pady=5)
@@ -151,14 +157,21 @@ class ConfigurationPanel(ttk.Frame):
         self.speed_combobox.bind('<<ComboboxSelected>>', self.set_playback_speed)
 
     def swap_metric(self):
+        global m_or_f
         self.data_manager.swap_metric()
+        if m_or_f == 0:
+            self.metric_label.config(text="Current Metric: Feet")
+            m_or_f = 1
+        else:
+            self.metric_label.config(text="Current Metric: Meters")
+            m_or_f = 0
 
     def get_statistics(self):
 
         if len(self.data_manager.user_selected_gauges_list) == 0:
             print("No fields selected")
             return None
-         
+
         file = "C:/Users/caleb/Documents/CS_499/Output_Data/Statistics.txt"
 
         output_file = open(file, "w")
@@ -172,7 +185,6 @@ class ConfigurationPanel(ttk.Frame):
             if self.data_manager.data_file[field].dtype == "int64" or self.data_manager.data_file[
                 field].dtype == "float64":
                 self.data_processor.calc_statistics(self.data_manager.data_file[field], field, file)
-
 
     def load_video(self):
         """Prompt the user to select a video file."""
