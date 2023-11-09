@@ -3,6 +3,10 @@ import pandas as pd
 import csv
 import time
 import datetime
+import subprocess
+import os
+import sys
+import traceback
 from tkinter import ttk, filedialog
 from src.playback.video import VideoPlayer
 from src.data.input import DataManager
@@ -283,11 +287,29 @@ class ConfigurationPanel(ttk.Frame):
 
     def set_playback_speed(self, event=None):
         speed_str = self.playback_speed.get()
+
+        # Check if the current video is reversed
+        is_reversed = 'reversed' in self.playback_panel.video_player.video_path
+
         if speed_str == '1X backwards':
             speed = -1
+            if self.playback_panel.video_player and not is_reversed:
+                self.playback_panel.reverse_video()
         else:
             speed = int(speed_str[:-1])
+
+            # If the current video is reversed and the new speed is not '1X backwards', switch to original
+            if is_reversed and speed_str != '1X backwards':
+                # Remove '_reversed' from the file name to get the original video
+                original_video_path = self.playback_panel.video_player.video_path.replace('_reversed', '')
+                print(original_video_path)
+                if os.path.exists(original_video_path):
+                    self.playback_panel.set_video_path(original_video_path)
+                else:
+                    print(f"Original video file does not exist: {original_video_path}")
+
         print(f"Setting playback speed to: {speed}X")
+
         if self.playback_panel.video_player:
             self.playback_panel.video_player.set_speed(speed)
 
@@ -399,6 +421,48 @@ class PlaybackPanel(ttk.Frame):
 
         # Schedule the update_ui method to be called after 500ms
         self.after(500, self.update_ui)
+
+    def reverse_video(self):
+        if not self.video_path:
+            print("No video loaded to reverse")
+            return
+
+        # Determine the file extension and reversed file name
+        base, ext = os.path.splitext(self.video_path)
+        if ext.lower() not in ['.mp4', '.mov']:
+            print("Unsupported file format for reversing")
+            return
+
+        reversed_video_path = f"{base}_reversed{ext}"
+
+        # Check if the reversed video file already exists
+        if os.path.exists(reversed_video_path):
+            print(f"Reversed video already exists: {reversed_video_path}")
+            self.is_video_reversed = True
+            self.set_video_path(reversed_video_path)
+        else:
+            try:
+                # Use ffmpeg to reverse the video
+                command = [
+                    'ffmpeg',
+                    '-i', self.video_path,
+                    '-vf', 'reverse',
+                    '-af', 'areverse',
+                    reversed_video_path
+                ]
+                subprocess.run(command, check=True)
+                print(f"Reversed video saved to {reversed_video_path}")
+
+                # Replace the old video path with the new reversed video path
+                self.is_video_reversed = True
+                self.set_video_path(reversed_video_path)
+            except subprocess.CalledProcessError as e:
+                self.is_video_reversed = False
+                print(f"ffmpeg error: {e}")
+            except Exception as e:
+                self.is_video_reversed = False
+                print(f"An error occurred while reversing the video: {e}")
+                traceback.print_exc(file=sys.stderr)
 
 
 class StatisticsPanel(ttk.Frame):
