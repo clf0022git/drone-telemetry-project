@@ -1,7 +1,7 @@
 import os
 import tkinter as tk
 import vlc
-
+from src.config.gauges import GaugeCreator
 
 class VideoPlayer(tk.Frame):
     def __init__(self, master, video_path, *args, **kwargs):
