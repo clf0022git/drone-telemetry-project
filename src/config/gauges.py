@@ -5,13 +5,12 @@ import datetime as dt
 import datetime as datetime
 import tkinter as Tkinter
 import tkinter as tk
-import tk_tools
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib import style
 import matplotlib.animation as animation
 from src.data.input import DataManager
-#from src.gui.window import GaugeWindow
+from src.config.indicatorLight import of_light
 
 #Manager class for the gauges
 class GaugeCreator:
@@ -189,23 +188,6 @@ class text_gauge:
       if (time % self.updateTime == 0):
          self.dataField.append(self.updateData[self.inc])
          self.inc += 1
-
-#This class will create an on/off light
-class of_light:
-   def __init__(self, name, data, min, median, max,frame):
-      self.name = name  # Name of the data metric being used
-      self.data = []  # Data is the array of values for a data metric (column of values) combed from the csv file
-      self.frame = frame
-      self.min = min
-      self.max = max
-      self.median = median
-
-   #This function will spawn the light
-   def create_light(self):
-      for elements in self.data:
-         data_label = self.name + "\n".format(elements)
-         if elements < self.median:
-            self.frame.itemconfig(my_oval, fill="red")  # Fill the circle with RED
 
 #This class will create a customizable circle gauge
 class circle_gauge:
