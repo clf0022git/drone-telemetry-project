@@ -36,7 +36,7 @@ class GaugeBase(tk.Frame):
 
     def check_alarm(self, value):
         """Check if the value exceeds the red limit and trigger an alarm if necessary."""
-        if value > self.red_limit:
+        if value >= self.red_limit:
             self.trigger_alarm()
 
     def trigger_alarm(self):

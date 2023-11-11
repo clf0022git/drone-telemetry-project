@@ -1,3 +1,4 @@
+import tkinter as tk
 from src.config.GaugeBase import GaugeBase
 
 
@@ -25,7 +26,6 @@ class LightIndicatorGauge(GaugeBase):
 
 # Example usage
 if __name__ == "__main__":
-    import tkinter as tk
     root = tk.Tk()
     root.title("Light Indicator Example")
 

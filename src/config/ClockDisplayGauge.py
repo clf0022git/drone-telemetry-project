@@ -1,3 +1,4 @@
+import tkinter as tk
 from src.config.GaugeBase import GaugeBase
 from datetime import datetime, timedelta
 
@@ -95,7 +96,6 @@ class ClockGauge(GaugeBase):
 
 
 if __name__ == "__main__":
-    import tkinter as tk
     root = tk.Tk()
     root.title("Clock Display Gauge Example")
 

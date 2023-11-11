@@ -1,84 +1,69 @@
+import tkinter as tk
 from src.config.GaugeBase import GaugeBase
-import math
+from math import pi, cos, sin
 
 
 class CircleGauge(GaugeBase):
-    def __init__(self, master, angle=360, name='Default', **kwargs):
-        super().__init__(master, name)
-        self.angle = angle
-        self.width = self.canvas.winfo_reqwidth()
-        self.height = self.canvas.winfo_reqheight()
+    def __init__(self, master, name='Circle Gauge', title='Circle Gauge', description='', degrees=360, *args, **kwargs):
+        super().__init__(master, name=name, title=title, description=description, *args, **kwargs)
+        self.degrees = degrees
         self.value = 0
-        self.colors = {
-            "blue": 25,
-            "green": 50,
-            "yellow": 75,
-            "red": 100
-        }
-        self.draw_gauge()
+        self.max_value = 100  # Default max value for the gauge
 
-    def draw_gauge(self):
-        start_angle = 90 - self.angle / 2
-        extent_angle = self.angle
-        self.canvas.create_arc(10, 10, self.width - 10, self.height - 10,
-                               start=start_angle, extent=extent_angle,
-                               style='arc', outline='black', width=2)
-        self.update_value(self.value)
+        # Canvas for drawing the gauge
+        self.gauge_canvas = tk.Canvas(self, width=200, height=200, bg='white')
+        self.gauge_canvas.pack()
+
+        # Needle to indicate the value
+        self.needle_length = 90
+        self.needle = self.gauge_canvas.create_line(100, 100, 100 + self.needle_length, 100, arrow=tk.LAST)
+
+        # Adjust the start angle based on the degrees
+        #start_angle = 90 + ((360 - degrees) / 2)
+        #self.arc = self.gauge_canvas.create_arc(10, 10, 190, 190, start=start_angle, extent=-degrees, style='arc')
+
+        # Adjust the starting angle based on the degrees
+        if degrees == 360:
+            start_angle = 90  # Start from the left (9 o'clock position)
+        else:
+            start_angle = -90  # For a semi-circle, start from the top (12 o'clock position)
+
+        self.arc = self.gauge_canvas.create_arc(10, 10, 190, 190, start=start_angle, extent=degrees, style='arc')
 
     def update_value(self, value):
-        super().check_alarm(value)
+        """Update the gauge's value and redraw the needle."""
         self.value = value
-        angle_rad = math.radians(90 - self.angle / 2 + (value / 100) * self.angle)
-        x0 = self.width / 2
-        y0 = self.height / 2
-        x1 = x0 + (self.width / 2 - 10) * math.cos(angle_rad)
-        y1 = y0 - (self.height / 2 - 10) * math.sin(angle_rad)
-        self.canvas.delete("needle")
-        self.canvas.create_line(x0, y0, x1, y1, fill='blue', width=2, tags="needle")
+        self.check_alarm(value)
+        # Adjust the angle calculation for the new orientation
+        angle_rad = (pi / 2) - (value / self.max_value) * (self.degrees * pi / 180)
+        if self.degrees == 180:
+            # For a 180-degree gauge, we adjust the angle calculation
+            angle_rad += pi / 2
+        x = 100 + self.needle_length * cos(angle_rad)
+        y = 100 - self.needle_length * sin(angle_rad)
+        self.gauge_canvas.coords(self.needle, 100, 100, x, y)
+        self.update_gauge_color(value)
 
-        # Set the color based on the value
-        needle_color = "black"
-        for color, limit in self.colors.items():
-            if value <= limit:
-                needle_color = color
-                break
-        self.canvas.itemconfig("needle", fill=needle_color)
-
-    def set_colors(self, blue, green, yellow, red):
-        self.colors = {
-            "blue": blue,
-            "green": green,
-            "yellow": yellow,
-            "red": red
-        }
+    def update_gauge_color(self, value):
+        """Change the gauge color based on the value."""
+        if value >= self.red_limit:
+            color = 'red'
+        elif value >= self.color_ranges['yellow']:
+            color = 'yellow'
+        elif value >= self.color_ranges['green']:
+            color = 'green'
+        else:
+            color = 'blue'
+        self.gauge_canvas.itemconfig(self.arc, outline=color)
 
 
+# Example usage
 if __name__ == "__main__":
-    import tkinter as tk
     root = tk.Tk()
     root.title("Circle Gauge Example")
 
-    # Create a CircleGauge instance with a 180-degree view
-    gauge = CircleGauge(root, angle=270, name="Speedometer")
+    circle_gauge = CircleGauge(root, title='Speed', degrees=180)
+    circle_gauge.pack(padx=10, pady=10)
+    circle_gauge.update_value(10)  # Update to a sample value
 
-    # Set the initial value of the gauge to 0
-    gauge.update_value(0)
-
-    # Set the gauge color thresholds
-    gauge.set_colors(blue=20, green=40, yellow=60, red=80)
-
-    # Function to update the gauge value periodically
-    def update_gauge_value(value):
-        if value <= 100:
-            gauge.update_value(value)
-            # Schedule the function to update the value again after 100ms
-            root.after(100, update_gauge_value, value + 1)
-        else:
-            # Reset the gauge value to 0 when it exceeds 100
-            update_gauge_value(0)
-
-    # Start updating the gauge value
-    update_gauge_value(0)
-
-    # Start the Tkinter event loop
     root.mainloop()

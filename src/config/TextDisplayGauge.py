@@ -1,3 +1,4 @@
+import tkinter as tk
 from src.config.GaugeBase import GaugeBase
 
 
@@ -24,7 +25,6 @@ class TextDisplayGauge(GaugeBase):
 
 # Example usage
 if __name__ == "__main__":
-    import tkinter as tk
     root = tk.Tk()
     root.title("Text Display Gauge Example")
 
