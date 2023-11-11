@@ -23,7 +23,7 @@ class DataManager:
         self.additional_btn = None
         self.remove_additional_btn = None
         self.user_selection_replacement_list = None
-        self.current_gauge_temp = None # Holds temporary gauge when 2nd field needs to be selected
+        self.current_gauge_temp = None  # Holds temporary gauge when 2nd field needs to be selected
 
     def parse(self, csv_path):
         """Handles the code for parsing the file"""
@@ -195,25 +195,29 @@ class DataManager:
         timestamp_string = "Timestamp: " + str(self.timestamp_value) + " second(s)"
         gauge_name_list.append(timestamp_string)
 
-        current_saved_gauge = TemporaryGauge(self.current_selected_field, selected_gauge[0], self.timestamp_value)
-        self.current_gauge_temp = current_saved_gauge
-        print(selected_gauge)
+        if len(self.user_selected_gauges_list) < 10:
+            current_saved_gauge = TemporaryGauge(self.current_selected_field, selected_gauge[0], self.timestamp_value)
+            self.current_gauge_temp = current_saved_gauge
+            print(selected_gauge)
 
         if selected_gauge[0] == "X-by-Y-plot":
             for element in self.user_selected_gauges_list:
-                if len(gauge_name_list) <= 11:
-                    gauge_name_list.append(element.field_name[0])
+                if len(gauge_name_list) <= 10:
+                    temp_gauge = "Gauge #" + str(element.id)
+                    gauge_name_list.append(temp_gauge)
 
             self.user_selection_replacement_list = user_selection_list
             self.instantiate_second_field(gauge_group_frame)
             return gauge_name_list
 
-        self.user_selected_gauges_list.append(current_saved_gauge)
+        if len(self.user_selected_gauges_list) < 10:
+            self.user_selected_gauges_list.append(current_saved_gauge)
 
         for i, element in enumerate(self.user_selected_gauges_list):
-            if len(gauge_name_list) <= 11:
-                element.id = i
-                gauge_name_list.append(element.field_name[0])
+            if len(gauge_name_list) <= 10:
+                element.id = i + 1
+                temp_gauge = "Gauge #" + str(element.id)
+                gauge_name_list.append(temp_gauge)
 
         return gauge_name_list
 
@@ -230,7 +234,8 @@ class DataManager:
         gauge_name_list.append(timestamp_string)
 
         for element in self.user_selected_gauges_list:
-            gauge_name_list.append(element.field_name[0])
+            temp_gauge = "Gauge #" + str(element.id)
+            gauge_name_list.append(temp_gauge)
 
         return gauge_name_list
 
@@ -280,7 +285,8 @@ class DataManager:
         current_saved_gauge = self.current_gauge_temp
         selected_gauge = [self.additional_listbox.get(i) for i in self.additional_listbox.curselection()]
 
-        dtype_bool = self.data_file[selected_gauge[0]].dtype == "int64" or self.data_file[selected_gauge[0]].dtype == "float64"
+        dtype_bool = self.data_file[selected_gauge[0]].dtype == "int64" or self.data_file[
+            selected_gauge[0]].dtype == "float64"
         print("This datatype: ")
         print(self.data_file[selected_gauge[0]].dtype)
         if selected_gauge and dtype_bool:
@@ -292,7 +298,7 @@ class DataManager:
 
             for i, element in enumerate(self.user_selected_gauges_list):
                 if len(gauge_name_list) <= 11:
-                    element.id = i
+                    element.id = i + 1
                     gauge_name_list.append(element.field_name[0])
 
             if len(gauge_name_list) <= 11:
@@ -306,6 +312,15 @@ class DataManager:
 
     def remove_second(self):
         self.delete_second_field()
+
+    def display_user_selections(self) -> list:
+        user_selection_string_list = []
+        for element in self.user_selected_gauges_list:
+            user_selection_string = "Gauge ID:" + str(element.id) + ",\n" + "Field 1:" + str(
+                element.field_name[0]) + ",\n" + "Field 2:" + str(element.second_field_name) + ",\n" + "Gauge:" + str(
+                element.gauge_name) + ",\n"
+            user_selection_string_list.append(user_selection_string)
+        return user_selection_string_list
 
 
 class TemporaryGauge:
