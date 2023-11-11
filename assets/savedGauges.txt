@@ -1,0 +1,6 @@
+CUSTOM.hSpeed [m/s]
+{'Minimum': 0, 'Maximum': 0, 'Average': 0.0, 'Standard Deviation': 0.0}
+
+CUSTOM.distance [m]
+{'Minimum': 0.0, 'Maximum': 4.73, 'Average': 2.488949903660889, 'Standard Deviation': 1.4191353833977065}
+
