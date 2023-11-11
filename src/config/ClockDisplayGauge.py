@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 class ClockGauge(GaugeBase):
     def __init__(self, master, name='Clock Gauge', title='Clock', description='', mode='clock', *args, **kwargs):
         super().__init__(master, name=name, title=title, description=description, *args, **kwargs)
-        self.mode = mode  # 'clock', 'stopwatch', or 'running_time'
+        self.mode = mode  # 'clock', 'stopwatch', 'running_time', or 'clock_csv'
         self.start_time = None
         self.current_time = None
 
@@ -17,6 +17,11 @@ class ClockGauge(GaugeBase):
         # Cases for stopwatch mode
         self.running = False
         self.elapsed_time_at_pause = timedelta(0)
+
+        # Label to display the date for clock_csv mode
+        self.date_var = tk.StringVar(value="")
+        self.date_label = tk.Label(self, textvariable=self.date_var, font=('Arial', 16))
+        self.date_label.pack()
 
     def get_initial_time_display(self):
         if self.mode == 'clock':
@@ -47,6 +52,14 @@ class ClockGauge(GaugeBase):
             if value is not None:
                 running_time = timedelta(seconds=value)
                 self.time_var.set(str(running_time).split('.')[0])  # Format as HH:MM:SS
+        elif self.mode == 'clock_csv':
+            # Expecting value in the format "MM/DD/YYYY HH:MM:SS"
+            try:
+                date_time_obj = datetime.strptime(value, "%m/%d/%Y %H:%M:%S")
+                self.time_var.set(date_time_obj.strftime("%H:%M:%S"))
+                self.date_var.set(date_time_obj.strftime("%m/%d/%Y"))
+            except ValueError as e:
+                print(f"Value provided is not in the expected format: {e}")
         else:
             raise ValueError("Invalid mode for ClockGauge.")
 
@@ -90,6 +103,10 @@ if __name__ == "__main__":
     clock_gauge = ClockGauge(root, title='Current Time', description='Local Time')
     clock_gauge.pack(padx=10, pady=10)
 
+    # Create a ClockGauge instance for clock time from a CSV file
+    csv_clock_gauge = ClockGauge(root, title='CSV Clock', mode='clock_csv')
+    csv_clock_gauge.pack(padx=10, pady=10)
+
     # Create a ClockGauge instance for the stopwatch
     stopwatch_gauge = ClockGauge(root, title='Stopwatch', description='Elapsed Time', mode='stopwatch')
     stopwatch_gauge.pack(padx=10, pady=10)
@@ -119,9 +136,15 @@ if __name__ == "__main__":
         video_time_seconds += 1
         root.after(1000, update_running_time)  # Increment the running time every second
 
-    # Start the stopwatch and running time updates
+    # Start the updates
     update_clock()
+
+    # Update the clock with a value from a CSV file (format: "MM/DD/YYYY HH:MM:SS")
+    csv_time_str = "1/25/2020 20:08:03"
+    csv_clock_gauge.update_value(csv_time_str)
+
     update_stopwatch()
+
     update_running_time()
 
     root.mainloop()
