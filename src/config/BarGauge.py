@@ -98,7 +98,9 @@ if __name__ == "__main__":
     def simulate_data_point():
         new_value = random.randint(0, 100)
         v_bar_gauge.update_value(new_value)
+        v_bar_gauge.set_figure_text(f"Value: {new_value}")
         h_bar_gauge.update_value(new_value)
+        h_bar_gauge.set_figure_text(f"Value: {new_value}")
         root.after(1000, simulate_data_point)
 
 
