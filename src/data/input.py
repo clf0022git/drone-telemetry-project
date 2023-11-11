@@ -250,6 +250,14 @@ class DataManager:
                             data = self.data_file.at[i, element]
                             self.data_file.at[i, element] = data * 39.76
                         i += 1
+                index = element.find('[C')
+                if index != -1:
+                    i = 0
+                    while i < len(self.data_file[element]):
+                        if self.data_file.at[i, element] != '':
+                            data = self.data_file.at[i, element]
+                            self.data_file.at[i, element] = (data * (9/5)) + 32
+                        i += 1
             # printing a field's data
             print('\nFirst 6 rows in CUSTOM.distance [m]:\n')
             for data in self.data_file['CUSTOM.distance [m]'][:6]:
@@ -265,6 +273,14 @@ class DataManager:
                         if self.data_file.at[i, element] != '':
                             data = self.data_file.at[i, element]
                             self.data_file.at[i, element] = data / 39.76
+                        i += 1
+                index = element.find('[C')
+                if index != -1:
+                    i = 0
+                    while i < len(self.data_file[element]):
+                        if self.data_file.at[i, element] != '':
+                            data = self.data_file.at[i, element]
+                            self.data_file.at[i, element] = (data - 32) * (5/9)
                         i += 1
             # printing a field's data
             print('\nFirst 6 rows in CUSTOM.distance [m]:\n')

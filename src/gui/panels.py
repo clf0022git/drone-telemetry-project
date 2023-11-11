@@ -11,6 +11,7 @@ from tkinter import ttk, filedialog
 from src.playback.video import VideoPlayer
 from src.data.input import DataManager
 from src.data.statistics import DataProcessor
+from src.data.fileManager import FileManager
 
 m_or_f = 0  # 0 = f and 1 = m
 
@@ -27,11 +28,13 @@ class ConfigurationPanel(ttk.Frame):
         # Instantiate a DataManager object
         self.data_manager = DataManager()
         self.data_processor = DataProcessor()
+        self.statistics_list = []
 
         self.label = ttk.Label(self, font=("Roboto Black", 14), text="Configuration Panel")
         self.label.pack(pady=10)
         self.playback_panel = playback_panel
         self.stats_panel = stats_panel
+        self.file_manager = FileManager
 
         # Styles for tkinter widgets
         button_style = ttk.Style()
@@ -46,9 +49,15 @@ class ConfigurationPanel(ttk.Frame):
         # Button to load CSV file
         self.load_csv_btn = ttk.Button(self, text="Load CSV", command=self.load_csv)
         self.load_csv_btn.pack(pady=5)
-        
-        self.metricButton = ttk.Button(self, text="Swap between meters and feet", command=self.swap_metric)
-        self.metricButton.pack(pady=5)
+
+        self.metric_group = tk.Frame(self)
+        self.metric_group.pack(pady=5, side=tk.TOP)
+
+        self.metricButton = ttk.Button(self.metric_group, text="Swap between meters and feet", command=self.swap_metric)
+        self.metricButton.pack(pady=5, side=tk.LEFT)
+
+        self.metric_label = ttk.Label(self.metric_group, font=("Roboto Light", 10), text="Current Metrics: Meters and Celsius")
+        self.metric_label.pack(pady=5, side=tk.RIGHT)
 
         self.statisticsButton = ttk.Button(self, text="Get Statistics", command=self.get_statistics)
         self.statisticsButton.pack(pady=5)
@@ -155,28 +164,35 @@ class ConfigurationPanel(ttk.Frame):
         self.speed_combobox.bind('<<ComboboxSelected>>', self.set_playback_speed)
 
     def swap_metric(self):
+        global m_or_f
+
+        if self.data_manager.data_file.empty:
+            print("Please load data before use")
+            return
+
         self.data_manager.swap_metric()
+        if m_or_f == 0:
+            self.metric_label.config(text="Current Metrics: Feet and Fahrenheit")
+            m_or_f = 1
+        else:
+            self.metric_label.config(text="Current Metrics: Meters and Celsius")
+            m_or_f = 0
 
     def get_statistics(self):
 
         if len(self.data_manager.user_selected_gauges_list) == 0:
             print("No fields selected")
             return None
-         
-        file = "C:/Users/caleb/Documents/CS_499/Output_Data/Statistics.txt"
-
-        output_file = open(file, "w")
-        output_file.write("")
-
-        output_file.close()
 
         for element in self.data_manager.user_selected_gauges_list:
             field = element.field_name[0]
             print(element.field_name[0])
             if self.data_manager.data_file[field].dtype == "int64" or self.data_manager.data_file[
                 field].dtype == "float64":
-                self.data_processor.calc_statistics(self.data_manager.data_file[field], field, file)
-
+                stats = self.data_processor.calc_statistics(self.data_manager.data_file[field], field)
+                print(type(self.statistics_list))
+                self.statistics_list.append(stats)
+        self.file_manager.save_gauges(self.data_manager.user_selected_gauges_list, self.statistics_list)
 
     def load_video(self):
         """Prompt the user to select a video file."""
