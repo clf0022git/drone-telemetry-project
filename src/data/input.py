@@ -25,6 +25,7 @@ class DataManager:
         self.remove_additional_btn = None
         self.user_selection_replacement_list = None
         self.current_gauge_temp = None  # Holds temporary gauge when 2nd field needs to be selected
+        self.statistics_list = []
 
     def parse(self, csv_path):
         """Handles the code for parsing the file"""
@@ -141,7 +142,8 @@ class DataManager:
                                                   "Circle - 270°",
                                                   "Circle - 360°",
                                                   "Number or Character Display",
-                                                  "X-by-Y-plot"]
+                                                  "X-by-Y-plot",
+                                                  "Bar"]
             self.combo.current(2)
             # there needs to be a special case for x by y plot
         elif self.data_file[self.current_selected_field[0]].dtype == "float64" or self.data_file[
@@ -151,7 +153,8 @@ class DataManager:
                                                   "Circle - 270°",
                                                   "Circle - 360°",
                                                   "Number or Character Display",
-                                                  "X-by-Y-plot"]
+                                                  "X-by-Y-plot",
+                                                  "Bar"]
             self.combo.current(3)
             # there needs to be a special case for x by y plot
         elif self.data_file[self.current_selected_field[0]].dtype == "object":
@@ -242,7 +245,7 @@ class DataManager:
 
     def set_timestamp(self, current_timestamp):
         self.timestamp_value = current_timestamp
-        
+
     def swap_metric(self):
         """Check what metric is already in use and swap to the other one"""
         if self.metric_indicator == 0:  # case for the units being in meters
@@ -261,7 +264,7 @@ class DataManager:
                     while i < len(self.data_file[element]):
                         if self.data_file.at[i, element] != '':
                             data = self.data_file.at[i, element]
-                            self.data_file.at[i, element] = (data * (9/5)) + 32
+                            self.data_file.at[i, element] = (data * (9 / 5)) + 32
                         i += 1
             # printing a field's data
             print('\nFirst 6 rows in CUSTOM.distance [m]:\n')
@@ -285,7 +288,7 @@ class DataManager:
                     while i < len(self.data_file[element]):
                         if self.data_file.at[i, element] != '':
                             data = self.data_file.at[i, element]
-                            self.data_file.at[i, element] = (data - 32) * (5/9)
+                            self.data_file.at[i, element] = (data - 32) * (5 / 9)
                         i += 1
             # printing a field's data
             print('\nFirst 6 rows in CUSTOM.distance [m]:\n')
@@ -301,7 +304,7 @@ class DataManager:
 
         # Create listbox
         self.additional_label = ttk.Label(self.additional_frame_group, font=("Roboto Light", 10),
-                                          text="Possible Gauges:")
+                                          text="Possible Second Field:")
         self.additional_label.pack(pady=5)
         self.additional_listbox = tk.Listbox(self.additional_frame_group, selectmode=tk.SINGLE, height=5,
                                              exportselection=0, width=30)
@@ -346,14 +349,16 @@ class DataManager:
             self.user_selection_replacement_list.delete(0, 'end')
 
             current_saved_gauge.set_second_field(selected_gauge[0])
-            self.user_selected_gauges_list.append(current_saved_gauge)
+            if len(self.user_selected_gauges_list) < 10:
+                self.user_selected_gauges_list.append(current_saved_gauge)
 
             for i, element in enumerate(self.user_selected_gauges_list):
-                if len(gauge_name_list) <= 11:
+                if len(gauge_name_list) <= 10:
                     element.id = i + 1
-                    gauge_name_list.append(element.field_name[0])
+                    temp_gauge = "Gauge #" + str(element.id)
+                    gauge_name_list.append(temp_gauge)
 
-            if len(gauge_name_list) <= 11:
+            if len(gauge_name_list) < 10:
                 self.user_selection_replacement_list.insert(0, *gauge_name_list)
             else:
                 print("You already have ten field selected!")
@@ -363,6 +368,25 @@ class DataManager:
             print("Please select a field that is an integer or float.")
 
     def remove_second(self):
+        gauge_name_list = []
+        timestamp_string = "Timestamp: " + str(self.timestamp_value) + " second(s)"
+        gauge_name_list.append(timestamp_string)
+
+        self.user_selection_replacement_list.delete(0, 'end')  # clear list before each call to update
+        if len(self.user_selected_gauges_list) <= 10:
+            self.user_selected_gauges_list.append(self.current_gauge_temp)
+            print("Working!1")
+
+        for i, element in enumerate(self.user_selected_gauges_list):
+            if len(gauge_name_list) <= 10:
+                element.id = i + 1
+                temp_gauge = "Gauge #" + str(element.id)
+                gauge_name_list.append(temp_gauge)
+            print("Working!2")
+
+        if len(gauge_name_list) <= 11:
+            self.user_selection_replacement_list.insert(0, *gauge_name_list)
+            print("Working!3")
         self.delete_second_field()
 
     def display_user_selections(self) -> list:
@@ -374,17 +398,28 @@ class DataManager:
             user_selection_string_list.append(user_selection_string)
         return user_selection_string_list
 
+    def set_statistics_list(self, stat_list):
+        self.statistics_list = stat_list
+
 
 class TemporaryGauge:
     """Stores a gauge's related information after a user completes a selection"""
-    
+
     def __init__(self, f_name, g_name, t_stamp):
         self.id = None
         self.field_name = f_name
         self.second_field_name = ""
         self.gauge_name = g_name
         self.timestamp_value = t_stamp
-
+        self.name = ""
+        self.blue_range_low = 0
+        self.blue_range_high = 0
+        self.green_range_low = 0
+        self.green_range_high = 0
+        self.yellow_range_low = 0
+        self.yellow_range_high = 0
+        self.red_range_low = 0
+        self.red_range_high = 0
 
     def set_second_field(self, second_field):
         self.second_field_name = second_field

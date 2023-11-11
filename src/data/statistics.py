@@ -12,6 +12,9 @@ class DataProcessor:
             if not math.isnan(data):
                 my_data.append(data)
 
+        if len(my_data) == 0:
+            my_data = [0]
+
         # Calculate statistics.
         minimum = min(my_data)
         maximum = max(my_data)
