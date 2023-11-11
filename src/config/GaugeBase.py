@@ -7,7 +7,7 @@ class GaugeBase(tk.Frame):
         self.name = name
         self.title_text = title
         self.description_text = description
-        self.color_ranges = {'blue': 25, 'green': 50, 'yellow': 75, 'red': 100}
+        self.color_ranges = {'blue': 25, 'green': 50, 'yellow': 75, 'red': 100}  # Default values, use update_colors to change
         self.red_limit = self.color_ranges['red']
 
         # Create the title label
