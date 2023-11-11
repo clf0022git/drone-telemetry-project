@@ -25,6 +25,9 @@ class ConfigurationPanel(ttk.Frame):
     def __init__(self, parent, playback_panel, stats_panel):
         super().__init__(parent)
 
+        # Connection to gauge panel
+        self.gauge_customization_panel = None
+
         # Instantiate a DataManager object
         self.data_manager = DataManager()
         self.data_processor = DataProcessor()
@@ -163,6 +166,14 @@ class ConfigurationPanel(ttk.Frame):
         self.speed_combobox.grid(row=0, column=0, padx=5, pady=2)
         self.speed_combobox.bind('<<ComboboxSelected>>', self.set_playback_speed)
 
+        # Button to update customization panel with current information
+        self.select_field_btn = ttk.Button(self, text="Send to Customization Panel", command=self.send_gauges)
+        self.select_field_btn.pack(pady=10, side=tk.TOP)
+
+    def send_gauges(self):
+        print("Gauges sent!")
+        self.gauge_customization_panel.update_gauges(True)
+
     def swap_metric(self):
         global m_or_f
 
@@ -300,6 +311,12 @@ class ConfigurationPanel(ttk.Frame):
     def change_timestamp(self, e):
         self.data_manager.set_timestamp(self.timestamp_combo.get())
         print(self.timestamp_combo.get())
+        self.user_selection_list.delete(0, 'end')  # clear list before each call to update
+        gt_list = ["Timestamp: " + str(self.data_manager.timestamp_value) + " second(s)"]
+        for element in self.data_manager.user_selected_gauges_list:
+            temp_gauge = "Gauge #" + str(element.id)
+            gt_list.append(temp_gauge)
+        self.user_selection_list.insert(0, *gt_list)
 
     def set_playback_speed(self, event=None):
         speed_str = self.playback_speed.get()
@@ -331,6 +348,74 @@ class ConfigurationPanel(ttk.Frame):
 
         if self.playback_panel.video_player:
             self.playback_panel.video_player.set_speed(speed)
+
+
+class GaugeCustomizationPanel(ttk.Frame):
+    """
+    Panel for displaying statistics of selected telemetry data fields.
+    """
+
+    def __init__(self, parent):
+        super().__init__(parent)
+
+        self.label = ttk.Label(self, font=("Roboto Black", 14), text="Gauge Customization Panel")
+        self.label.pack(pady=10)
+        self.data_manager = None
+
+        # Frame to hold the gauge viewer
+        self.gauge_viewer_frame = tk.Frame(self)
+        self.gauge_viewer_frame.pack(pady=100)
+
+        self.current_gauge_text_label = tk.Label(self.gauge_viewer_frame, font=("Roboto Medium", 10), text="No Gauge Selected")
+        self.current_gauge_text_label.pack(side=tk.TOP, pady=10)
+
+        self.gauge_viewer_contents_frame = tk.Frame(self.gauge_viewer_frame)
+        self.gauge_viewer_contents_frame.pack(side=tk.TOP)
+
+        self.current_gauge_left_btn = tk.Button(self.gauge_viewer_contents_frame, text="<", command=self.scroll_left)
+        self.current_gauge_left_btn.pack(side=tk.LEFT)
+
+        self.current_gauge_text = tk.Text(self.gauge_viewer_contents_frame, height=10, width=30)
+        self.current_gauge_text.config(state="disabled")
+        self.current_gauge_text.pack(side=tk.LEFT)
+        self.current_gauge_position = 0
+        self.current_gauge_text_list = []
+
+        self.current_gauge_statistics_text = tk.Text(self.gauge_viewer_contents_frame, height=10, width=30)
+        self.current_gauge_statistics_text.config(state="disabled")
+        self.current_gauge_statistics_text.pack(side=tk.LEFT)
+        self.current_gauge_statistics_position = 0
+        self.current_gauge_statistics_text_list = []
+
+        self.current_gauge_right_btn = tk.Button(self.gauge_viewer_contents_frame, text=">", command=self.scroll_right)
+        self.current_gauge_right_btn.pack(side=tk.LEFT)
+
+        # TODO: Add widgets to display statistics like min, max, average, etc.
+
+    def scroll_right(self):
+        if self.current_gauge_position < len(self.data_manager.user_selected_gauges_list) - 1:
+            self.current_gauge_position = self.current_gauge_position + 1
+        self.update_gauges(False)
+
+    def scroll_left(self):
+        if self.current_gauge_position > 0:
+            self.current_gauge_position = self.current_gauge_position - 1
+        self.update_gauges(False)
+
+    def set_data_manager(self, config_panel: ConfigurationPanel):
+        self.data_manager = config_panel.data_manager
+
+    def update_gauges(self, reset_position):
+        if reset_position:
+            self.current_gauge_position = 0
+        if len(self.data_manager.user_selected_gauges_list) > 0:
+            self.current_gauge_text_list = self.data_manager.display_user_selections()
+            self.current_gauge_text.config(state="normal")
+            self.current_gauge_text.delete("1.0", "end")
+            self.current_gauge_text.insert(tk.END, self.current_gauge_text_list[self.current_gauge_position])
+            temp_text = "Gauge #" + str(self.data_manager.user_selected_gauges_list[self.current_gauge_position].id)
+            self.current_gauge_text_label.config(text=temp_text)
+            self.current_gauge_text.config(state="disabled")
 
 
 class PlaybackPanel(ttk.Frame):

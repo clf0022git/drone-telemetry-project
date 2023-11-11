@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
-from src.gui.panels import ConfigurationPanel, PlaybackPanel, StatisticsPanel
+from src.gui.panels import ConfigurationPanel, PlaybackPanel, GaugeCustomizationPanel
 
 
 class MainWindow(tk.Tk):
@@ -19,10 +19,17 @@ class MainWindow(tk.Tk):
         # Adding panels to the notebook as separate tabs
 
         self.playback_panel = PlaybackPanel(self.notebook,)
-        self.stats_panel = StatisticsPanel(self.notebook)
-        self.config_panel = ConfigurationPanel(self.notebook, self.playback_panel, self.stats_panel)
+        self.gauge_panel = GaugeCustomizationPanel(self.notebook)
+        self.config_panel = ConfigurationPanel(self.notebook, self.playback_panel, self.gauge_panel)
+
+        # Pass a reference of the playback panel to the gauge panel
+        self.gauge_panel.set_data_manager(self.config_panel)
+
+        # Pass a reference of the gauge customization panel to the config panel
+        self.config_panel.gauge_customization_panel = self.gauge_panel
 
         self.notebook.add(self.config_panel, text="Configuration")
+        self.notebook.add(self.gauge_panel, text="GaugeCustomization")
         self.notebook.add(self.playback_panel, text="Playback")
         #self.notebook.add(self.stats_panel, text="Statistics")
 
