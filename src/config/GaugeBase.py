@@ -42,6 +42,7 @@ class GaugeBase(tk.Frame):
     def trigger_alarm(self):
         """Trigger an audible alarm."""
         print(f"Alarm! {self.name} value exceeded red limit.")  # Placeholder for actual alarm logic
+        self.master.bell()  # Ring the system bell
 
     def set_title(self, title):
         """Set the title of the gauge."""
