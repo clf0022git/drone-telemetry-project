@@ -412,6 +412,7 @@ class TemporaryGauge:
         self.gauge_name = g_name
         self.timestamp_value = t_stamp
         self.name = ""
+        self.statistics = "This gauge has no statistics associated with it."
         self.blue_range_low = 0
         self.blue_range_high = 0
         self.green_range_low = 0
