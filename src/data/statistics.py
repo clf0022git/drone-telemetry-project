@@ -1,11 +1,10 @@
 import math
-from tkinter import filedialog
 
 
 class DataProcessor:
 
     @staticmethod
-    def calc_statistics(field, field_name, file):
+    def calc_statistics(field, field_name):
         """Calculate statistics for the given data."""
         my_data = []
 
@@ -13,12 +12,8 @@ class DataProcessor:
             if not math.isnan(data):
                 my_data.append(data)
 
-        if not my_data or math.isnan(min(my_data)):
-            output_file = open(file, "a")
-            output_file.write(f"{field_name}" + '\n')
-            output_file.write("No data available." + '\n')
-            output_file.write('\n')
-            return None
+        if len(my_data) == 0:
+            my_data = [0]
 
         # Calculate statistics.
         minimum = min(my_data)
@@ -35,8 +30,7 @@ class DataProcessor:
             'Standard Deviation': standard_dev
         }
 
-        output_file = open(file, "a")
-        output_file.write(f"{field_name}" + '\n')
-        output_file.write(f"Statistics: {statistics}" + '\n')
-        output_file.write('\n')
+        print(f"{field_name}" + '\n')
+        print(f"Statistics: {statistics}" + '\n')
+        print('\n')
         return statistics

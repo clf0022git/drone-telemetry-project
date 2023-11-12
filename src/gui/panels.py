@@ -3,11 +3,16 @@ import pandas as pd
 import csv
 import time
 import datetime
+import subprocess
+import os
+import sys
+import traceback
 from tkinter import ttk, filedialog
 from src.playback.video import VideoPlayer
 from src.data.input import DataManager
 from src.data.statistics import DataProcessor
 from src.config.gauges import *
+from src.data.fileManager import FileManager
 
 m_or_f = 0  # 0 = f and 1 = m
 
@@ -21,14 +26,19 @@ class ConfigurationPanel(ttk.Frame):
     def __init__(self, parent, playback_panel, stats_panel):
         super().__init__(parent)
 
+        # Connection to gauge panel
+        self.gauge_customization_panel = None
+
         # Instantiate a DataManager object
         self.data_manager = DataManager()
         self.data_processor = DataProcessor()
+        self.statistics_list = []
 
         self.label = ttk.Label(self, font=("Roboto Black", 14), text="Configuration Panel")
         self.label.pack(pady=10)
         self.playback_panel = playback_panel
         self.stats_panel = stats_panel
+        self.file_manager = FileManager
 
         # Styles for tkinter widgets
         button_style = ttk.Style()
@@ -43,12 +53,16 @@ class ConfigurationPanel(ttk.Frame):
         # Button to load CSV file
         self.load_csv_btn = ttk.Button(self, text="Load CSV", command=self.load_csv)
         self.load_csv_btn.pack(pady=5)
-        
-        self.metricButton = ttk.Button(self, text="Swap between meters and feet", command=self.swap_metric)
-        self.metricButton.pack(pady=5)
 
-        self.statisticsButton = ttk.Button(self, text="Get Statistics", command=self.get_statistics)
-        self.statisticsButton.pack(pady=5)
+        self.metric_group = tk.Frame(self)
+        self.metric_group.pack(pady=5, side=tk.TOP)
+
+        self.metricButton = ttk.Button(self.metric_group, text="Swap to Metric or Imperial", command=self.swap_metric)
+        self.metricButton.pack(pady=5, side=tk.TOP)
+
+        self.metric_label = ttk.Label(self.metric_group, font=("Roboto Light", 10),
+                                      text="Current Metrics: Meters and Celsius")
+        self.metric_label.pack(pady=5, side=tk.TOP)
 
         # Frames that hold the fieldnames and their options
         self.fieldnames_gauge_group = tk.Frame(self)
@@ -63,6 +77,10 @@ class ConfigurationPanel(ttk.Frame):
         self.gauge_options_group.pack(padx=10, side=tk.LEFT)
         self.user_selection_group = tk.Frame(self.fieldnames_gauge_group)
         self.user_selection_group.pack(side=tk.LEFT)
+
+        # Possible way to show the second listbox of fieldnames
+        self.second_field_group = tk.Frame(self)
+        self.second_field_group.pack(pady=5)
 
         # Combobox that allows timestamp specification
         self.timestamp_label = ttk.Label(self.timestamp_group, font=("Roboto Light", 10), text="Timestamp:")
@@ -156,28 +174,40 @@ class ConfigurationPanel(ttk.Frame):
         self.speed_combobox.bind('<<ComboboxSelected>>', self.set_playback_speed)
 
     def swap_metric(self):
+        global m_or_f
+
+        if self.data_manager.data_file.empty:
+            print("Please load data before use")
+            return
+
         self.data_manager.swap_metric()
+        if m_or_f == 0:
+            self.metric_label.config(text="Current Metrics: Feet and Fahrenheit")
+            m_or_f = 1
+        else:
+            self.metric_label.config(text="Current Metrics: Meters and Celsius")
+            m_or_f = 0
 
     def get_statistics(self):
-
         if len(self.data_manager.user_selected_gauges_list) == 0:
             print("No fields selected")
             return None
-         
-        file = "C:/Users/caleb/Documents/CS_499/Output_Data/Statistics.txt"
-
-        output_file = open(file, "w")
-        output_file.write("")
-
-        output_file.close()
 
         for element in self.data_manager.user_selected_gauges_list:
             field = element.field_name[0]
             print(element.field_name[0])
             if self.data_manager.data_file[field].dtype == "int64" or self.data_manager.data_file[
                 field].dtype == "float64":
-                self.data_processor.calc_statistics(self.data_manager.data_file[field], field, file)
-
+                stats = self.data_processor.calc_statistics(self.data_manager.data_file[field], field)
+                print(type(self.statistics_list))
+                self.statistics_list.append(stats)
+                element.statistics = stats
+            else:
+                # This entry has no statistics
+                self.statistics_list.append("This entry has no statistics")
+                print("This has no stats!")
+        self.data_manager.set_statistics_list(self.statistics_list)
+        self.file_manager.save_gauges(self.data_manager.user_selected_gauges_list, self.statistics_list)
 
     def load_video(self):
         """Prompt the user to select a video file."""
@@ -265,6 +295,7 @@ class ConfigurationPanel(ttk.Frame):
         if selected_gauge:
             print(f"Selected Gauge: {', '.join(selected_gauge)}")
             self.user_selection_list.delete(0, 'end')  # clear list before each call to update
+            print("Called!")
             gt_list = self.data_manager.confirm_selection(selected_gauge, self.fieldnames_gauge_group,
                                                           self.user_selection_list)
             if len(gt_list) <= 10:
@@ -278,6 +309,10 @@ class ConfigurationPanel(ttk.Frame):
         else:
             print("Please select a gauge.")
 
+        self.get_statistics()
+        print("Gauges sent!")
+        self.gauge_customization_panel.update_gauges(True)
+
     def change_datatype(self, e):
         self.gauge_types_list.delete(0, 'end')
         self.gauge_types_list.insert(0, *self.data_manager.check_datatype(self.datatype_combo.get()))
@@ -285,6 +320,12 @@ class ConfigurationPanel(ttk.Frame):
     def change_timestamp(self, e):
         self.data_manager.set_timestamp(self.timestamp_combo.get())
         print(self.timestamp_combo.get())
+        self.user_selection_list.delete(0, 'end')  # clear list before each call to update
+        gt_list = ["Timestamp: " + str(self.data_manager.timestamp_value) + " second(s)"]
+        for element in self.data_manager.user_selected_gauges_list:
+            temp_gauge = "Gauge #" + str(element.id)
+            gt_list.append(temp_gauge)
+        self.user_selection_list.insert(0, *gt_list)
 
     def generate_gauges(self):
         print("button works")
@@ -294,13 +335,223 @@ class ConfigurationPanel(ttk.Frame):
 
     def set_playback_speed(self, event=None):
         speed_str = self.playback_speed.get()
+
+        # Check if the current video is reversed
+        is_reversed = 'reversed' in self.playback_panel.video_player.video_path
+
         if speed_str == '1X backwards':
-            speed = -1
+            speed = 1
+            backwards = 'backwards'
+            if self.playback_panel.video_player and not is_reversed:
+                self.playback_panel.reverse_video()
         else:
             speed = int(speed_str[:-1])
-        print(f"Setting playback speed to: {speed}X")
+            backwards = ''
+
+            # If the current video is reversed and the new speed is not '1X backwards', switch to original
+            if is_reversed and speed_str != '1X backwards':
+                # Remove '_reversed' from the file name to get the original video
+                original_video_path = self.playback_panel.video_player.video_path.replace('_reversed', '')
+                print(original_video_path)
+                if os.path.exists(original_video_path):
+                    self.playback_panel.is_video_reversed = False
+                    self.playback_panel.set_video_path(original_video_path)
+                else:
+                    print(f"Original video file does not exist: {original_video_path}")
+
+        print(f"Setting playback speed to: {speed}X {backwards}")
+
         if self.playback_panel.video_player:
             self.playback_panel.video_player.set_speed(speed)
+
+
+class GaugeCustomizationPanel(ttk.Frame):
+    """
+    Panel for displaying statistics of selected telemetry data fields.
+    """
+
+    def __init__(self, parent):
+        super().__init__(parent)
+
+        self.label = ttk.Label(self, font=("Roboto Black", 14), text="Gauge Customization Panel")
+        self.label.pack(pady=10)
+        self.data_manager = None
+
+        # Frame to hold the gauge viewer
+        self.gauge_viewer_frame = tk.Frame(self)
+        self.gauge_viewer_frame.pack(pady=100)
+
+        self.current_gauge_text_label = tk.Label(self.gauge_viewer_frame, font=("Roboto Medium", 10),
+                                                 text="No Gauge Selected")
+        self.current_gauge_text_label.pack(side=tk.TOP, pady=10)
+
+        self.gauge_viewer_contents_frame = tk.Frame(self.gauge_viewer_frame)
+        self.gauge_viewer_contents_frame.pack(side=tk.TOP)
+
+        self.current_gauge_left_btn = tk.Button(self.gauge_viewer_contents_frame, text="<", command=self.scroll_left)
+        self.current_gauge_left_btn.pack(side=tk.LEFT)
+
+        self.current_gauge_text = tk.Text(self.gauge_viewer_contents_frame, height=10, width=30)
+        self.current_gauge_text.config(state="disabled")
+        self.current_gauge_text.pack(side=tk.LEFT)
+        self.current_gauge_position = 0
+        self.current_gauge_text_list = []
+
+        self.current_gauge_statistics_text = tk.Text(self.gauge_viewer_contents_frame, height=10, width=30)
+        self.current_gauge_statistics_text.config(state="disabled")
+        self.current_gauge_statistics_text.pack(side=tk.LEFT)
+        self.current_gauge_statistics_position = 0
+        self.current_gauge_statistics_text_list = []
+
+        self.current_gauge_right_btn = tk.Button(self.gauge_viewer_contents_frame, text=">", command=self.scroll_right)
+        self.current_gauge_right_btn.pack(side=tk.LEFT)
+
+        # Set up all of the frames for the gauge settings
+        self.current_gauge_settings_frame = tk.Frame(self)
+        self.current_gauge_settings_frame.pack(side=tk.TOP)
+        self.name_frame = tk.Frame(self.current_gauge_settings_frame)
+        self.name_frame.pack(side=tk.TOP)
+        self.blue_frame = tk.Frame(self.current_gauge_settings_frame)
+        self.blue_frame.pack(side=tk.TOP)
+        self.green_frame = tk.Frame(self.current_gauge_settings_frame)
+        self.green_frame.pack(side=tk.TOP)
+        self.yellow_frame = tk.Frame(self.current_gauge_settings_frame)
+        self.yellow_frame.pack(side=tk.TOP)
+        self.red_frame = tk.Frame(self.current_gauge_settings_frame)
+        self.red_frame.pack(side=tk.TOP)
+
+        self.current_gauge_name_label = tk.Label(self.name_frame, font=("Roboto Medium", 10), text="Gauge Name:")
+        self.current_gauge_name_label.pack(side=tk.LEFT)
+        self.current_gauge_name_entry = tk.Entry(self.name_frame)
+        self.current_gauge_name_entry.pack(side=tk.LEFT)
+        self.current_gauge_name_btn = tk.Button(self.name_frame, text="Change Name", command=self.change_name)
+        self.current_gauge_name_btn.pack(side=tk.LEFT)
+
+        self.current_gauge_blue_label = tk.Label(self.blue_frame, font=("Roboto Medium", 10), text="Blue Range:")
+        self.current_gauge_blue_label.pack(side=tk.LEFT)
+        self.current_gauge_blue_one_entry = tk.Entry(self.blue_frame)
+        self.current_gauge_blue_one_entry.pack(side=tk.LEFT)
+        self.current_gauge_blue_two_entry = tk.Entry(self.blue_frame)
+        self.current_gauge_blue_two_entry.pack(side=tk.LEFT)
+        self.current_gauge_blue_btn = tk.Button(self.blue_frame, text="Change Blue Range", command=self.change_blue)
+        self.current_gauge_blue_btn.pack(side=tk.LEFT)
+
+        self.current_gauge_green_label = tk.Label(self.green_frame, font=("Roboto Medium", 10), text="Green Range:")
+        self.current_gauge_green_label.pack(side=tk.LEFT)
+        self.current_gauge_green_one_entry = tk.Entry(self.green_frame)
+        self.current_gauge_green_one_entry.pack(side=tk.LEFT)
+        self.current_gauge_green_two_entry = tk.Entry(self.green_frame)
+        self.current_gauge_green_two_entry.pack(side=tk.LEFT)
+        self.current_gauge_green_btn = tk.Button(self.green_frame, text="Change Green Range", command=self.change_green)
+        self.current_gauge_green_btn.pack(side=tk.LEFT)
+
+        self.current_gauge_yellow_label = tk.Label(self.yellow_frame, font=("Roboto Medium", 10), text="Yellow Range:")
+        self.current_gauge_yellow_label.pack(side=tk.LEFT)
+        self.current_gauge_yellow_one_entry = tk.Entry(self.yellow_frame)
+        self.current_gauge_yellow_one_entry.pack(side=tk.LEFT)
+        self.current_gauge_yellow_two_entry = tk.Entry(self.yellow_frame)
+        self.current_gauge_yellow_two_entry.pack(side=tk.LEFT)
+        self.current_gauge_yellow_btn = tk.Button(self.yellow_frame, text="Change Yellow Range",
+                                                  command=self.change_yellow)
+        self.current_gauge_yellow_btn.pack(side=tk.LEFT)
+
+        self.current_gauge_red_label = tk.Label(self.red_frame, font=("Roboto Medium", 10), text="Red Range:")
+        self.current_gauge_red_label.pack(side=tk.LEFT)
+        self.current_gauge_red_one_entry = tk.Entry(self.red_frame)
+        self.current_gauge_red_one_entry.pack(side=tk.LEFT)
+        self.current_gauge_red_two_entry = tk.Entry(self.red_frame)
+        self.current_gauge_red_two_entry.pack(side=tk.LEFT)
+        self.current_gauge_red_btn = tk.Button(self.red_frame, text="Change Red Range", command=self.change_red)
+        self.current_gauge_red_btn.pack(side=tk.LEFT)
+
+        # TODO: Add widgets to display statistics like min, max, average, etc.
+
+    def change_name(self):
+        if len(self.data_manager.user_selected_gauges_list) != 0:
+            new_name = self.current_gauge_name_entry.get()
+            self.data_manager.user_selected_gauges_list[self.current_gauge_position].name = new_name
+            self.current_gauge_text_label.config(text=new_name)
+            print(new_name)
+        self.current_gauge_name_entry.delete(0, 'end')
+
+    def change_blue(self):
+        if len(self.data_manager.user_selected_gauges_list) != 0:
+            blue_low = self.current_gauge_blue_one_entry.get()
+            self.data_manager.user_selected_gauges_list[self.current_gauge_position].blue_range_low = blue_low
+            blue_high = self.current_gauge_blue_two_entry.get()
+            self.data_manager.user_selected_gauges_list[self.current_gauge_position].blue_range_high = blue_high
+            print(blue_low)
+            print(blue_high)
+        self.current_gauge_blue_one_entry.delete(0, 'end')
+        self.current_gauge_blue_two_entry.delete(0, 'end')
+
+    def change_green(self):
+        if len(self.data_manager.user_selected_gauges_list) != 0:
+            green_low = self.current_gauge_green_one_entry.get()
+            self.data_manager.user_selected_gauges_list[self.current_gauge_position].green_range_low = green_low
+            green_high = self.current_gauge_green_two_entry.get()
+            self.data_manager.user_selected_gauges_list[self.current_gauge_position].green_range_high = green_high
+            print(green_low)
+            print(green_high)
+        self.current_gauge_green_one_entry.delete(0, 'end')
+        self.current_gauge_green_two_entry.delete(0, 'end')
+
+    def change_yellow(self):
+        if len(self.data_manager.user_selected_gauges_list) != 0:
+            yellow_low = self.current_gauge_yellow_one_entry.get()
+            self.data_manager.user_selected_gauges_list[self.current_gauge_position].yellow_range_low = yellow_low
+            yellow_high = self.current_gauge_yellow_two_entry.get()
+            self.data_manager.user_selected_gauges_list[self.current_gauge_position].yellow_range_high = yellow_high
+            print(yellow_low)
+            print(yellow_high)
+        self.current_gauge_yellow_one_entry.delete(0, 'end')
+        self.current_gauge_yellow_two_entry.delete(0, 'end')
+
+    def change_red(self):
+        if len(self.data_manager.user_selected_gauges_list) != 0:
+            red_low = self.current_gauge_red_one_entry.get()
+            self.data_manager.user_selected_gauges_list[self.current_gauge_position].red_range_low = red_low
+            red_high = self.current_gauge_red_two_entry.get()
+            self.data_manager.user_selected_gauges_list[self.current_gauge_position].red_range_high = red_high
+            print(red_low)
+            print(red_high)
+        self.current_gauge_red_one_entry.delete(0, 'end')
+        self.current_gauge_red_two_entry.delete(0, 'end')
+
+    def scroll_right(self):
+        if self.current_gauge_position < len(self.data_manager.user_selected_gauges_list) - 1:
+            self.current_gauge_position = self.current_gauge_position + 1
+        self.update_gauges(False)
+
+    def scroll_left(self):
+        if self.current_gauge_position > 0:
+            self.current_gauge_position = self.current_gauge_position - 1
+        self.update_gauges(False)
+
+    def set_data_manager(self, config_panel: ConfigurationPanel):
+        self.data_manager = config_panel.data_manager
+
+    def update_gauges(self, reset_position):
+        if reset_position:
+            self.current_gauge_position = 0
+        if len(self.data_manager.user_selected_gauges_list) > 0:
+            self.current_gauge_text_list = self.data_manager.display_user_selections()
+            self.current_gauge_statistics_text_list = self.data_manager.statistics_list
+            self.current_gauge_text.config(state="normal")
+            self.current_gauge_statistics_text.config(state="normal")
+            self.current_gauge_text.delete("1.0", "end")
+            self.current_gauge_statistics_text.delete("1.0", "end")
+            self.current_gauge_text.insert(tk.END, self.current_gauge_text_list[self.current_gauge_position])
+            self.current_gauge_statistics_text.insert(tk.END, self.data_manager.user_selected_gauges_list[
+                self.current_gauge_position].statistics)
+            if self.data_manager.user_selected_gauges_list[self.current_gauge_position].name == "":
+                temp_text = "Gauge #" + str(self.data_manager.user_selected_gauges_list[self.current_gauge_position].id)
+                self.current_gauge_text_label.config(text=temp_text)
+            else:
+                temp_text = str(self.data_manager.user_selected_gauges_list[self.current_gauge_position].name)
+                self.current_gauge_text_label.config(text=temp_text)
+            self.current_gauge_text.config(state="disabled")
+            self.current_gauge_statistics_text.config(state="disabled")
 
 
 class PlaybackPanel(ttk.Frame):
@@ -410,6 +661,48 @@ class PlaybackPanel(ttk.Frame):
 
         # Schedule the update_ui method to be called after 500ms
         self.after(500, self.update_ui)
+
+    def reverse_video(self):
+        if not self.video_path:
+            print("No video loaded to reverse")
+            return
+
+        # Determine the file extension and reversed file name
+        base, ext = os.path.splitext(self.video_path)
+        if ext.lower() not in ['.mp4', '.mov']:
+            print("Unsupported file format for reversing")
+            return
+
+        reversed_video_path = f"{base}_reversed{ext}"
+
+        # Check if the reversed video file already exists
+        if os.path.exists(reversed_video_path):
+            print(f"Reversed video already exists: {reversed_video_path}")
+            self.is_video_reversed = True
+            self.set_video_path(reversed_video_path)
+        else:
+            try:
+                # Use ffmpeg to reverse the video
+                command = [
+                    'ffmpeg',
+                    '-i', self.video_path,
+                    '-vf', 'reverse',
+                    '-af', 'areverse',
+                    reversed_video_path
+                ]
+                subprocess.run(command, check=True)
+                print(f"Reversed video saved to {reversed_video_path}")
+
+                # Replace the old video path with the new reversed video path
+                self.is_video_reversed = True
+                self.set_video_path(reversed_video_path)
+            except subprocess.CalledProcessError as e:
+                self.is_video_reversed = False
+                print(f"ffmpeg error: {e}")
+            except Exception as e:
+                self.is_video_reversed = False
+                print(f"An error occurred while reversing the video: {e}")
+                traceback.print_exc(file=sys.stderr)
 
 
 class StatisticsPanel(ttk.Frame):
