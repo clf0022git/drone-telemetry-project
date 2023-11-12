@@ -49,6 +49,11 @@ class BarGauge(GaugeBase):
                 return color
         return 'red'
 
+    def set_figure_title(self, title):
+        """Set the title for the matplotlib plot. This is different from the GaugeBase title."""
+        self.plot.set_title(title)
+        self.canvas.draw_idle()
+
     def set_figure_text(self, text):
         """Set additional text on the matplotlib figure."""
         if self.figure_text is not None:

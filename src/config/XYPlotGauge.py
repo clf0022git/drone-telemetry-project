@@ -56,8 +56,8 @@ class XYPlotGauge(GaugeBase):
                 return color
         return 'red'
 
-    def set_plot_title(self, title):
-        """Set the title for the matplotlib plot."""
+    def set_figure_title(self, title):
+        """Set the title for the matplotlib plot. This is different from the GaugeBase title."""
         self.axis.set_title(title)
         self.canvas.draw_idle()
 
@@ -87,6 +87,8 @@ if __name__ == "__main__":
     xy_plot_gauge.pack(fill=tk.BOTH, expand=True)
 
     xy_plot_gauge.set_bounds(x_bounds=(-10, 10), y_bounds=(-10, 10))
+
+    xy_plot_gauge.set_figure_title("Drone Position")
 
     # Function to simulate data points being added to the plot over time
     def simulate_data():
