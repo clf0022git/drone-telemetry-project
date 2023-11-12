@@ -69,6 +69,12 @@ class XYPlotGauge(GaugeBase):
         self.figure_text = self.axis.text(0.5, 0.9, text, ha='center', va='center', transform=self.axis.transAxes)
         self.canvas.draw_idle()
 
+    def set_figure_size(self, width, height):
+        """Set the figure size."""
+        self.figsize = (width, height)
+        self.figure.set_size_inches(self.figsize, forward=True)
+        self.figure.canvas.draw_idle()
+
     def set_bounds(self, x_bounds=None, y_bounds=None):
         """Set the x/y bounds of the plot."""
         if x_bounds:
