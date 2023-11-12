@@ -9,6 +9,7 @@ class GaugeBase(tk.Frame):
         self.description_text = description
         self.color_ranges = {'blue': 25, 'green': 50, 'yellow': 75, 'red': 100}  # Default values, use update_colors to change
         self.red_limit = 80
+        self.alarm_times = 0  # Number of times the alarm has been triggered
 
         # Create the title label
         self.title_label = tk.Label(self, text=self.title_text)
@@ -41,7 +42,8 @@ class GaugeBase(tk.Frame):
 
     def trigger_alarm(self):
         """Trigger an audible alarm."""
-        print(f"Alarm! {self.name} value exceeded red limit.")  # Placeholder for actual alarm logic
+        self.alarm_times += 1
+        print(f"Alarm! {self.name} value exceeded red limit {self.alarm_times} times.")  # Placeholder for actual alarm logic
         self.master.bell()  # Ring the system bell
 
     def set_title(self, title):
