@@ -33,7 +33,7 @@ class XPlotGauge(GaugeBase):
         self.time_values.append(len(self.time_values))  # Assuming uniform time intervals
 
         # Update the plot line with the new data
-        self.lines.set_data(self.time_values, self.x_values)
+        self.lines.set_data(self.x_values, self.time_values)
 
         # Adjust the plot limits
         self.axis.relim()
@@ -85,14 +85,13 @@ class XPlotGauge(GaugeBase):
 
 # Example usage
 if __name__ == "__main__":
-    CASE = 0  # Change this to 0 or 1 to run the corresponding example below
+    CASE = 1  # Change this to 0 or 1 to run the corresponding example below
     if CASE == 0:  # Simulate (random) data points being added to the plot over time
         root = tk.Tk()
         root.title("X Plot Gauge Example")
 
         x_plot_gauge = XPlotGauge(root, title='Data over Time', description='X values plotted over time')
         x_plot_gauge.pack(fill=tk.BOTH, expand=True)
-
         # Function to simulate data points being added to the plot over time
         def simulate_data():
             import random
@@ -119,12 +118,12 @@ if __name__ == "__main__":
 
         # Sample x-values (could represent anything, such as temperature readings)
         sample_x_values = [23, 25, 22, 26, 24, 28, 27, 29, 30, 25, 81, 24, 23, 22]
-
         # Function to update the plot with the next data point from the sample list
         def update_plot(index=0):
-            if index < len(sample_x_values):
-                x_plot_gauge.update_value(sample_x_values[index])
-                x_plot_gauge.set_figure_text(f"Value: {sample_x_values[index]}")
+            x_line = [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3]
+            if index < len(x_line):
+                x_plot_gauge.update_value(x_line[index])
+                x_plot_gauge.set_figure_text(f"Value: {x_line[index]}")
                 root.after(1000, update_plot, index + 1)
 
 
