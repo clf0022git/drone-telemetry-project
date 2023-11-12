@@ -9,7 +9,8 @@ class XYPlotGauge(GaugeBase):
         super().__init__(master, name=f'{name}-{id(self)}', title=title, description=description, *args, **kwargs)
 
         # Initialize the figure and axis for the plot
-        self.figure = Figure(figsize=(5, 4), dpi=100)
+        self.figsize = kwargs.get('figsize', (5, 4))  # Default figure size can be overridden with kwargs
+        self.figure = Figure(figsize=self.figsize, dpi=100)
         self.axis = self.figure.add_subplot(111)
 
         # Create the canvas and add it to the GaugeBase frame
