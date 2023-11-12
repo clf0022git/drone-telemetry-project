@@ -37,6 +37,18 @@ class MainWindow(tk.Tk):
         # (If there's any additional frame creation logic, it goes here)
         pass
 
+
+class GaugeWindow(tk.Toplevel):
+    def __init__(self):
+        super().__init__()
+
+        # Window properties
+        self.title("Telemetry Data Gauges")
+        self.geometry("300x300")
+        self.configure(bg="white")
+        self.playback_panel = PlaybackPanel
+        self.config_panel = ConfigurationPanel
+
 if __name__ == "__main__":
     app = MainWindow()
     app.mainloop()

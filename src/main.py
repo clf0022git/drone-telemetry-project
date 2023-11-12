@@ -2,7 +2,6 @@ import sys
 import traceback
 from src.gui.window import MainWindow
 
-
 def main():
     """
     Entry point for the Drone Telemetry Playback application.
@@ -11,7 +10,9 @@ def main():
     """
     try:
         root = MainWindow()
+        #second = GaugeWindow()
         root.mainloop()
+        #second.mainloop()
     except Exception as e:
         print(f"An error occurred: {e}", file=sys.stderr)
         traceback.print_exc(file=sys.stderr)
