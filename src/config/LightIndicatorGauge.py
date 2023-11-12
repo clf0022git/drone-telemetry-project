@@ -4,7 +4,7 @@ from src.config.GaugeBase import GaugeBase
 
 class LightIndicatorGauge(GaugeBase):
     def __init__(self, master, name='Light Indicator', title='Light', description='', *args, **kwargs):
-        super().__init__(master, name=name, title=title, description=description, *args, **kwargs)
+        super().__init__(master, name=f'{name}-{id(self)}', title=title, description=description, *args, **kwargs)
 
         # Canvas for the light indicator
         self.light_canvas = tk.Canvas(self, width=60, height=60, bg='white')

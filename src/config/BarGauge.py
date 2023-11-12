@@ -6,7 +6,7 @@ from src.config.GaugeBase import GaugeBase
 
 class BarGauge(GaugeBase):
     def __init__(self, master, name='Bar Gauge', title='Bar Gauge', description='', orientation='vertical', *args, **kwargs):
-        super().__init__(master, name=name, title=title, description=description, *args, **kwargs)
+        super().__init__(master, name=f'{name}-{id(self)}', title=title, description=description, *args, **kwargs)
         self.orientation = orientation
         self.figsize = kwargs.get('figsize', (4, 2))  # Default figure size can be overridden with kwargs
 

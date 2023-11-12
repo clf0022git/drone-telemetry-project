@@ -5,7 +5,7 @@ from math import pi, cos, sin
 
 class CircleGauge(GaugeBase):
     def __init__(self, master, name='Circle Gauge', title='Circle Gauge', description='', degrees=360, *args, **kwargs):
-        super().__init__(master, name=name, title=title, description=description, *args, **kwargs)
+        super().__init__(master, name=f'{name}-{id(self)}', title=title, description=description, *args, **kwargs)
         self.degrees = degrees
         self.value = 0
         self.max_value = 100  # Default max value for the gauge

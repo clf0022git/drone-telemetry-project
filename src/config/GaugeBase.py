@@ -8,7 +8,7 @@ class GaugeBase(tk.Frame):
         self.title_text = title
         self.description_text = description
         self.color_ranges = {'blue': 25, 'green': 50, 'yellow': 75, 'red': 100}  # Default values, use update_colors to change
-        self.red_limit = self.color_ranges['red']
+        self.red_limit = 80
 
         # Create the title label
         self.title_label = tk.Label(self, text=self.title_text)
@@ -32,7 +32,7 @@ class GaugeBase(tk.Frame):
             self.color_ranges['yellow'] = yellow
         if red is not None:
             self.color_ranges['red'] = red
-            self.red_limit = red
+            self.red_limit = int(red - 20)  # Set the red limit to 20 less than the red color range
 
     def check_alarm(self, value):
         """Check if the value exceeds the red limit and trigger an alarm if necessary."""

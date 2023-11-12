@@ -4,7 +4,7 @@ from src.config.GaugeBase import GaugeBase
 
 class TextDisplayGauge(GaugeBase):
     def __init__(self, master, name='Text Display', title='Text Gauge', description='', *args, **kwargs):
-        super().__init__(master, name=name, title=title, description=description, *args, **kwargs)
+        super().__init__(master, name=f'{name}-{id(self)}', title=title, description=description, *args, **kwargs)
 
         # Variable to hold the text value
         self.text_var = tk.StringVar(value="")

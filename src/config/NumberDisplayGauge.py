@@ -4,7 +4,7 @@ from src.config.GaugeBase import GaugeBase
 
 class NumberDisplayGauge(GaugeBase):
     def __init__(self, master, name='Number Display', *args, **kwargs):
-        super().__init__(master, name=name, *args, **kwargs)
+        super().__init__(master, name=f'{name}-{id(self)}', *args, **kwargs)
         self.display_var = tk.StringVar()
         self.display_label = tk.Label(self, textvariable=self.display_var, font=('Arial', 24))
         self.display_label.pack(expand=True)

@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 
 class ClockGauge(GaugeBase):
     def __init__(self, master, name='Clock Gauge', title='Clock', description='', mode='clock', *args, **kwargs):
-        super().__init__(master, name=name, title=title, description=description, *args, **kwargs)
+        super().__init__(master, name=f'{name}-{id(self)}', title=title, description=description, *args, **kwargs)
         self.mode = mode  # 'clock', 'stopwatch', 'running_time', or 'clock_csv'
         self.start_time = None
         self.current_time = None

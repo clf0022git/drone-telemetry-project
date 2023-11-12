@@ -5,8 +5,8 @@ from matplotlib.figure import Figure
 
 
 class XYPlotGauge(GaugeBase):
-    def __init__(self, master, name='XY Plot Gauge', title='XY Plot', description='', connect_dots=False, *args, **kwargs):
-        super().__init__(master, name=name, title=title, description=description, *args, **kwargs)
+    def __init__(self, master, name=f'XY Plot Gauge', title='XY Plot', description='', connect_dots=False, *args, **kwargs):
+        super().__init__(master, name=f'{name}-{id(self)}', title=title, description=description, *args, **kwargs)
 
         # Initialize the figure and axis for the plot
         self.figure = Figure(figsize=(5, 4), dpi=100)
