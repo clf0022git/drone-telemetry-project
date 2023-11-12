@@ -10,7 +10,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib import style
 import matplotlib.animation as animation
 from src.data.input import DataManager
-from src.config.indicatorLight import of_light
+from src.config.LightIndicator import of_light
 
 #Manager class for the gauges
 class GaugeCreator:
