@@ -85,7 +85,7 @@ class XPlotGauge(GaugeBase):
 
 # Example usage
 if __name__ == "__main__":
-    CASE = 0
+    CASE = 0  # Change this to 0 or 1 to run the corresponding example below
     if CASE == 0:  # Simulate (random) data points being added to the plot over time
         root = tk.Tk()
         root.title("X Plot Gauge Example")
