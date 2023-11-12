@@ -59,11 +59,9 @@ class ConfigurationPanel(ttk.Frame):
         self.metricButton = ttk.Button(self.metric_group, text="Swap to Metric or Imperial", command=self.swap_metric)
         self.metricButton.pack(pady=5, side=tk.TOP)
 
-        self.metric_label = ttk.Label(self.metric_group, font=("Roboto Light", 10), text="Current Metrics: Meters and Celsius")
+        self.metric_label = ttk.Label(self.metric_group, font=("Roboto Light", 10),
+                                      text="Current Metrics: Meters and Celsius")
         self.metric_label.pack(pady=5, side=tk.TOP)
-
-        self.statisticsButton = ttk.Button(self, text="Get Statistics", command=self.get_statistics)
-        self.statisticsButton.pack(pady=5)
 
         # Frames that hold the fieldnames and their options
         self.fieldnames_gauge_group = tk.Frame(self)
@@ -170,14 +168,6 @@ class ConfigurationPanel(ttk.Frame):
         self.speed_combobox.grid(row=0, column=0, padx=5, pady=2)
         self.speed_combobox.bind('<<ComboboxSelected>>', self.set_playback_speed)
 
-        # Button to update customization panel with current information
-        self.select_field_btn = ttk.Button(self, text="Send to Customization Panel", command=self.send_gauges)
-        self.select_field_btn.pack(pady=10, side=tk.TOP)
-
-    def send_gauges(self):
-        print("Gauges sent!")
-        self.gauge_customization_panel.update_gauges(True)
-
     def swap_metric(self):
         global m_or_f
 
@@ -206,6 +196,7 @@ class ConfigurationPanel(ttk.Frame):
                 stats = self.data_processor.calc_statistics(self.data_manager.data_file[field], field)
                 print(type(self.statistics_list))
                 self.statistics_list.append(stats)
+                element.statistics = stats
             else:
                 # This entry has no statistics
                 self.statistics_list.append("This entry has no statistics")
@@ -314,6 +305,8 @@ class ConfigurationPanel(ttk.Frame):
             print("Please select a gauge.")
 
         self.get_statistics()
+        print("Gauges sent!")
+        self.gauge_customization_panel.update_gauges(True)
 
     def change_datatype(self, e):
         self.gauge_types_list.delete(0, 'end')
@@ -377,7 +370,8 @@ class GaugeCustomizationPanel(ttk.Frame):
         self.gauge_viewer_frame = tk.Frame(self)
         self.gauge_viewer_frame.pack(pady=100)
 
-        self.current_gauge_text_label = tk.Label(self.gauge_viewer_frame, font=("Roboto Medium", 10), text="No Gauge Selected")
+        self.current_gauge_text_label = tk.Label(self.gauge_viewer_frame, font=("Roboto Medium", 10),
+                                                 text="No Gauge Selected")
         self.current_gauge_text_label.pack(side=tk.TOP, pady=10)
 
         self.gauge_viewer_contents_frame = tk.Frame(self.gauge_viewer_frame)
@@ -446,7 +440,8 @@ class GaugeCustomizationPanel(ttk.Frame):
         self.current_gauge_yellow_one_entry.pack(side=tk.LEFT)
         self.current_gauge_yellow_two_entry = tk.Entry(self.yellow_frame)
         self.current_gauge_yellow_two_entry.pack(side=tk.LEFT)
-        self.current_gauge_yellow_btn = tk.Button(self.yellow_frame, text="Change Yellow Range", command=self.change_yellow)
+        self.current_gauge_yellow_btn = tk.Button(self.yellow_frame, text="Change Yellow Range",
+                                                  command=self.change_yellow)
         self.current_gauge_yellow_btn.pack(side=tk.LEFT)
 
         self.current_gauge_red_label = tk.Label(self.red_frame, font=("Roboto Medium", 10), text="Red Range:")
@@ -464,7 +459,9 @@ class GaugeCustomizationPanel(ttk.Frame):
         if len(self.data_manager.user_selected_gauges_list) != 0:
             new_name = self.current_gauge_name_entry.get()
             self.data_manager.user_selected_gauges_list[self.current_gauge_position].name = new_name
+            self.current_gauge_text_label.config(text=new_name)
             print(new_name)
+        self.current_gauge_name_entry.delete(0, 'end')
 
     def change_blue(self):
         if len(self.data_manager.user_selected_gauges_list) != 0:
@@ -474,6 +471,8 @@ class GaugeCustomizationPanel(ttk.Frame):
             self.data_manager.user_selected_gauges_list[self.current_gauge_position].blue_range_high = blue_high
             print(blue_low)
             print(blue_high)
+        self.current_gauge_blue_one_entry.delete(0, 'end')
+        self.current_gauge_blue_two_entry.delete(0, 'end')
 
     def change_green(self):
         if len(self.data_manager.user_selected_gauges_list) != 0:
@@ -483,6 +482,8 @@ class GaugeCustomizationPanel(ttk.Frame):
             self.data_manager.user_selected_gauges_list[self.current_gauge_position].green_range_high = green_high
             print(green_low)
             print(green_high)
+        self.current_gauge_green_one_entry.delete(0, 'end')
+        self.current_gauge_green_two_entry.delete(0, 'end')
 
     def change_yellow(self):
         if len(self.data_manager.user_selected_gauges_list) != 0:
@@ -492,6 +493,8 @@ class GaugeCustomizationPanel(ttk.Frame):
             self.data_manager.user_selected_gauges_list[self.current_gauge_position].yellow_range_high = yellow_high
             print(yellow_low)
             print(yellow_high)
+        self.current_gauge_yellow_one_entry.delete(0, 'end')
+        self.current_gauge_yellow_two_entry.delete(0, 'end')
 
     def change_red(self):
         if len(self.data_manager.user_selected_gauges_list) != 0:
@@ -501,6 +504,8 @@ class GaugeCustomizationPanel(ttk.Frame):
             self.data_manager.user_selected_gauges_list[self.current_gauge_position].red_range_high = red_high
             print(red_low)
             print(red_high)
+        self.current_gauge_red_one_entry.delete(0, 'end')
+        self.current_gauge_red_two_entry.delete(0, 'end')
 
     def scroll_right(self):
         if self.current_gauge_position < len(self.data_manager.user_selected_gauges_list) - 1:
@@ -526,9 +531,14 @@ class GaugeCustomizationPanel(ttk.Frame):
             self.current_gauge_text.delete("1.0", "end")
             self.current_gauge_statistics_text.delete("1.0", "end")
             self.current_gauge_text.insert(tk.END, self.current_gauge_text_list[self.current_gauge_position])
-            self.current_gauge_statistics_text.insert(tk.END, self.current_gauge_statistics_text_list[self.current_gauge_position])
-            temp_text = "Gauge #" + str(self.data_manager.user_selected_gauges_list[self.current_gauge_position].id)
-            self.current_gauge_text_label.config(text=temp_text)
+            self.current_gauge_statistics_text.insert(tk.END, self.data_manager.user_selected_gauges_list[
+                self.current_gauge_position].statistics)
+            if self.data_manager.user_selected_gauges_list[self.current_gauge_position].name == "":
+                temp_text = "Gauge #" + str(self.data_manager.user_selected_gauges_list[self.current_gauge_position].id)
+                self.current_gauge_text_label.config(text=temp_text)
+            else:
+                temp_text = str(self.data_manager.user_selected_gauges_list[self.current_gauge_position].name)
+                self.current_gauge_text_label.config(text=temp_text)
             self.current_gauge_text.config(state="disabled")
             self.current_gauge_statistics_text.config(state="disabled")
 
