@@ -19,6 +19,10 @@ class GaugeBase(tk.Frame):
         self.description_label = tk.Label(self, text=self.description_text)
         self.description_label.pack(side=tk.BOTTOM, fill=tk.X)
 
+        # Create the alarm label
+        self.alarm_label = tk.Label(self, text='ALARM!', fg='red')
+        self.alarm_label_visible = False
+
     def update_value(self, value):
         """Update the gauge's value."""
         raise NotImplementedError("Must be implemented by the subclass.")
@@ -50,18 +54,21 @@ class GaugeBase(tk.Frame):
         self.flash_alarm_text()  # Flash the alarm text
 
     def flash_alarm_text(self, count=1):
-        """Flash the alarm text in the description label. ONLY pass 1 for count. Originally I was going to flash the
-        text multiple times, but we cannot do that because of tkinter limitations."""
-        alarm_text = "ALARM!"
+        """Flash the alarm text in the alarm label."""
         if count > 0:
-            # Flash the alarm text
-            self.description_label.config(fg='red' if self.description_label.cget("text") != alarm_text else 'black',
-                                          text=alarm_text)
+            # Toggle the visibility of the alarm label
+            if self.alarm_label_visible:
+                self.alarm_label.pack_forget()
+                self.alarm_label_visible = False
+            else:
+                self.alarm_label.pack(side=tk.BOTTOM, fill=tk.X)
+                self.alarm_label_visible = True
             # Schedule the next flash
             self.after(800, self.flash_alarm_text, count - 1)
         else:
-            # After flashing, revert to the original description
-            self.description_label.config(text=self.description_text, fg='black')
+            # Ensure the alarm label is hidden after flashing
+            self.alarm_label.pack_forget()
+            self.alarm_label_visible = False
 
     def set_title(self, title):
         """Set the title of the gauge."""
