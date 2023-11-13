@@ -54,7 +54,6 @@ class CircleGauge(GaugeBase):
             for num in range(start, end + 1, self.number_step):
                 # Calculate the angle for each number
                 angle_deg = (num - start) / (end - start) * max_degree
-                #angle_rad = pi * (1.5 - 2 * angle_deg / 360)
                 if max_degree == 90:
                     angle_rad = pi * (0.5 - angle_deg / 180)  # Adjust for 90-degree gauge
                 elif max_degree == 180:
@@ -90,7 +89,7 @@ class CircleGauge(GaugeBase):
             color = 'green'
         else:
             color = 'blue'
-        #self.canvas.itemconfig(self.gauge_shape, outline=color)
+        #self.canvas.itemconfig(self.gauge_shape, outline=color)  # Uncomment this if you want to change the outline color
         self.canvas.itemconfig("needle", fill=color)
 
     def draw_needle(self):
