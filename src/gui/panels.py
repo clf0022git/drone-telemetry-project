@@ -159,8 +159,8 @@ class ConfigurationPanel(ttk.Frame):
         self.select_field_btn.pack(pady=10)
 
         # Button to select field with gauge
-        self.generate_gauges_btn = ttk.Button(self, text="Generate Gauges", command=self.generate_gauges)
-        self.generate_gauges_btn.pack(pady=10, side=tk.TOP)
+        #self.generate_gauges_btn = ttk.Button(self, text="Generate Gauges", command=self.generate_gauges)
+        #self.generate_gauges_btn.pack(pady=10, side=tk.TOP)
 
         self.speed_label = ttk.Label(self, font=("Roboto Light", 10), text="Playback Speed:")
         self.speed_label.pack(pady=5)
@@ -191,6 +191,9 @@ class ConfigurationPanel(ttk.Frame):
         else:
             self.metric_label.config(text="Current Metrics: Meters and Celsius")
             m_or_f = 0
+
+        self.get_statistics()
+        self.gauge_customization_panel.update_gauges(True)
 
     def get_statistics(self):
         if len(self.data_manager.user_selected_gauges_list) == 0:
@@ -299,9 +302,11 @@ class ConfigurationPanel(ttk.Frame):
             print(f"Selected Gauge: {', '.join(selected_field)}")
             self.user_selection_list.delete(0, 'end')  # clear list before each call to update
             self.user_selection_list.insert(0, *self.data_manager.delete_selection(k))
-
         else:
             print("Please select a field to remove.")
+
+        self.get_statistics()
+        self.gauge_customization_panel.update_gauges(True)
 
     def select_field(self):
         """Will call functionality to send selected fields to function"""
@@ -312,7 +317,7 @@ class ConfigurationPanel(ttk.Frame):
             self.user_selection_list.delete(0, 'end')  # clear list before each call to update
             print("Called!")
             gt_list = self.data_manager.confirm_selection(selected_gauge, self.fieldnames_gauge_group,
-                                                          self.user_selection_list)
+                                                          self.user_selection_list, self.gauge_customization_panel, self)
             if len(gt_list) <= 10:
                 self.user_selection_list.insert(0, *gt_list)
                 # Functionality to ask user about the type of the data probably in between identifying gauges and
@@ -557,7 +562,7 @@ class GaugeCustomizationPanel(ttk.Frame):
         if len(self.data_manager.user_selected_gauges_list) != 0:
             new_name = self.current_gauge_name_entry.get()
             self.data_manager.user_selected_gauges_list[self.current_gauge_position].name = new_name
-            self.current_gauge_text_label.config(text=new_name)
+            #self.current_gauge_text_label.config(text=new_name)
             print(new_name)
             for widget in self.current_gauge_view.winfo_children():
                 widget.destroy()
@@ -645,16 +650,15 @@ class GaugeCustomizationPanel(ttk.Frame):
             self.current_gauge_text.delete("1.0", "end")
             self.current_gauge_statistics_text.delete("1.0", "end")
             self.current_gauge_text.insert(tk.END, self.current_gauge_text_list[self.current_gauge_position])
-            self.current_gauge_statistics_text.insert(tk.END, self.data_manager.user_selected_gauges_list[
-                self.current_gauge_position].statistics)
-            self.current_gauge_statistics_text.insert(tk.END, self.data_manager.user_selected_gauges_list[
-                self.current_gauge_position].statistics_two)
-            if self.data_manager.user_selected_gauges_list[self.current_gauge_position].name == "":
-                temp_text = "Gauge #" + str(self.data_manager.user_selected_gauges_list[self.current_gauge_position].id)
-                self.current_gauge_text_label.config(text=temp_text)
-            else:
-                temp_text = str(self.data_manager.user_selected_gauges_list[self.current_gauge_position].name)
-                self.current_gauge_text_label.config(text=temp_text)
+            temp_statistics = self.data_manager.user_selected_gauges_list[self.current_gauge_position].statistics + self.data_manager.user_selected_gauges_list[self.current_gauge_position].statistics_two
+            self.current_gauge_statistics_text.insert(tk.END, temp_statistics)
+            print(temp_statistics)
+            #if self.data_manager.user_selected_gauges_list[self.current_gauge_position].name == "":
+            temp_text = "Gauge #" + str(self.data_manager.user_selected_gauges_list[self.current_gauge_position].id)
+            self.current_gauge_text_label.config(text=temp_text)
+            #else:
+                #temp_text = str(self.data_manager.user_selected_gauges_list[self.current_gauge_position].name)
+                #self.current_gauge_text_label.config(text=temp_text)
             self.current_gauge_text.config(state="disabled")
             self.current_gauge_statistics_text.config(state="disabled")
             self.gauge_manager.draw_gauge(self.current_gauge_view,

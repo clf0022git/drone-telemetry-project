@@ -17,6 +17,7 @@ from src.config.ClockDisplayGauge import ClockGauge
 from src.config.LightIndicatorGauge import LightIndicatorGauge
 from src.config.NumberDisplayGauge import NumberDisplayGauge
 from src.config.TextDisplayGauge import TextDisplayGauge
+from src.config.XPlotGauge import XPlotGauge
 from src.config.XYPlotGauge import XYPlotGauge
 from src.data.input import DataManager
 
@@ -35,6 +36,9 @@ class GaugeManager:
                 xy_plot_gauge.pack(fill=tk.BOTH, expand=True)
 
                 xy_plot_gauge.set_bounds(x_bounds=(-10, 10), y_bounds=(-10, 10))
+            case "X-Plot":
+                x_plot_gauge = XPlotGauge(root, title=element.name, description='X values plotted over time')
+                x_plot_gauge.pack(fill=tk.BOTH, expand=True)
             # Case for getting the data and drawing the bar graph
             case "Bar":
                 # Initialize vertical bar gauge
@@ -46,7 +50,7 @@ class GaugeManager:
                 v_bar_gauge.set_figure_size(4, 3)
 
                 # Set the bounds for the bar gauges
-                v_bar_gauge.set_bounds(y_bounds=(0, 100))
+                v_bar_gauge.set_bounds(y_bounds=(element.statistics_values.get('Minimum'), element.statistics_values.get('Maximum')))
             # Case for getting the data and drawing  the 90 degree circle graph
             case "Circle - 90°":
                 circle_gauge = CircleGauge(root, title=element.name, degrees=90)
