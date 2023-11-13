@@ -42,12 +42,6 @@ class GaugeBase(tk.Frame):
         if value >= self.red_limit:
             self.trigger_alarm()
 
-    # def trigger_alarm(self):
-    #     """Trigger an audible alarm."""
-    #     self.alarm_times += 1
-    #     print(f"Alarm! {self.name} value exceeded red limit {self.alarm_times} times.")  # Placeholder for actual alarm logic
-    #     self.master.bell()  # Ring the system bell
-
     def trigger_alarm(self):
         """Trigger an audible alarm and flash the description label."""
         self.alarm_times += 1
