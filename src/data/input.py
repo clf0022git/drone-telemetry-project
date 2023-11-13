@@ -20,12 +20,17 @@ class DataManager:
         self.metric_indicator = 0  # default to 0 (meters)
         self.additional_frame_group = None
         self.additional_listbox = None
+        self.additional_entry_box = None
         self.additional_label = None
         self.additional_btn = None
+        self.fieldnames_searched = []
+        self.fieldnames = []
         self.remove_additional_btn = None
         self.user_selection_replacement_list = None
         self.current_gauge_temp = None  # Holds temporary gauge when 2nd field needs to be selected
         self.statistics_list = []
+        self.gauge_panel = None  # Allows DataManager to update the statistics for second field
+        self.config_panel = None
 
     def parse(self, csv_path):
         """Handles the code for parsing the file"""
@@ -132,8 +137,7 @@ class DataManager:
                                                   "Running Time"]
             self.combo.current(0)
         elif self.data_file[self.current_selected_field[0]].dtype == "bool":
-            self.current_selected_field_gauges = ["X-Plot",
-                                                  "On/off light"]
+            self.current_selected_field_gauges = ["On/off light"]
             self.combo.current(1)
         elif self.data_file[self.current_selected_field[0]].dtype == "int64" or self.data_file[
             self.current_selected_field[0]].dtype == "int32":
@@ -143,6 +147,7 @@ class DataManager:
                                                   "Circle - 360°",
                                                   "Number or Character Display",
                                                   "X-by-Y-plot",
+                                                  "X-Plot",
                                                   "Bar"]
             self.combo.current(2)
             # there needs to be a special case for x by y plot
@@ -154,6 +159,7 @@ class DataManager:
                                                   "Circle - 360°",
                                                   "Number or Character Display",
                                                   "X-by-Y-plot",
+                                                  "X-Plot",
                                                   "Bar"]
             self.combo.current(3)
             # there needs to be a special case for x by y plot
@@ -194,7 +200,10 @@ class DataManager:
 
     # Creates a list of labels that show what the user has selected so far and
     # displays them to the screen
-    def confirm_selection(self, selected_gauge, gauge_group_frame, user_selection_list) -> list:
+    def confirm_selection(self, selected_gauge, gauge_group_frame, user_selection_list, gauge_panel,
+                          config_panel) -> list:
+        self.gauge_panel = gauge_panel
+        self.config_panel = config_panel
         gauge_name_list = []
         timestamp_string = "Timestamp: " + str(self.timestamp_value) + " second(s)"
         gauge_name_list.append(timestamp_string)
@@ -204,7 +213,7 @@ class DataManager:
             self.current_gauge_temp = current_saved_gauge
             print(selected_gauge)
 
-        if selected_gauge[0] == "X-by-Y-plot":
+        if selected_gauge[0] == "X-by-Y-plot" and len(self.user_selected_gauges_list) < 10:
             for element in self.user_selected_gauges_list:
                 if len(gauge_name_list) <= 10:
                     temp_gauge = "Gauge #" + str(element.id)
@@ -221,6 +230,7 @@ class DataManager:
             if len(gauge_name_list) <= 10:
                 element.id = i + 1
                 temp_gauge = "Gauge #" + str(element.id)
+                element.name = temp_gauge
                 gauge_name_list.append(temp_gauge)
 
         return gauge_name_list
@@ -237,10 +247,13 @@ class DataManager:
         timestamp_string = "Timestamp: " + str(self.timestamp_value) + " second(s)"
         gauge_name_list.append(timestamp_string)
 
-        for element in self.user_selected_gauges_list:
+        for i, element in enumerate(self.user_selected_gauges_list):
+            element.id = i + 1
             temp_gauge = "Gauge #" + str(element.id)
+            element.name = temp_gauge
             gauge_name_list.append(temp_gauge)
 
+        print("Updated!")
         return gauge_name_list
 
     def set_timestamp(self, current_timestamp):
@@ -306,6 +319,9 @@ class DataManager:
         self.additional_label = ttk.Label(self.additional_frame_group, font=("Roboto Light", 10),
                                           text="Possible Second Field:")
         self.additional_label.pack(pady=5)
+        self.additional_entry_box = ttk.Entry(self.additional_frame_group, font=("Roboto Light", 10))
+        self.additional_entry_box.pack(pady=5)
+        self.additional_entry_box.bind("<KeyRelease>", self.search_fields_two)
         self.additional_listbox = tk.Listbox(self.additional_frame_group, selectmode=tk.SINGLE, height=5,
                                              exportselection=0, width=30)
         self.additional_listbox.pack(pady=5)
@@ -321,13 +337,32 @@ class DataManager:
                                                 command=self.remove_second)
         self.remove_additional_btn.pack(pady=10)
 
-        fieldnames = []
+        self.fieldnames = []
 
         for col in self.data_file.columns:
-            fieldnames.append(col)
+            self.fieldnames.append(col)
 
-        for field in fieldnames:
+        for field in self.fieldnames:
             self.additional_listbox.insert(tk.END, field)
+
+    def update_field_list(self, new_list):
+        """Used by search_fields to update the listbox while the user is searching"""
+        self.additional_listbox.delete(0, tk.END)
+        for field in new_list:
+            self.additional_listbox.insert(tk.END, field)
+
+    def search_fields_two(self, e):
+        """Called when user searches for a field in the second entry box"""
+        user_typed_input = self.additional_entry_box.get()
+
+        if user_typed_input == '':
+            self.fieldnames_searched = self.fieldnames
+        else:
+            self.fieldnames_searched = []
+            for field in self.fieldnames:
+                if user_typed_input.lower() in field.lower():
+                    self.fieldnames_searched.append(field)
+                    self.update_field_list(self.fieldnames_searched)
 
     def delete_second_field(self):
         self.additional_frame_group.destroy()
@@ -353,16 +388,20 @@ class DataManager:
                 self.user_selected_gauges_list.append(current_saved_gauge)
 
             for i, element in enumerate(self.user_selected_gauges_list):
-                if len(gauge_name_list) <= 10:
+                if len(gauge_name_list) <= 11:
                     element.id = i + 1
                     temp_gauge = "Gauge #" + str(element.id)
+                    element.name = temp_gauge
                     gauge_name_list.append(temp_gauge)
 
-            if len(gauge_name_list) < 10:
+            if len(gauge_name_list) <= 11:
+                for element in self.user_selected_gauges_list:
+                    print(element)
+                self.config_panel.get_statistics()
+                self.gauge_panel.update_gauges(True)
                 self.user_selection_replacement_list.insert(0, *gauge_name_list)
             else:
                 print("You already have ten field selected!")
-                self.user_selection_replacement_list.insert(0, *gauge_name_list)
             self.remove_second()
         else:
             print("Please select a field that is an integer or float.")
@@ -373,14 +412,12 @@ class DataManager:
         gauge_name_list.append(timestamp_string)
 
         self.user_selection_replacement_list.delete(0, 'end')  # clear list before each call to update
-        if len(self.user_selected_gauges_list) <= 10:
-            self.user_selected_gauges_list.append(self.current_gauge_temp)
-            print("Working!1")
 
         for i, element in enumerate(self.user_selected_gauges_list):
             if len(gauge_name_list) <= 10:
                 element.id = i + 1
                 temp_gauge = "Gauge #" + str(element.id)
+                element.name = temp_gauge
                 gauge_name_list.append(temp_gauge)
             print("Working!2")
 
@@ -392,9 +429,9 @@ class DataManager:
     def display_user_selections(self) -> list:
         user_selection_string_list = []
         for element in self.user_selected_gauges_list:
-            user_selection_string = "Gauge ID:" + str(element.id) + ",\n" + "Field 1:" + str(
-                element.field_name[0]) + ",\n" + "Field 2:" + str(element.second_field_name) + ",\n" + "Gauge:" + str(
-                element.gauge_name) + ",\n"
+            user_selection_string = "Gauge ID:" + str(element.id) + "\n" + "Field 1:" + str(
+                element.field_name[0]) + "\n" + "Field 2:" + str(element.second_field_name) + "\n" + "Gauge:" + str(
+                element.gauge_name) + "\n"
             user_selection_string_list.append(user_selection_string)
         return user_selection_string_list
 
@@ -412,7 +449,10 @@ class TemporaryGauge:
         self.gauge_name = g_name
         self.timestamp_value = t_stamp
         self.name = ""
-        self.statistics = "This gauge has no statistics associated with it."
+        self.statistics = "This gauge has no statistics\nassociated with it."
+        self.statistics_two = ""
+        self.statistics_values = None
+        self.statistics_values_two = None
         self.blue_range_low = 0
         self.blue_range_high = 0
         self.green_range_low = 0
@@ -424,3 +464,17 @@ class TemporaryGauge:
 
     def set_second_field(self, second_field):
         self.second_field_name = second_field
+
+    def set_statistics_text(self, stats):
+        user_stats_string = "--Field One--\n" + "Minimum: " + str(stats.get('Minimum')) + "\n" + "Maximum: " + str(
+            stats.get('Maximum')) + "\n" + "Average: " + str(
+            stats.get('Average')) + "\n" + "Standard Deviation: " + str(
+            stats.get('Standard Deviation')) + "\n"
+        self.statistics = user_stats_string
+
+    def set_statistics_two_text(self, stats):
+        user_stats_string = "--Field Two--\n" + "Minimum: " + str(stats.get('Minimum')) + "\n" + "Maximum: " + str(
+            stats.get('Maximum')) + "\n" + "Average: " + str(
+            stats.get('Average')) + "\n" + "Standard Deviation: " + str(
+            stats.get('Standard Deviation')) + "\n"
+        self.statistics_two = user_stats_string
