@@ -30,17 +30,15 @@ class GaugeManager:
         match element.gauge_name:
             # Case for getting data and drawing the x-by-y plot
             case "X-by-Y-plot":
-                xy_plot_gauge = XYPlotGauge(root, title='Drone Position', description='Drone X-Y Plot',
+                xy_plot_gauge = XYPlotGauge(root, title=element.name, description='Drone X-Y Plot',
                                             connect_dots=True)
                 xy_plot_gauge.pack(fill=tk.BOTH, expand=True)
 
                 xy_plot_gauge.set_bounds(x_bounds=(-10, 10), y_bounds=(-10, 10))
-
-                xy_plot_gauge.set_figure_title("Drone Position")
             # Case for getting the data and drawing the bar graph
             case "Bar":
                 # Initialize vertical bar gauge
-                v_bar_gauge = BarGauge(root, title='Vertical Bar', description='Vertical bar description',
+                v_bar_gauge = BarGauge(root, title=element.name, description='Vertical bar description',
                                        orientation='vertical')
                 v_bar_gauge.pack(padx=10, pady=10)
 
@@ -51,45 +49,46 @@ class GaugeManager:
                 v_bar_gauge.set_bounds(y_bounds=(0, 100))
             # Case for getting the data and drawing  the 90 degree circle graph
             case "Circle - 90°":
-                circle_gauge = CircleGauge(root, title='Speed', degrees=90)
+                circle_gauge = CircleGauge(root, title=element.name, degrees=90)
                 circle_gauge.pack(padx=10, pady=10)
                 circle_gauge.update_value(10)  # Update to a sample value
 
             # Case for getting the data and drawing  the 180 degree circle graph
             case "Circle - 180°":
-                circle_gauge = CircleGauge(root, title='Speed', degrees=180)
+                circle_gauge = CircleGauge(root, title=element.name, degrees=180)
                 circle_gauge.pack(padx=10, pady=10)
                 circle_gauge.update_value(10)  # Update to a sample value
 
             # Case for getting the data and drawing  the 270 degree circle graph
             case "Circle - 270°":
-                circle_gauge = CircleGauge(root, title='Speed', degrees=270)
+                circle_gauge = CircleGauge(root, title=element.name, degrees=270)
                 circle_gauge.pack(padx=10, pady=10)
                 circle_gauge.update_value(10)  # Update to a sample value
 
             # Case for getting the data and drawing  the 360 degree circle graph
             case "Circle - 360°":
-                circle_gauge = CircleGauge(root, title='Speed', degrees=360)
+                circle_gauge = CircleGauge(root, title=element.name, degrees=360)
                 circle_gauge.pack(padx=10, pady=10)
                 circle_gauge.update_value(10)  # Update to a sample value
 
             # Case for getting data and drawing  the text display
             case "Text Display":
-                text_gauge = TextDisplayGauge(root, title='Message', description='Current Status')
+                print(element.name)
+                text_gauge = TextDisplayGauge(root, title=element.name, description='Current Text')
                 text_gauge.pack(padx=10, pady=10)
-                text_gauge.update_value("Hello, World!")  # Update value example
+                text_gauge.update_value("Sample Text")  # Update value example
             # Case for getting the data and drawing the number/character display
             case "Number or Character Display":
-                number_gauge = NumberDisplayGauge(root, title='Speed', description='km/h')
+                number_gauge = NumberDisplayGauge(root, title=element.name, description='km/h')
                 number_gauge.pack(padx=10, pady=10)
                 number_gauge.update_value(42)  # Update value example
             # Case for drawing the clock
             case "Clock":
-                clock_gauge = ClockGauge(root, title='Current Time', description='Local Time')
+                clock_gauge = ClockGauge(root, title=element.name, description='Local Time')
                 clock_gauge.pack(padx=10, pady=10)
             # Case for drawing the stopwatch
             case "Stopwatch":
-                stopwatch_gauge = ClockGauge(root, title='Stopwatch', description='Elapsed Time', mode='stopwatch')
+                stopwatch_gauge = ClockGauge(root, title=element.name, description='Elapsed Time', mode='stopwatch')
                 stopwatch_gauge.pack(padx=10, pady=10)
 
                 # Button to toggle the stopwatch start/pause
@@ -97,12 +96,12 @@ class GaugeManager:
                 toggle_button.pack(pady=5)
             # Case for drawing the running time gauge
             case "Running Time":
-                running_time_gauge = ClockGauge(root, title='Running Time', description='Video Time',
+                running_time_gauge = ClockGauge(root, title=element.name, description='Video Time',
                                                 mode='running_time')
                 running_time_gauge.pack(padx=10, pady=10)
             # Case for drawing the on/off light
             case "On/off light":
-                light_gauge = LightIndicatorGauge(root, title='Power Status', description='System Power')
+                light_gauge = LightIndicatorGauge(root, title=element.name, description='System Power')
                 light_gauge.pack(padx=10, pady=10)
 
                 # Button to toggle the light on/off

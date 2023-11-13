@@ -204,7 +204,7 @@ class DataManager:
             self.current_gauge_temp = current_saved_gauge
             print(selected_gauge)
 
-        if selected_gauge[0] == "X-by-Y-plot":
+        if selected_gauge[0] == "X-by-Y-plot" and len(self.user_selected_gauges_list) < 10:
             for element in self.user_selected_gauges_list:
                 if len(gauge_name_list) <= 10:
                     temp_gauge = "Gauge #" + str(element.id)
@@ -221,6 +221,7 @@ class DataManager:
             if len(gauge_name_list) <= 10:
                 element.id = i + 1
                 temp_gauge = "Gauge #" + str(element.id)
+                element.name = temp_gauge
                 gauge_name_list.append(temp_gauge)
 
         return gauge_name_list
@@ -237,8 +238,10 @@ class DataManager:
         timestamp_string = "Timestamp: " + str(self.timestamp_value) + " second(s)"
         gauge_name_list.append(timestamp_string)
 
-        for element in self.user_selected_gauges_list:
+        for i, element in enumerate(self.user_selected_gauges_list):
+            element.id = i + 1
             temp_gauge = "Gauge #" + str(element.id)
+            element.name = temp_gauge
             gauge_name_list.append(temp_gauge)
 
         return gauge_name_list
@@ -353,16 +356,19 @@ class DataManager:
                 self.user_selected_gauges_list.append(current_saved_gauge)
 
             for i, element in enumerate(self.user_selected_gauges_list):
-                if len(gauge_name_list) <= 10:
+                if len(gauge_name_list) <= 11:
                     element.id = i + 1
                     temp_gauge = "Gauge #" + str(element.id)
+                    element.name = temp_gauge
                     gauge_name_list.append(temp_gauge)
 
-            if len(gauge_name_list) < 10:
+            if len(gauge_name_list) <= 11:
+                for element in self.user_selected_gauges_list:
+                    print(element)
+                    print("This is an element!")
                 self.user_selection_replacement_list.insert(0, *gauge_name_list)
             else:
                 print("You already have ten field selected!")
-                self.user_selection_replacement_list.insert(0, *gauge_name_list)
             self.remove_second()
         else:
             print("Please select a field that is an integer or float.")
@@ -373,14 +379,12 @@ class DataManager:
         gauge_name_list.append(timestamp_string)
 
         self.user_selection_replacement_list.delete(0, 'end')  # clear list before each call to update
-        if len(self.user_selected_gauges_list) <= 10:
-            self.user_selected_gauges_list.append(self.current_gauge_temp)
-            print("Working!1")
 
         for i, element in enumerate(self.user_selected_gauges_list):
             if len(gauge_name_list) <= 10:
                 element.id = i + 1
                 temp_gauge = "Gauge #" + str(element.id)
+                element.name = temp_gauge
                 gauge_name_list.append(temp_gauge)
             print("Working!2")
 
@@ -392,9 +396,9 @@ class DataManager:
     def display_user_selections(self) -> list:
         user_selection_string_list = []
         for element in self.user_selected_gauges_list:
-            user_selection_string = "Gauge ID:" + str(element.id) + ",\n" + "Field 1:" + str(
-                element.field_name[0]) + ",\n" + "Field 2:" + str(element.second_field_name) + ",\n" + "Gauge:" + str(
-                element.gauge_name) + ",\n"
+            user_selection_string = "Gauge ID:" + str(element.id) + "\n" + "Field 1:" + str(
+                element.field_name[0]) + "\n" + "Field 2:" + str(element.second_field_name) + "\n" + "Gauge:" + str(
+                element.gauge_name) + "\n"
             user_selection_string_list.append(user_selection_string)
         return user_selection_string_list
 
@@ -412,7 +416,10 @@ class TemporaryGauge:
         self.gauge_name = g_name
         self.timestamp_value = t_stamp
         self.name = ""
-        self.statistics = "This gauge has no statistics associated with it."
+        self.statistics = "This gauge has no statistics\nassociated with it."
+        self.statistics_two = ""
+        self.statistics_values = None
+        self.statistics_values_two = None
         self.blue_range_low = 0
         self.blue_range_high = 0
         self.green_range_low = 0
@@ -424,3 +431,13 @@ class TemporaryGauge:
 
     def set_second_field(self, second_field):
         self.second_field_name = second_field
+
+    def set_statistics_text(self, stats):
+        user_stats_string = "Minimum: " + str(stats.get('Minimum')) + "\n" + "Maximum :" + str(
+            stats.get('Maximum')) + "\n" + "Average: " + str(
+            stats.get('Average')) + "\n" + "Standard Deviation: " + str(
+            stats.get('Standard Deviation')) + "\n"
+        self.statistics = user_stats_string
+
+    def set_statistics_two_text(self, stats):
+        print("Temp Func")
