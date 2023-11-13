@@ -7,7 +7,7 @@ class GaugeBase(tk.Frame):
         self.name = name
         self.title_text = title
         self.description_text = description
-        self.color_ranges = {'blue': 25, 'green': 50, 'yellow': 75, 'red': 100}  # Default values, use update_colors to change
+        self.color_ranges = {'blue': 25, 'green': 50, 'yellow': 75, 'red': 90}  # Default values, use update_colors to change
         self.red_limit = int(self.color_ranges['red'] + 1)  # Value at which the alarm is triggered (default is 1 above the red limit)
         self.alarm_times = 0  # Number of times the alarm has been triggered
 
@@ -42,11 +42,32 @@ class GaugeBase(tk.Frame):
         if value >= self.red_limit:
             self.trigger_alarm()
 
+    # def trigger_alarm(self):
+    #     """Trigger an audible alarm."""
+    #     self.alarm_times += 1
+    #     print(f"Alarm! {self.name} value exceeded red limit {self.alarm_times} times.")  # Placeholder for actual alarm logic
+    #     self.master.bell()  # Ring the system bell
+
     def trigger_alarm(self):
-        """Trigger an audible alarm."""
+        """Trigger an audible alarm and flash the description label."""
         self.alarm_times += 1
         print(f"Alarm! {self.name} value exceeded red limit {self.alarm_times} times.")  # Placeholder for actual alarm logic
         self.master.bell()  # Ring the system bell
+        self.flash_alarm_text()  # Flash the alarm text
+
+    def flash_alarm_text(self, count=1):
+        """Flash the alarm text in the description label. ONLY pass 1 for count. Originally I was going to flash the
+        text multiple times, but we cannot do that because of tkinter limitations."""
+        alarm_text = "ALARM!"
+        if count > 0:
+            # Flash the alarm text
+            self.description_label.config(fg='red' if self.description_label.cget("text") != alarm_text else 'black',
+                                          text=alarm_text)
+            # Schedule the next flash
+            self.after(800, self.flash_alarm_text, count - 1)
+        else:
+            # After flashing, revert to the original description
+            self.description_label.config(text=self.description_text, fg='black')
 
     def set_title(self, title):
         """Set the title of the gauge."""
