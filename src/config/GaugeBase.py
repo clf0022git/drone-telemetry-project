@@ -23,7 +23,7 @@ class GaugeBase(tk.Frame):
         """Update the gauge's value."""
         raise NotImplementedError("Must be implemented by the subclass.")
 
-    def update_colors(self, blue=None, green=None, yellow=None, red=None):
+    def update_colors(self, blue=None, green=None, yellow=None, red=None, red_limit=None):
         """Update the color ranges for the gauge."""
         if blue is not None:
             self.color_ranges['blue'] = blue
@@ -34,6 +34,8 @@ class GaugeBase(tk.Frame):
         if red is not None:
             self.color_ranges['red'] = red
             self.red_limit = int(red + 1)  # Set the red limit to 1 above the red value
+        if red_limit is not None:
+            self.red_limit = red_limit
 
     def check_alarm(self, value):
         """Check if the value exceeds the red limit and trigger an alarm if necessary."""
