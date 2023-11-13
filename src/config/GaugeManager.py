@@ -1,16 +1,4 @@
-import numpy as np
-from numpy import sin, cos, pi
-import plotly.graph_objects as go
-import datetime as dt
-import datetime as datetime
-import tkinter as Tkinter
-import tkinter as tk
-import tk_tools
-from matplotlib import pyplot as plt
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-from matplotlib import style
-import matplotlib.animation as animation
-
+#File imports
 from src.config.BarGauge import BarGauge
 from src.config.CircleGauge import CircleGauge
 from src.config.ClockDisplayGauge import ClockGauge
@@ -21,95 +9,157 @@ from src.config.XPlotGauge import XPlotGauge
 from src.config.XYPlotGauge import XYPlotGauge
 from src.data.input import DataManager
 
-
-# from src.gui.window import GaugeWindow
+#Library imports
+import tkinter as tk
 
 # Manager class for the gauges
 class GaugeManager:
+    #Initialization function
+    def __init__(self):
+        self.name = None
+        self.render_window = GaugeWindow()
+        #self.render_window.mainloop()
 
-    def draw_gauge(self, root, element):
-        match element.gauge_name:
-            # Case for getting data and drawing the x-by-y plot
-            case "X-by-Y-plot":
-                xy_plot_gauge = XYPlotGauge(root, title=element.name, description='Drone X-Y Plot',
-                                            connect_dots=True)
-                xy_plot_gauge.pack(fill=tk.BOTH, expand=True)
+    #Function for drawing each of the functions out
+    def drawGauges(self, data_manager: DataManager):
+        for element in data_manager.user_selected_gauges_list:
+            for field_name in element.field_name:
+                data_list1 = [value for value in data_manager.data_file.get(field_name, [])]
 
-                xy_plot_gauge.set_bounds(x_bounds=(-10, 10), y_bounds=(-10, 10))
-            case "X-Plot":
-                x_plot_gauge = XPlotGauge(root, title=element.name, description='X values plotted over time')
-                x_plot_gauge.pack(fill=tk.BOTH, expand=True)
-            # Case for getting the data and drawing the bar graph
-            case "Bar":
-                # Initialize vertical bar gauge
-                v_bar_gauge = BarGauge(root, title=element.name, description='Vertical bar description',
-                                       orientation='vertical')
-                v_bar_gauge.pack(padx=10, pady=10)
+            match element.gauge_name:
 
-                # Change figure size as needed
-                v_bar_gauge.set_figure_size(4, 3)
+                # Case for getting data and drawing the x-by-y plot
+                case "X-by-Y-plot":
+                    data_list2 = [value for value in data_manager.data_file.get(element.second_field_name, [])]
+                    x_y_graph = XYPlotGauge(self.render_window, title= element.field_name, description= element.field_name, connect_dots=True) #element.second_field_name, data_list1, data_list2, element.timestamp_value)
+                    x_y_graph.grid(row = 0, column = 2)
+                    #x_y_graph.create_x_by_y_Graph()
 
-                # Set the bounds for the bar gauges
-                v_bar_gauge.set_bounds(y_bounds=(element.statistics_values.get('Minimum'), element.statistics_values.get('Maximum')))
-            # Case for getting the data and drawing  the 90 degree circle graph
-            case "Circle - 90°":
-                circle_gauge = CircleGauge(root, title=element.name, degrees=90)
-                circle_gauge.pack(padx=10, pady=10)
-                circle_gauge.update_value(10)  # Update to a sample value
+                #Case for getting the data and drawing the x-graph
+                case "X-Plot":
+                    x_plot = XPlotGauge()
+                    x_plot.grid(row = 1, column = 2)
+                    #x_plot.create_x_graph()
 
-            # Case for getting the data and drawing  the 180 degree circle graph
-            case "Circle - 180°":
-                circle_gauge = CircleGauge(root, title=element.name, degrees=180)
-                circle_gauge.pack(padx=10, pady=10)
-                circle_gauge.update_value(10)  # Update to a sample value
+                # Case for getting the data and drawing the bar graph
+                case "Bar-Graph":
+                    bar_graph = BarGauge(element.field_name[0], data_list1, element.timestamp_value)
+                    bar_graph.createBarGraph()
 
-            # Case for getting the data and drawing  the 270 degree circle graph
-            case "Circle - 270°":
-                circle_gauge = CircleGauge(root, title=element.name, degrees=270)
-                circle_gauge.pack(padx=10, pady=10)
-                circle_gauge.update_value(10)  # Update to a sample value
+                # Case for getting the data and drawing  the 90 degree circle graph
+                case "Circle - 90°":
+                    circle_gauge_90 = CircleGauge(element.field_name[0], data_list1, element.timestamp_value)
+                    circle_gauge_90.grid(row = 0, column = 0)
+                    fig = circle_gauge_90.draw_circular_gauge(0, 90, self.name)
+                    fig.show()
 
-            # Case for getting the data and drawing  the 360 degree circle graph
-            case "Circle - 360°":
-                circle_gauge = CircleGauge(root, title=element.name, degrees=360)
-                circle_gauge.pack(padx=10, pady=10)
-                circle_gauge.update_value(10)  # Update to a sample value
+                # Case for getting the data and drawing  the 180 degree circle graph
+                case "Circle - 180°":
+                    circle_gauge_180 = CircleGauge(element.field_name[0], data_list1, element.timestamp_value)
+                    circle_gauge_180.grid(row=0, column=1)
+                    fig = circle_gauge_180.draw_circular_gauge(0, 180, self.name)
+                    fig.show()
 
-            # Case for getting data and drawing  the text display
-            case "Text Display":
-                print(element.name)
-                text_gauge = TextDisplayGauge(root, title=element.name, description='Current Text')
-                text_gauge.pack(padx=10, pady=10)
-                text_gauge.update_value("Sample Text")  # Update value example
-            # Case for getting the data and drawing the number/character display
-            case "Number or Character Display":
-                number_gauge = NumberDisplayGauge(root, title=element.name, description='km/h')
-                number_gauge.pack(padx=10, pady=10)
-                number_gauge.update_value(42)  # Update value example
-            # Case for drawing the clock
-            case "Clock":
-                clock_gauge = ClockGauge(root, title=element.name, description='Local Time')
-                clock_gauge.pack(padx=10, pady=10)
-            # Case for drawing the stopwatch
-            case "Stopwatch":
-                stopwatch_gauge = ClockGauge(root, title=element.name, description='Elapsed Time', mode='stopwatch')
-                stopwatch_gauge.pack(padx=10, pady=10)
+                # Case for getting the data and drawing  the 270 degree circle graph
+                case "Circle - 270°":
+                    circle_gauge_270 = CircleGauge(element.field_name[0], data_list1, element.timestamp_value)
+                    circle_gauge_270.grid(row = 1, column = 0)
+                    fig = circle_gauge_270.draw_circular_gauge(0, 270, self.name)
+                    fig.show()
 
-                # Button to toggle the stopwatch start/pause
-                toggle_button = tk.Button(root, text="Start/Stop", command=stopwatch_gauge.toggle_stopwatch)
-                toggle_button.pack(pady=5)
-            # Case for drawing the running time gauge
-            case "Running Time":
-                running_time_gauge = ClockGauge(root, title=element.name, description='Video Time',
-                                                mode='running_time')
-                running_time_gauge.pack(padx=10, pady=10)
-            # Case for drawing the on/off light
-            case "On/off light":
-                light_gauge = LightIndicatorGauge(root, title=element.name, description='System Power')
-                light_gauge.pack(padx=10, pady=10)
+                # Case for getting the data and drawing  the 360 degree circle graph
+                case "Circle - 360°":
+                    # circle_window = GaugeWindow()
+                    circle_gauge_360 = CircleGauge(element.field_name[0], data_list1, element.timestamp_value)
+                    circle_gauge_360.grid(row = 1, column = 1)
+                    fig = circle_gauge_360.draw_circular_gauge(0, 360, self.name)
+                    fig.show()
 
-                # Button to toggle the light on/off
-                toggle_button = tk.Button(root, text="Toggle Light", command=light_gauge.toggle_light)
-                toggle_button.pack(pady=5)
-            case _:
-                print("Gauge not found")
+                # Case for getting data and drawing  the text display
+                case "Text Display":
+                    text_gauge = TextDisplayGauge(self.render_window, name = element.field_name, title = element.field_name, description = '')
+                    text_gauge.grid(row = 2, column = 0, pady = 5)
+
+                # Case for getting the data and drawing the number/character display
+                case "Number or Character Display":
+                    num_gauge = NumberDisplayGauge(self.render_window, name = '', title = element.field_name, description = '')
+                    num_gauge.grid(row = 2, column = 1)
+
+                # Case for drawing the clock
+                case "Clock":
+                    clock_gauge = ClockGauge(self.render_window, title='Current Time', description='Local Time')
+                    clock_gauge.grid(row = 3, column = 0)
+
+                # Case for drawing the stopwatch
+                case "Stopwatch":
+                    stopwatch_gauge = ClockGauge(self.render_window, title='Stopwatch', description='Elapsed Time', mode='stopwatch')
+                    toggle_button = tk.Button(self.render_window, text="Start/Stop", command=stopwatch_gauge.toggle_stopwatch)
+                    stopwatch_gauge.grid(row = 3, column = 1)
+
+                # Case for drawing the running time gauge
+                case "Running Time":
+                    running_gauge = ClockGauge(self.render_window, title='Running Time', description='Video Time', mode='running_time')
+                    running_gauge.grid(row = 3, column = 3)
+
+                # Case for drawing the on/off light
+                case "On/off light":
+                    indicator_light = LightIndicatorGauge(title='', description='', )
+                    indicator_light.grid(row = 2, column = 2)
+                #Default case
+                case _:
+                    print("Gauge not found")
+
+class GaugeWindow(tk.Toplevel):
+    def __init__(self):
+        super().__init__()
+        # Window properties
+        self.title("Telemetry Data Gauges")
+        self.geometry("500x500")
+        self.configure(bg="white")
+
+#Example render
+example_window = GaugeWindow()
+
+#X-Y-plot example
+x_y_graph = XYPlotGauge(example_window, title= 'X-Y-Plot', description= "Example Text", connect_dots=True) #element.second_field_name, data_list1, data_list2, element.timestamp_value)
+x_y_graph.grid(row = 0, column = 2)
+
+#X-plot example
+x_plot = XPlotGauge(example_window, title= 'X-plot', description= 'Example Text')
+x_plot.grid(row = 1, column = 2)
+
+#Bar Graph example
+
+#Circle 90 example
+
+#Circle 180 example
+
+#Circle 270 example
+
+#Circle 360 example
+
+#Text Display example
+text_gauge = TextDisplayGauge(example_window, title = 'Text Gauge', description = '')
+text_gauge.grid(row = 2, column = 0, pady = 5)
+
+#Number Display example
+num_gauge = NumberDisplayGauge(example_window, title = 'Number Gauge', description = '')
+num_gauge.grid(row = 2, column = 1)
+
+#Clock Example
+clock_gauge = ClockGauge(example_window, title='Current Time', description='Local Time')
+clock_gauge.grid(row = 3, column = 0)
+
+#Stopwatch example
+stopwatch_gauge = ClockGauge(example_window, title='Stopwatch', description='Elapsed Time', mode='stopwatch')
+toggle_button = tk.Button(example_window, text="Start/Stop", command=stopwatch_gauge.toggle_stopwatch)
+stopwatch_gauge.grid(row = 3, column = 1)
+
+#Running Time example
+running_gauge = ClockGauge(example_window, title='Running Time', description='Video Time', mode='running_time')
+running_gauge.grid(row = 3, column = 3)
+
+#Indicator Light example
+indicator_light = LightIndicatorGauge(example_window, title='Example Gauge', description='Insert Text')
+indicator_light.grid(row = 2, column = 2)
+example_window.mainloop()

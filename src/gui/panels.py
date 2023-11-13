@@ -15,7 +15,7 @@ from src.config.TextDisplayGauge import TextDisplayGauge
 from src.playback.video import VideoPlayer
 from src.data.input import DataManager
 from src.data.statistics import DataProcessor
-from src.config.gauges import *
+from src.config.GaugeManager import *
 from src.data.fileManager import FileManager
 
 m_or_f = 0  # 0 = f and 1 = m
@@ -349,7 +349,7 @@ class ConfigurationPanel(ttk.Frame):
 
     def generate_gauges(self):
         print("button works")
-        gauge_creator = GaugeCreator()
+        gauge_creator = GaugeManager()
         # for items in self.data_manager.user_selected_gauges_list:
         gauge_creator.drawGauges(self.data_manager)
 
