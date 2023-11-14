@@ -17,7 +17,7 @@ class GaugeManager:
     #Initialization function
     def __init__(self):
         self.name = None
-        self.render_window = GaugeWindow()
+        #self.render_window = GaugeWindow()
         self.gauge_container = []
 
         #Variables for instantiating each of the gauges
@@ -302,49 +302,51 @@ class GaugeWindow(tk.Toplevel):
         self.configure(bg="white")
 
 #Example render
-example_window = GaugeWindow()
-example_data = [0, 1 ,2, 3, 4, 5]
+if __name__ == "__main__":
+    example_window = tk.Tk()
+    example_data = [0, 1 ,2, 3, 4, 5]
 
-#X-Y-plot example
-x_y_graph = XYPlotGauge(example_window, title= 'X-Y-Plot', description= "Example Text", connect_dots=True) #element.second_field_name, data_list1, data_list2, element.timestamp_value)
-x_y_graph.grid(row = 0, column = 2)
+    #X-Y-plot example
+    x_y_graph = XYPlotGauge(example_window, title= 'X-Y-Plot', description= "Example Text", connect_dots=True) #element.second_field_name, data_list1, data_list2, element.timestamp_value)
+    x_y_graph.grid(row = 0, column = 2)
 
-#X-plot example
-x_plot = XPlotGauge(example_window, title= 'X-plot', description= 'Example Text')
-x_plot.grid(row = 1, column = 2)
+    #X-plot example
+    x_plot = XPlotGauge(example_window, title= 'X-plot', description= 'Example Text')
+    x_plot.grid(row = 1, column = 2)
 
-#Bar Graph example
+    #Bar Graph example
 
-#Circle 90 example
+    #Circle 90 example
 
-#Circle 180 example
+    #Circle 180 example
 
-#Circle 270 example
+    #Circle 270 example
 
-#Circle 360 example
+    #Circle 360 example
 
-#Text Display example
-text_gauge = TextDisplayGauge(example_window, title = 'Text Gauge', description = '')
-text_gauge.grid(row = 2, column = 0, pady = 5)
+    #Text Display example
+    text_gauge = TextDisplayGauge(example_window, title = 'Text Gauge', description = '')
+    text_gauge.grid(row = 2, column = 0, pady = 5)
 
-#Number Display example
-num_gauge = NumberDisplayGauge(example_window, title = 'Number Gauge', description = '')
-num_gauge.grid(row = 2, column = 1)
+    #Number Display example
+    num_gauge = NumberDisplayGauge(example_window, title = 'Number Gauge', description = '')
+    num_gauge.grid(row = 2, column = 1)
 
-#Clock Example
-clock_gauge = ClockGauge(example_window, title='Current Time', description='Local Time')
-clock_gauge.grid(row = 3, column = 0)
+    #Clock Example
+    clock_gauge = ClockGauge(example_window, title='Current Time', description='Local Time')
+    clock_gauge.grid(row = 3, column = 0)
 
-#Stopwatch example
-stopwatch_gauge = ClockGauge(example_window, title='Stopwatch', description='Elapsed Time', mode='stopwatch')
-toggle_button = tk.Button(example_window, text="Start/Stop", command=stopwatch_gauge.toggle_stopwatch)
-stopwatch_gauge.grid(row = 3, column = 1)
+    #Stopwatch example
+    stopwatch_gauge = ClockGauge(example_window, title='Stopwatch', description='Elapsed Time', mode='stopwatch')
+    toggle_button = tk.Button(example_window, text="Start/Stop", command=stopwatch_gauge.toggle_stopwatch)
+    stopwatch_gauge.grid(row = 3, column = 1)
 
-#Running Time example
-running_gauge = ClockGauge(example_window, title='Running Time', description='Video Time', mode='running_time')
-running_gauge.grid(row = 3, column = 3)
+    #Running Time example
+    running_gauge = ClockGauge(example_window, title='Running Time', description='Video Time', mode='running_time')
+    running_gauge.grid(row = 3, column = 3)
 
-#Indicator Light example
-indicator_light = LightIndicatorGauge(example_window, title='Example Gauge', description='Insert Text')
-indicator_light.grid(row = 2, column = 2)
-example_window.mainloop()
+    #Indicator Light example
+    indicator_light = LightIndicatorGauge(example_window, title='Example Gauge', description='Insert Text')
+    indicator_light.grid(row = 2, column = 2)
+
+    example_window.mainloop()

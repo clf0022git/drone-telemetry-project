@@ -348,7 +348,7 @@ class ConfigurationPanel(ttk.Frame):
 
     def generate_gauges(self):
         print("button works")
-        gauge_creator = GaugeCreator()
+        gauge_creator = GaugeManager()
         # for items in self.data_manager.user_selected_gauges_list:
         gauge_creator.drawGauges(self.data_manager)
 
