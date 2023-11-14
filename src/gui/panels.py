@@ -159,8 +159,8 @@ class ConfigurationPanel(ttk.Frame):
         self.select_field_btn.pack(pady=10)
 
         # Button to select field with gauge
-        #self.generate_gauges_btn = ttk.Button(self, text="Generate Gauges", command=self.generate_gauges)
-        #self.generate_gauges_btn.pack(pady=10, side=tk.TOP)
+        # self.generate_gauges_btn = ttk.Button(self, text="Generate Gauges", command=self.generate_gauges)
+        # self.generate_gauges_btn.pack(pady=10, side=tk.TOP)
 
         self.speed_label = ttk.Label(self, font=("Roboto Light", 10), text="Playback Speed:")
         self.speed_label.pack(pady=5)
@@ -316,7 +316,8 @@ class ConfigurationPanel(ttk.Frame):
             self.user_selection_list.delete(0, 'end')  # clear list before each call to update
             print("Called!")
             gt_list = self.data_manager.confirm_selection(selected_gauge, self.fieldnames_gauge_group,
-                                                          self.user_selection_list, self.gauge_customization_panel, self)
+                                                          self.user_selection_list, self.gauge_customization_panel,
+                                                          self)
             if len(gt_list) <= 10:
                 self.user_selection_list.insert(0, *gt_list)
                 # Functionality to ask user about the type of the data probably in between identifying gauges and
@@ -449,7 +450,7 @@ class GaugeCustomizationPanel(ttk.Frame):
         # Set up all the frames for the gauge settings
         self.current_gauge_settings_frame = tk.Frame(self.current_gauge_view_and_settings)
         self.current_gauge_settings_frame.pack(side=tk.LEFT)
-        
+
         self.name_frame = tk.Frame(self.current_gauge_settings_frame)
         self.name_frame.pack(side=tk.TOP)
         self.blue_frame = tk.Frame(self.current_gauge_settings_frame)
@@ -510,7 +511,20 @@ class GaugeCustomizationPanel(ttk.Frame):
         self.current_gauge_view = tk.Frame(self.current_gauge_view_and_settings)
         self.current_gauge_view.pack(side=tk.LEFT)
 
+        self.display_gauge_window_btn = tk.Button(self, text="Show Gauges on Window", command=self.create_window)
+        self.display_gauge_window_btn.pack(side=tk.TOP)
+
+        self.gauge_window = None
+
+        self.display_gauge_manager = GaugeManager()  # Ryan's gauge manager
+
         # TODO: Add widgets to display statistics like min, max, average, etc.
+
+    def create_window(self):
+        self.gauge_window = tk.Toplevel()
+        self.gauge_window.title("Gauge View")
+        self.gauge_window.geometry("1000x700")
+        self.display_gauge_manager.draw_gauges(self.data_manager, self.gauge_window)
 
     def draw_range_options(self):
         self.current_gauge_blue_label = tk.Label(self.blue_frame, font=("Roboto Medium", 10), text="Blue Range:")
@@ -564,7 +578,7 @@ class GaugeCustomizationPanel(ttk.Frame):
         if len(self.data_manager.user_selected_gauges_list) != 0:
             new_name = self.current_gauge_name_entry.get()
             self.data_manager.user_selected_gauges_list[self.current_gauge_position].name = new_name
-            #self.current_gauge_text_label.config(text=new_name)
+            # self.current_gauge_text_label.config(text=new_name)
             print(new_name)
             for widget in self.current_gauge_view.winfo_children():
                 widget.destroy()
@@ -583,7 +597,8 @@ class GaugeCustomizationPanel(ttk.Frame):
             if current_gauge_stats.get('Minimum') <= blue_low <= current_gauge_stats.get('Maximum'):
                 current_gauge_stats.blue_range_low = blue_low
             blue_high = self.current_gauge_blue_two_entry.get()
-            if current_gauge_stats.get('Minimum') <= blue_low <= current_gauge_stats.get('Maximum') and blue_high > blue_low:
+            if current_gauge_stats.get('Minimum') <= blue_low <= current_gauge_stats.get(
+                    'Maximum') and blue_high > blue_low:
                 current_gauge_stats.blue_range_high = blue_high
             print(blue_low)
             print(blue_high)
@@ -597,7 +612,8 @@ class GaugeCustomizationPanel(ttk.Frame):
             if current_gauge_stats.get('Minimum') <= green_low <= current_gauge_stats.get('Maximum'):
                 current_gauge_stats.green_range_low = green_low
             green_high = self.current_gauge_green_two_entry.get()
-            if current_gauge_stats.get('Minimum') <= green_high <= current_gauge_stats.get('Maximum') and green_high > green_low:
+            if current_gauge_stats.get('Minimum') <= green_high <= current_gauge_stats.get(
+                    'Maximum') and green_high > green_low:
                 current_gauge_stats.green_range_high = green_high
             print(green_low)
             print(green_high)
@@ -611,7 +627,8 @@ class GaugeCustomizationPanel(ttk.Frame):
             if current_gauge_stats.get('Minimum') <= yellow_low <= current_gauge_stats.get('Maximum'):
                 current_gauge_stats.yellow_range_low = yellow_low
             yellow_high = self.current_gauge_yellow_two_entry.get()
-            if current_gauge_stats.get('Minimum') <= yellow_high <= current_gauge_stats.get('Maximum') and yellow_high > yellow_low:
+            if current_gauge_stats.get('Minimum') <= yellow_high <= current_gauge_stats.get(
+                    'Maximum') and yellow_high > yellow_low:
                 current_gauge_stats.yellow_range_high = yellow_high
             print(yellow_low)
             print(yellow_high)
@@ -625,7 +642,8 @@ class GaugeCustomizationPanel(ttk.Frame):
             if current_gauge_stats.get('Minimum') <= red_low <= current_gauge_stats.get('Maximum'):
                 current_gauge_stats.red_range_low = red_low
             red_high = self.current_gauge_red_two_entry.get()
-            if current_gauge_stats.get('Minimum') <= red_high <= current_gauge_stats.get('Maximum') and red_high > red_low:
+            if current_gauge_stats.get('Minimum') <= red_high <= current_gauge_stats.get(
+                    'Maximum') and red_high > red_low:
                 current_gauge_stats.red_range_high = red_high
             print(red_low)
             print(red_high)
@@ -667,15 +685,16 @@ class GaugeCustomizationPanel(ttk.Frame):
             self.current_gauge_text.delete("1.0", "end")
             self.current_gauge_statistics_text.delete("1.0", "end")
             self.current_gauge_text.insert(tk.END, self.current_gauge_text_list[self.current_gauge_position])
-            temp_statistics = self.data_manager.user_selected_gauges_list[self.current_gauge_position].statistics + self.data_manager.user_selected_gauges_list[self.current_gauge_position].statistics_two
+            temp_statistics = self.data_manager.user_selected_gauges_list[self.current_gauge_position].statistics + \
+                              self.data_manager.user_selected_gauges_list[self.current_gauge_position].statistics_two
             self.current_gauge_statistics_text.insert(tk.END, temp_statistics)
             print(temp_statistics)
-            #if self.data_manager.user_selected_gauges_list[self.current_gauge_position].name == "":
+            # if self.data_manager.user_selected_gauges_list[self.current_gauge_position].name == "":
             temp_text = "Gauge #" + str(self.data_manager.user_selected_gauges_list[self.current_gauge_position].id)
             self.current_gauge_text_label.config(text=temp_text)
-            #else:
-                #temp_text = str(self.data_manager.user_selected_gauges_list[self.current_gauge_position].name)
-                #self.current_gauge_text_label.config(text=temp_text)
+            # else:
+            # temp_text = str(self.data_manager.user_selected_gauges_list[self.current_gauge_position].name)
+            # self.current_gauge_text_label.config(text=temp_text)
             self.current_gauge_text.config(state="disabled")
             self.current_gauge_statistics_text.config(state="disabled")
             self.gauge_manager.draw_gauge(self.current_gauge_view,

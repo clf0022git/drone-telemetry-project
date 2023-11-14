@@ -135,7 +135,7 @@ class CircleGauge(GaugeBase):
 
 
 if __name__ == "__main__":
-    root = tk.Tk()
+    root = tk.Toplevel()
     root.title("Circle Gauge Examples")
 
     # Configuration for each gauge
@@ -158,6 +158,12 @@ if __name__ == "__main__":
 
     for i, alarm in enumerate(gauge_alarms):
         gauges[i].update_colors(red_limit=alarm)
+
+    gauges[0].update_colors(blue=(0,20), green=(20,40), yellow=(40,60), red=(60,90))
+    gauges[1].update_colors(blue=(0,20), green=(20,40), yellow=(40,60), red=(60,180))
+    gauges[2].update_colors(blue=(0,20), green=(20,40), yellow=(40,60), red=(60,270))
+    gauges[3].update_colors(blue=(0,20), green=(20,40), yellow=(40,60), red=(60,360))
+
 
     # Function to update gauge values for demonstration
     def update_gauges():
