@@ -28,7 +28,7 @@ class VideoPlayer(tk.Frame):
         # Variables to manage time update event
         self.last_time = None
         self.timer_running = False
-        self.event_handlers = {"second-changed": [], "duration-changed": []}  # Custom event handlers
+        self.event_handlers = {"second-changed": [], "duration-changed": [], "play-video": [], "pause-video": []}  # Custom event handlers
 
         self.video_length = self.player.get_length()
 
@@ -52,10 +52,12 @@ class VideoPlayer(tk.Frame):
 
         if not self.player.is_playing():
             self.player.play()
+            self.trigger_event("play-video")
             #self.play_button.configure(text="Pause")
             self.start_time_update_timer()  # Start the timer when the video starts
         else:
             self.player.pause()
+            self.trigger_event("pause-video")
             #self.play_button.configure(text="Play")
             self.stop_time_update_timer()  # Stop the timer when the video is paused
 
@@ -169,6 +171,7 @@ class VideoPlayer(tk.Frame):
             return
 
         self.player.pause()
+        self.trigger_event("pause-video")
 
     def seek(self, seconds):
         """Method to seek through the video."""

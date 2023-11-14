@@ -637,7 +637,7 @@ class GaugeCustomizationPanel(ttk.Frame):
             print(self.current_gauge_position)
             print(self.data_manager.user_selected_gauges_list[self.current_gauge_position].gauge_name)
             g_name = self.data_manager.user_selected_gauges_list[self.current_gauge_position].gauge_name
-            if g_name == "Circle - 90°" or g_name == "Circle - 180°" or g_name == "Circle - 270°" or g_name == "Circle - 360°" or g_name == "Bar":
+            if g_name in ["Circle - 90°", "Circle - 180°", "Circle - 270°", "Circle - 360°", "Bar"]:
                 print("Drawing the range options!")
                 self.draw_range_options()
             # Clears temp widget

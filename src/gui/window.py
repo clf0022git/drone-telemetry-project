@@ -29,7 +29,7 @@ class MainWindow(tk.Tk):
         self.config_panel.gauge_customization_panel = self.gauge_panel
 
         self.notebook.add(self.config_panel, text="Configuration")
-        self.notebook.add(self.gauge_panel, text="GaugeCustomization")
+        self.notebook.add(self.gauge_panel, text="Gauge Customization")
         self.notebook.add(self.playback_panel, text="Playback")
         #self.notebook.add(self.stats_panel, text="Statistics")
 
