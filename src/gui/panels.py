@@ -574,44 +574,59 @@ class GaugeCustomizationPanel(ttk.Frame):
         self.current_gauge_name_entry.delete(0, 'end')
 
     def change_blue(self):
+        """Only changes the blue range if it fits within the detected minimum and maximum and the blue high is above
+        the blue low"""
+        current_gauge_stats = self.data_manager.user_selected_gauges_list[self.current_gauge_position].statistics_values
+
         if len(self.data_manager.user_selected_gauges_list) != 0:
             blue_low = self.current_gauge_blue_one_entry.get()
-            self.data_manager.user_selected_gauges_list[self.current_gauge_position].blue_range_low = blue_low
+            if current_gauge_stats.get('Minimum') <= blue_low <= current_gauge_stats.get('Maximum'):
+                current_gauge_stats.blue_range_low = blue_low
             blue_high = self.current_gauge_blue_two_entry.get()
-            self.data_manager.user_selected_gauges_list[self.current_gauge_position].blue_range_high = blue_high
+            if current_gauge_stats.get('Minimum') <= blue_low <= current_gauge_stats.get('Maximum') and blue_high > blue_low:
+                current_gauge_stats.blue_range_high = blue_high
             print(blue_low)
             print(blue_high)
         self.current_gauge_blue_one_entry.delete(0, 'end')
         self.current_gauge_blue_two_entry.delete(0, 'end')
 
     def change_green(self):
+        current_gauge_stats = self.data_manager.user_selected_gauges_list[self.current_gauge_position].statistics_values
         if len(self.data_manager.user_selected_gauges_list) != 0:
             green_low = self.current_gauge_green_one_entry.get()
-            self.data_manager.user_selected_gauges_list[self.current_gauge_position].green_range_low = green_low
+            if current_gauge_stats.get('Minimum') <= green_low <= current_gauge_stats.get('Maximum'):
+                current_gauge_stats.green_range_low = green_low
             green_high = self.current_gauge_green_two_entry.get()
-            self.data_manager.user_selected_gauges_list[self.current_gauge_position].green_range_high = green_high
+            if current_gauge_stats.get('Minimum') <= green_high <= current_gauge_stats.get('Maximum') and green_high > green_low:
+                current_gauge_stats.green_range_high = green_high
             print(green_low)
             print(green_high)
         self.current_gauge_green_one_entry.delete(0, 'end')
         self.current_gauge_green_two_entry.delete(0, 'end')
 
     def change_yellow(self):
+        current_gauge_stats = self.data_manager.user_selected_gauges_list[self.current_gauge_position].statistics_values
         if len(self.data_manager.user_selected_gauges_list) != 0:
             yellow_low = self.current_gauge_yellow_one_entry.get()
-            self.data_manager.user_selected_gauges_list[self.current_gauge_position].yellow_range_low = yellow_low
+            if current_gauge_stats.get('Minimum') <= yellow_low <= current_gauge_stats.get('Maximum'):
+                current_gauge_stats.yellow_range_low = yellow_low
             yellow_high = self.current_gauge_yellow_two_entry.get()
-            self.data_manager.user_selected_gauges_list[self.current_gauge_position].yellow_range_high = yellow_high
+            if current_gauge_stats.get('Minimum') <= yellow_high <= current_gauge_stats.get('Maximum') and yellow_high > yellow_low:
+                current_gauge_stats.yellow_range_high = yellow_high
             print(yellow_low)
             print(yellow_high)
         self.current_gauge_yellow_one_entry.delete(0, 'end')
         self.current_gauge_yellow_two_entry.delete(0, 'end')
 
     def change_red(self):
+        current_gauge_stats = self.data_manager.user_selected_gauges_list[self.current_gauge_position].statistics_values
         if len(self.data_manager.user_selected_gauges_list) != 0:
             red_low = self.current_gauge_red_one_entry.get()
-            self.data_manager.user_selected_gauges_list[self.current_gauge_position].red_range_low = red_low
+            if current_gauge_stats.get('Minimum') <= red_low <= current_gauge_stats.get('Maximum'):
+                current_gauge_stats.red_range_low = red_low
             red_high = self.current_gauge_red_two_entry.get()
-            self.data_manager.user_selected_gauges_list[self.current_gauge_position].red_range_high = red_high
+            if current_gauge_stats.get('Minimum') <= red_high <= current_gauge_stats.get('Maximum') and red_high > red_low:
+                current_gauge_stats.red_range_high = red_high
             print(red_low)
             print(red_high)
         self.current_gauge_red_one_entry.delete(0, 'end')
