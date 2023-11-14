@@ -213,7 +213,7 @@ class ConfigurationPanel(ttk.Frame):
             else:
                 # This entry has no statistics
                 self.statistics_list.append("This entry has no statistics")
-                print("This has no stats!")
+                print("This gauge has no statistics associated with it.")
             if element.second_field_name != "":
                 field = element.second_field_name
                 if self.data_manager.data_file[field].dtype == "int64" or self.data_manager.data_file[
@@ -225,7 +225,6 @@ class ConfigurationPanel(ttk.Frame):
                     # This entry has no statistics
                     print("This has no stats!")
         self.data_manager.set_statistics_list(self.statistics_list)
-        self.file_manager.save_gauges(self.data_manager.user_selected_gauges_list, self.statistics_list)
 
     def load_video(self):
         """Prompt the user to select a video file."""
@@ -396,6 +395,7 @@ class GaugeCustomizationPanel(ttk.Frame):
         self.label = ttk.Label(self, font=("Roboto Black", 14), text="Gauge Customization Panel")
         self.label.pack(pady=10)
         self.data_manager = None
+        self.fileManager = FileManager
         self.gauge_manager = GaugeManager()
 
         # Frame to hold the gauge viewer
@@ -441,13 +441,15 @@ class GaugeCustomizationPanel(ttk.Frame):
         self.current_gauge_right_btn = tk.Button(self.gauge_viewer_contents_frame, text=">", command=self.scroll_right)
         self.current_gauge_right_btn.pack(side=tk.LEFT)
 
+        self.saveButton = ttk.Button(self, text="Save Data", command=self.save_data)
+        self.saveButton.pack(pady=2)
         self.current_gauge_view_and_settings = tk.Frame(self)
         self.current_gauge_view_and_settings.pack(side=tk.TOP)
 
         # Set up all the frames for the gauge settings
         self.current_gauge_settings_frame = tk.Frame(self.current_gauge_view_and_settings)
         self.current_gauge_settings_frame.pack(side=tk.LEFT)
-
+        
         self.name_frame = tk.Frame(self.current_gauge_settings_frame)
         self.name_frame.pack(side=tk.TOP)
         self.blue_frame = tk.Frame(self.current_gauge_settings_frame)
@@ -664,6 +666,9 @@ class GaugeCustomizationPanel(ttk.Frame):
             self.gauge_manager.draw_gauge(self.current_gauge_view,
                                           self.data_manager.user_selected_gauges_list[self.current_gauge_position])
             # Going to need to save the temporary widget that is created
+
+    def save_data(self):
+        self.fileManager.save_gauges(self.data_manager.user_selected_gauges_list)
 
 
 class PlaybackPanel(ttk.Frame):
