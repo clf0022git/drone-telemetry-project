@@ -53,7 +53,7 @@ class GaugeBase(tk.Frame):
     def trigger_alarm(self):
         """Trigger an audible alarm and flash the description label."""
         self.alarm_times += 1
-        print(f"Alarm! {self.name} value exceeded red limit {self.alarm_times} times.")  # Placeholder for actual alarm logic
+        print(f"Alarm! {self.name} value exceeded red limit {self.alarm_times} times.")
         self.master.bell()  # Ring the system bell
         self.flash_alarm_text()  # Flash the alarm text
 
