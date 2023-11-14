@@ -203,8 +203,8 @@ class ConfigurationPanel(ttk.Frame):
         for element in self.data_manager.user_selected_gauges_list:
             field = element.field_name[0]
             print(element.field_name[0])
-            if self.data_manager.data_file[field].dtype == "int64" or self.data_manager.data_file[
-                field].dtype == "float64":
+            print("Help me")
+            if self.data_manager.data_file[field].dtype == "int64" or self.data_manager.data_file[field].dtype == "float64":
                 stats = self.data_processor.calc_statistics(self.data_manager.data_file[field], field)
                 print(type(self.statistics_list))
                 self.statistics_list.append(stats)
@@ -759,6 +759,9 @@ class PlaybackPanel(ttk.Frame):
 
         self.update_ui()
 
+        # Ref to customization panel
+        self.gauge_customization_panel = None
+
     def set_video_path(self, video_path):
         self.video_path = video_path
         if self.video_path:  # if a file is selected
@@ -766,6 +769,7 @@ class PlaybackPanel(ttk.Frame):
             if self.video_player is None:
                 self.video_player = VideoPlayer(self, self.video_path)
                 self.video_player.pack(fill="both", expand=True)
+                self.video_player.bind_event("second-changed", self.update_graphs)
                 # self.video_player.bind_event("second-changed", self.on_second_changed)
                 # self.video_player.bind_event("duration-changed", self.on_duration_changed)
             else:
@@ -774,6 +778,10 @@ class PlaybackPanel(ttk.Frame):
             # Enable control buttons now that a video is loaded
             self.play_button.config(state=tk.NORMAL)
             self.pause_button.config(state=tk.NORMAL)
+
+    def update_graphs(self, current_time):
+        """Updates the gauges with current information"""
+        self.gauge_customization_panel.display_gauge_manager.update_gauges(self.gauge_customization_panel.data_manager, current_time-1)
 
     def play_video(self):
         if self.video_player:

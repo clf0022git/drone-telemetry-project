@@ -72,128 +72,195 @@ class GaugeManager:
 
     # Function for drawing each of the functions out
     def draw_gauges(self, data_manager: DataManager, gauge_window):
-        for element in data_manager.user_selected_gauges_list:
-
+        for i, element in enumerate(data_manager.user_selected_gauges_list):
+            print(type(element.statistics_values))
             match element.gauge_name:
 
                 # Case for getting data and drawing the x-by-y plot
                 case "X-by-Y-plot":
-                    pass
+                    self.x_y_graph = XYPlotGauge(gauge_window, title=element.name)
+                    if i < 5:
+                        self.x_y_graph.grid(row=0, column=i)
+                    else:
+                        self.x_y_graph.grid(row=1, column=i - 5)
                 # Case for getting the data and drawing the x-graph
                 case "X-Plot":
-                    pass
+                    self.x_plot = XPlotGauge(gauge_window, title=element.name)
+                    if i < 5:
+                        self.x_plot.grid(row=0, column=i)
+                    else:
+                        self.x_plot.grid(row=1, column=i - 5)
                 # Case for getting the data and drawing the bar graph
-                case "Bar-Graph":
-                    pass
+                case "Bar":
+                    self.bar_graph = BarGauge(gauge_window, title=element.name, orientation='vertical')
+                    self.bar_graph.set_bounds(
+                        y_bounds=(element.statistics_values.get('Minimum'), element.statistics_values.get('Maximum')))
+                    if i < 5:
+                        self.bar_graph.grid(row=0, column=i)
+                    else:
+                        self.bar_graph.grid(row=1, column=i - 5)
                 # Case for getting the data and drawing the 90 degree circle graph
                 case "Circle - 90°":
-                    pass
+                    self.circle_gauge_90 = CircleGauge(gauge_window, title=element.name, max_degree=90,
+                                                       number_range=(element.statistics_values.get('Minimum'),
+                                                                     element.statistics_values.get('Maximum')),
+                                                       number_step=1)
+                    if i < 5:
+                        self.circle_gauge_90.grid(row=0, column=i)
+                    else:
+                        self.circle_gauge_90.grid(row=1, column=i - 5)
+                    self.circle_gauge_90.update_value(element.statistics_values.get('Maximum'))
                 # Case for getting the data and drawing the 180 degree circle graph
                 case "Circle - 180°":
-                    pass
+                    self.circle_gauge_180 = CircleGauge(gauge_window, title=element.name, max_degree=180,
+                                                        number_range=(element.statistics_values.get('Minimum'),
+                                                                      element.statistics_values.get('Maximum')),
+                                                        number_step=1)
+                    if i < 5:
+                        self.circle_gauge_180.grid(row=0, column=i)
+                    else:
+                        self.circle_gauge_180.grid(row=1, column=i - 5)
+                    self.circle_gauge_180.update_value(element.statistics_values.get('Maximum'))
                 # Case for getting the data and drawing the 270 degree circle graph
                 case "Circle - 270°":
-                    pass
+                    self.circle_gauge_270 = CircleGauge(gauge_window, title=element.name, max_degree=270,
+                                                        number_range=(element.statistics_values.get('Minimum'),
+                                                                      element.statistics_values.get('Maximum')),
+                                                        number_step=1)
+                    if i < 5:
+                        self.circle_gauge_270.grid(row=0, column=i)
+                    else:
+                        self.circle_gauge_270.grid(row=1, column=i - 5)
+                    self.circle_gauge_270.update_value(element.statistics_values.get('Maximum'))
                 # Case for getting the data and drawing the 360 degree circle graph
                 case "Circle - 360°":
                     # circle_window = GaugeWindow()
-                    self.circle_gauge_360 = CircleGauge(gauge_window, name=element.name, max_degree=360,
-                                                        number_range=(int(element.statistics_values.get('Minimum')),
-                                                                      int(element.statistics_values.get('Maximum'))),
+                    self.circle_gauge_360 = CircleGauge(gauge_window, title=element.name, max_degree=360,
+                                                        number_range=(element.statistics_values.get('Minimum'),
+                                                                      element.statistics_values.get('Maximum')),
                                                         number_step=1)
-                    self.circle_gauge_360.grid(row=1, column=1)
-                    self.circle_gauge_360.update_value(2)
+                    if i < 5:
+                        self.circle_gauge_360.grid(row=0, column=i)
+                    else:
+                        self.circle_gauge_360.grid(row=1, column=i - 5)
+                    self.circle_gauge_360.update_value(element.statistics_values.get('Maximum'))
 
                 # Case for getting data and drawing the text display
                 case "Text Display":
-                    pass
+                    self.text_gauge = TextDisplayGauge(gauge_window, title=element.name)
+                    if i < 5:
+                        self.text_gauge.grid(row=0, column=i)
+                    else:
+                        self.text_gauge.grid(row=1, column=i - 5)
                 # Case for getting the data and drawing the number/character display
                 case "Number or Character Display":
-                    pass
+                    self.num_gauge = NumberDisplayGauge(gauge_window, title=element.name)
+                    if i < 5:
+                        self.num_gauge.grid(row=0, column=i)
+                    else:
+                        self.num_gauge.grid(row=1, column=i - 5)
                 # Case for drawing the clock
                 case "Clock":
-                    pass
+                    self.clock_gauge = ClockGauge(gauge_window, title=element.name, description="Local Time")
+                    if i < 5:
+                        self.clock_gauge.grid(row=0, column=i)
+                    else:
+                        self.clock_gauge.grid(row=1, column=i - 5)
                 # Case for drawing the stopwatch
                 case "Stopwatch":
-                    pass
+                    self.stopwatch_gauge = ClockGauge(gauge_window, title=element.name, description='Elapsed Time',
+                                                      mode='stopwatch')
+                    if i < 5:
+                        self.stopwatch_gauge.grid(row=0, column=i)
+                    else:
+                        self.stopwatch_gauge.grid(row=1, column=i - 5)
                 # Case for drawing the running time gauge
                 case "Running Time":
-                    pass
+                    self.running_gauge = ClockGauge(gauge_window, title=element.name, description='Video Time',
+                                                    mode='running_time')
+                    if i < 5:
+                        self.running_gauge.grid(row=0, column=i)
+                    else:
+                        self.running_gauge.grid(row=1, column=i - 5)
                 # Case for drawing the on/off light
                 case "On/off light":
-                    pass
+                    self.indicator_light = LightIndicatorGauge(gauge_window, title=element.name,
+                                                               description='System Power')
+                    if i < 5:
+                        self.indicator_light.grid(row=0, column=i)
+                    else:
+                        self.indicator_light.grid(row=1, column=i - 5)
                 # Default case
                 case _:
                     print("Gauge not found")
 
     # This function will call each of the animation functions for the displayed gauges
-    def animateGauges(self, data_manager: DataManager):
-        token = 3
-        for token in data_manager.user_selected_gauges_list:
-            for field_name in token.field_name:
+    def update_gauges(self, data_manager: DataManager, current_time):
+        for element in data_manager.user_selected_gauges_list:
 
-                match token.gauge_name:
+            match element.gauge_name:
 
-                    # Case for animating the x-by-y plot
-                    case "X-by-Y-plot":
-                        self.x_y_graph.update_value(self.x_axis_list[self.anim_inc], self.y_axis_list[self.anim_inc],
-                                                    self.x_y_alarm)
+                # Case for animating the x-by-y plot
+                case "X-by-Y-plot":
+                    self.x_y_graph.update_value(data_manager.data_file.at[current_time, element.field_name[0]],
+                                                data_manager.data_file.at[current_time, element.second_field_name],
+                                                data_manager.data_file.at[current_time, element.second_field_name])
 
-                    # Case for animating the x-graph
-                    case "X-Plot":
-                        self.x_plot.update_value(self.x_plot_list[self.anim_inc])
+                # Case for animating the x-graph
+                case "X-Plot":
+                    self.x_plot.update_value(data_manager.data_file.at[current_time, element.field_name[0]])
 
-                    # Case for animating the bar graph
-                    case "Bar-Graph":
-                        self.bar_graph.update_value(self.bar_graph_list[self.anim_inc])
+                # Case for animating the bar graph
+                case "Bar-Graph":
+                    self.bar_graph.update_value(data_manager.data_file.at[current_time, element.field_name[0]])
 
-                    # Case for animating the 90 degree circle graph
-                    case "Circle - 90°":
-                        self.circle_gauge_90.update_value(self.circle_gauge_90_list[self.anim_inc])
+                # Case for animating the 90 degree circle graph
+                case "Circle - 90°":
+                    self.circle_gauge_90.update_value(data_manager.data_file.at[current_time, element.field_name[0]])
 
-                    # Case for animating the 180 degree circle graph
-                    case "Circle - 180°":
-                        self.circle_gauge_180.update_value(self.circle_gauge_180_list[self.anim_inc])
+                # Case for animating the 180 degree circle graph
+                case "Circle - 180°":
+                    self.circle_gauge_180.update_value(data_manager.data_file.at[current_time, element.field_name[0]])
 
-                    # Case for animating the 270 degree circle graph
-                    case "Circle - 270°":
-                        self.circle_gauge_270.update_value(self.circle_gauge_270_list[self.anim_inc])
+                # Case for animating the 270 degree circle graph
+                case "Circle - 270°":
+                    self.circle_gauge_270.update_value(data_manager.data_file.at[current_time, element.field_name[0]])
 
-                    # Case for animating the 360 degree circle graph
-                    case "Circle - 360°":
-                        # circle_window = GaugeWindow()
-                        self.circle_gauge_360.update_value(self.circle_gauge_360_list[self.anim_inc])
+                # Case for animating the 360 degree circle graph
+                case "Circle - 360°":
+                    # circle_window = GaugeWindow()
+                    self.circle_gauge_360.update_value(data_manager.data_file.at[current_time, element.field_name[0]])
 
-                    # Case for animating the text display
-                    case "Text Display":
-                        self.text_gauge.update_value(self.text_gauge_list[self.anim_inc])
+                # Case for animating the text display
+                case "Text Display":
+                    self.text_gauge.update_value(data_manager.data_file.at[current_time, element.field_name[0]])
 
-                    # Case for animating the number/character display
-                    case "Number or Character Display":
-                        self.num_gauge.update_value(self.num_gauge_list[self.anim_inc])
+                # Case for animating the number/character display
+                case "Number or Character Display":
+                    self.num_gauge.update_value(data_manager.data_file.at[current_time, element.field_name[0]])
 
-                    # Case for animating the clock
-                    case "Clock":
-                        self.clock_gauge.update_value()
+                # Case for animating the clock
+                case "Clock":
+                    self.clock_gauge.update_value()
 
-                    # Case for animating the stopwatch
-                    case "Stopwatch":
-                        self.stopwatch_gauge.update_value()
+                # Case for animating the stopwatch
+                case "Stopwatch":
+                    self.stopwatch_gauge.update_value()
 
-                    # Case for animating the running time gauge
-                    case "Running Time":
-                        self.running_gauge.update_value()
+                # Case for animating the running time gauge
+                case "Running Time":
+                    self.running_gauge.update_value()
 
-                    # Case for animating the on/off light
-                    case "On/off light":
-                        self.indicator_light.update_value(self.indicator_light_list[self.anim_inc])
+                # Case for animating the on/off light
+                case "On/off light":
+                    self.indicator_light.update_value(data_manager.data_file.at[current_time, element.field_name[0]])
 
-                    # Default case
-                    case _:
-                        print("Gauge not found")
+                # Default case
+                case _:
+                    print("Gauge not found")
 
     # This function will update the color ranges for each of the gauges
-    def update_Ranges(self, data_manager: DataManager):
+    def update_ranges(self, data_manager: DataManager):
         for token in data_manager.user_selected_gauges_list:
             for field_name in token.field_name:
 
