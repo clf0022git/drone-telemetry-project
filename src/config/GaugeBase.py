@@ -7,8 +7,8 @@ class GaugeBase(tk.Frame):
         self.name = name
         self.title_text = title
         self.description_text = description
-        self.color_ranges = {'blue': 25, 'green': 50, 'yellow': 75, 'red': 90}  # Default values, use update_colors to change
-        self.red_limit = int(self.color_ranges['red'] + 1)  # Value at which the alarm is triggered (default is 1 above the red limit)
+        self.color_ranges = {'blue': (0, 25), 'green': (25, 50), 'yellow': (50, 75), 'red': (75, 90)}  # Default values, use update_colors to change
+        self.red_limit = int(self.color_ranges['red'][1] + 1)  # Value at which the alarm is triggered (default is 1 above the red limit)
         self.alarm_times = 0  # Number of times the alarm has been triggered
 
         # Create the title label
@@ -29,17 +29,21 @@ class GaugeBase(tk.Frame):
 
     def update_colors(self, blue=None, green=None, yellow=None, red=None, red_limit=None):
         """Update the color ranges for the gauge."""
+        # Update each color range
         if blue is not None:
-            self.color_ranges['blue'] = blue
+            self.color_ranges['blue'] = blue if isinstance(blue, tuple) else (0, blue)
         if green is not None:
-            self.color_ranges['green'] = green
+            self.color_ranges['green'] = green if isinstance(green, tuple) else (self.color_ranges['blue'][1], green)
         if yellow is not None:
-            self.color_ranges['yellow'] = yellow
+            self.color_ranges['yellow'] = yellow if isinstance(yellow, tuple) else (self.color_ranges['green'][1], yellow)
         if red is not None:
-            self.color_ranges['red'] = red
-            self.red_limit = int(red + 1)  # Set the red limit to 1 above the red value
+            self.color_ranges['red'] = red if isinstance(red, tuple) else (self.color_ranges['yellow'][1], red)
+
+        # Update the red limit
         if red_limit is not None:
             self.red_limit = red_limit
+        else:
+            self.red_limit = self.color_ranges['red'][1] + 1  # Default to 1 above the upper bound of the red range
 
     def check_alarm(self, value):
         """Check if the value exceeds the red limit and trigger an alarm if necessary."""
