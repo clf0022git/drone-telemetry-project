@@ -22,14 +22,6 @@ class LightIndicatorGauge(GaugeBase):
         self.is_on = value
         self.light_canvas.itemconfig(self.light, fill='green' if self.is_on else 'grey')
 
-    '''def update_value2(self):
-        self.is_on = self.data_set1[self.increment]
-        if (self.data_set1[self.increment] != self.data_set1[++self.increment]):
-            self.light_canvas.itemconfig(self.light, fill='grey')
-        else:
-            self.light_canvas.itemconfig(self.light, fill='green')
-        self.increment += 1'''
-
     def toggle_light(self):
         """Toggle the light state."""
         self.update_value(not self.is_on)
