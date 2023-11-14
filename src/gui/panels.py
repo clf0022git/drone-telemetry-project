@@ -10,7 +10,7 @@ import traceback
 from tkinter import ttk, filedialog
 
 from src.config.ClockDisplayGauge import ClockGauge
-from src.config.GaugeManager import GaugeManager
+from src.config.GaugeControl import GaugeManager
 from src.config.TextDisplayGauge import TextDisplayGauge
 from src.playback.video import VideoPlayer
 from src.data.input import DataManager
