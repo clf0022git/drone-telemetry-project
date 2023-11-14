@@ -7,8 +7,8 @@ class GaugeBase(tk.Frame):
         self.name = name
         self.title_text = title
         self.description_text = description
-        self.color_ranges = {'blue': 25, 'green': 50, 'yellow': 75, 'red': 100}  # Default values, use update_colors to change
-        self.red_limit = 80
+        self.color_ranges = {'blue': (0, 25), 'green': (25, 50), 'yellow': (50, 75), 'red': (75, 90)}  # Default values, use update_colors to change
+        self.red_limit = int(self.color_ranges['red'][1] + 1)  # Value at which the alarm is triggered (default is 1 above the red limit)
         self.alarm_times = 0  # Number of times the alarm has been triggered
 
         # Create the title label
@@ -19,21 +19,31 @@ class GaugeBase(tk.Frame):
         self.description_label = tk.Label(self, text=self.description_text)
         self.description_label.pack(side=tk.BOTTOM, fill=tk.X)
 
+        # Create the alarm label
+        self.alarm_label = tk.Label(self, text='ALARM!', fg='red')
+        self.alarm_label_visible = False
+
     def update_value(self, value):
         """Update the gauge's value."""
         raise NotImplementedError("Must be implemented by the subclass.")
 
-    def update_colors(self, blue=None, green=None, yellow=None, red=None):
+    def update_colors(self, blue=None, green=None, yellow=None, red=None, red_limit=None):
         """Update the color ranges for the gauge."""
+        # Update each color range
         if blue is not None:
-            self.color_ranges['blue'] = blue
+            self.color_ranges['blue'] = blue if isinstance(blue, tuple) else (0, blue)
         if green is not None:
-            self.color_ranges['green'] = green
+            self.color_ranges['green'] = green if isinstance(green, tuple) else (self.color_ranges['blue'][1], green)
         if yellow is not None:
-            self.color_ranges['yellow'] = yellow
+            self.color_ranges['yellow'] = yellow if isinstance(yellow, tuple) else (self.color_ranges['green'][1], yellow)
         if red is not None:
-            self.color_ranges['red'] = red
-            self.red_limit = int(red - 20)  # Set the red limit to 20 less than the red color range
+            self.color_ranges['red'] = red if isinstance(red, tuple) else (self.color_ranges['yellow'][1], red)
+
+        # Update the red limit
+        if red_limit is not None:
+            self.red_limit = red_limit
+        else:
+            self.red_limit = int(self.color_ranges['red'][1] + 1)  # Default to 1 above the upper bound of the red range
 
     def check_alarm(self, value):
         """Check if the value exceeds the red limit and trigger an alarm if necessary."""
@@ -41,10 +51,28 @@ class GaugeBase(tk.Frame):
             self.trigger_alarm()
 
     def trigger_alarm(self):
-        """Trigger an audible alarm."""
+        """Trigger an audible alarm and flash the description label."""
         self.alarm_times += 1
         print(f"Alarm! {self.name} value exceeded red limit {self.alarm_times} times.")  # Placeholder for actual alarm logic
         self.master.bell()  # Ring the system bell
+        self.flash_alarm_text()  # Flash the alarm text
+
+    def flash_alarm_text(self, count=1):
+        """Flash the alarm text in the alarm label."""
+        if count > 0:
+            # Toggle the visibility of the alarm label
+            if self.alarm_label_visible:
+                self.alarm_label.pack_forget()
+                self.alarm_label_visible = False
+            else:
+                self.alarm_label.pack(side=tk.BOTTOM, fill=tk.X)
+                self.alarm_label_visible = True
+            # Schedule the next flash
+            self.after(800, self.flash_alarm_text, count - 1)
+        else:
+            # Ensure the alarm label is hidden after flashing
+            self.alarm_label.pack_forget()
+            self.alarm_label_visible = False
 
     def set_title(self, title):
         """Set the title of the gauge."""

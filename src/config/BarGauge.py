@@ -44,10 +44,10 @@ class BarGauge(GaugeBase):
 
     def get_color_for_value(self, value):
         """Determine the color of the bar based on the current value."""
-        for color, limit in self.color_ranges.items():
-            if value <= limit:
+        for color, (lower_bound, upper_bound) in self.color_ranges.items():
+            if lower_bound <= value <= upper_bound:
                 return color
-        return 'red'
+        return 'red'  # Default to 'red' if value exceeds all defined ranges
 
     def set_figure_title(self, title):
         """Set the title for the matplotlib plot. This is different from the GaugeBase title."""

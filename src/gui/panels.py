@@ -8,6 +8,10 @@ import os
 import sys
 import traceback
 from tkinter import ttk, filedialog
+
+from src.config.ClockDisplayGauge import ClockGauge
+from src.config.GaugeManager import GaugeManager
+from src.config.TextDisplayGauge import TextDisplayGauge
 from src.playback.video import VideoPlayer
 from src.data.input import DataManager
 from src.data.statistics import DataProcessor
@@ -155,8 +159,8 @@ class ConfigurationPanel(ttk.Frame):
         self.select_field_btn.pack(pady=10)
 
         # Button to select field with gauge
-        self.generate_gauges_btn = ttk.Button(self, text="Generate Gauges", command=self.generate_gauges)
-        self.generate_gauges_btn.pack(pady=10, side=tk.TOP)
+        #self.generate_gauges_btn = ttk.Button(self, text="Generate Gauges", command=self.generate_gauges)
+        #self.generate_gauges_btn.pack(pady=10, side=tk.TOP)
 
         self.speed_label = ttk.Label(self, font=("Roboto Light", 10), text="Playback Speed:")
         self.speed_label.pack(pady=5)
@@ -188,6 +192,9 @@ class ConfigurationPanel(ttk.Frame):
             self.metric_label.config(text="Current Metrics: Meters and Celsius")
             m_or_f = 0
 
+        self.get_statistics()
+        self.gauge_customization_panel.update_gauges(True)
+
     def get_statistics(self):
         if len(self.data_manager.user_selected_gauges_list) == 0:
             print("No fields selected")
@@ -201,11 +208,22 @@ class ConfigurationPanel(ttk.Frame):
                 stats = self.data_processor.calc_statistics(self.data_manager.data_file[field], field)
                 print(type(self.statistics_list))
                 self.statistics_list.append(stats)
-                element.statistics = stats
+                element.set_statistics_text(stats)
+                element.statistics_values = stats
             else:
                 # This entry has no statistics
                 self.statistics_list.append("This entry has no statistics")
                 print("This gauge has no statistics associated with it.")
+            if element.second_field_name != "":
+                field = element.second_field_name
+                if self.data_manager.data_file[field].dtype == "int64" or self.data_manager.data_file[
+                    field].dtype == "float64":
+                    stats = self.data_processor.calc_statistics(self.data_manager.data_file[field], field)
+                    element.set_statistics_two_text(stats)
+                    element.statistics_values_two = stats
+                else:
+                    # This entry has no statistics
+                    print("This has no stats!")
         self.data_manager.set_statistics_list(self.statistics_list)
 
     def load_video(self):
@@ -283,9 +301,11 @@ class ConfigurationPanel(ttk.Frame):
             print(f"Selected Gauge: {', '.join(selected_field)}")
             self.user_selection_list.delete(0, 'end')  # clear list before each call to update
             self.user_selection_list.insert(0, *self.data_manager.delete_selection(k))
-
         else:
             print("Please select a field to remove.")
+
+        self.get_statistics()
+        self.gauge_customization_panel.update_gauges(True)
 
     def select_field(self):
         """Will call functionality to send selected fields to function"""
@@ -296,7 +316,7 @@ class ConfigurationPanel(ttk.Frame):
             self.user_selection_list.delete(0, 'end')  # clear list before each call to update
             print("Called!")
             gt_list = self.data_manager.confirm_selection(selected_gauge, self.fieldnames_gauge_group,
-                                                          self.user_selection_list)
+                                                          self.user_selection_list, self.gauge_customization_panel, self)
             if len(gt_list) <= 10:
                 self.user_selection_list.insert(0, *gt_list)
                 # Functionality to ask user about the type of the data probably in between identifying gauges and
@@ -329,7 +349,7 @@ class ConfigurationPanel(ttk.Frame):
     def generate_gauges(self):
         print("button works")
         gauge_creator = GaugeCreator()
-        #for items in self.data_manager.user_selected_gauges_list:
+        # for items in self.data_manager.user_selected_gauges_list:
         gauge_creator.drawGauges(self.data_manager)
 
     def set_playback_speed(self, event=None):
@@ -376,10 +396,11 @@ class GaugeCustomizationPanel(ttk.Frame):
         self.label.pack(pady=10)
         self.data_manager = None
         self.fileManager = FileManager
+        self.gauge_manager = GaugeManager()
 
         # Frame to hold the gauge viewer
         self.gauge_viewer_frame = tk.Frame(self)
-        self.gauge_viewer_frame.pack(pady=100)
+        self.gauge_viewer_frame.pack(pady=5)
 
         self.current_gauge_text_label = tk.Label(self.gauge_viewer_frame, font=("Roboto Medium", 10),
                                                  text="No Gauge Selected")
@@ -391,15 +412,29 @@ class GaugeCustomizationPanel(ttk.Frame):
         self.current_gauge_left_btn = tk.Button(self.gauge_viewer_contents_frame, text="<", command=self.scroll_left)
         self.current_gauge_left_btn.pack(side=tk.LEFT)
 
-        self.current_gauge_text = tk.Text(self.gauge_viewer_contents_frame, height=10, width=30)
-        self.current_gauge_text.config(state="disabled")
-        self.current_gauge_text.pack(side=tk.LEFT)
+        self.left_gauge_info_frame = tk.Frame(self.gauge_viewer_contents_frame)
+        self.left_gauge_info_frame.pack(side=tk.LEFT)
+
+        self.left_gauge_info_label = tk.Label(self.left_gauge_info_frame, font=("Roboto Light", 10),
+                                              text="Basic Gauge Info:")
+        self.left_gauge_info_label.pack(side=tk.TOP)
+
+        self.current_gauge_text = tk.Text(self.left_gauge_info_frame, height=5, width=35)
+        self.current_gauge_text.config(state="disabled", font=("Roboto Light", 10))
+        self.current_gauge_text.pack(side=tk.TOP)
         self.current_gauge_position = 0
         self.current_gauge_text_list = []
 
-        self.current_gauge_statistics_text = tk.Text(self.gauge_viewer_contents_frame, height=10, width=30)
-        self.current_gauge_statistics_text.config(state="disabled")
-        self.current_gauge_statistics_text.pack(side=tk.LEFT)
+        self.right_gauge_info_frame = tk.Frame(self.gauge_viewer_contents_frame)
+        self.right_gauge_info_frame.pack(side=tk.LEFT)
+
+        self.right_gauge_info_label = tk.Label(self.right_gauge_info_frame, font=("Roboto Light", 10),
+                                               text="Gauge Statistics:")
+        self.right_gauge_info_label.pack(side=tk.TOP)
+
+        self.current_gauge_statistics_text = tk.Text(self.right_gauge_info_frame, height=5, width=35)
+        self.current_gauge_statistics_text.config(state="disabled", font=("Roboto Light", 10))
+        self.current_gauge_statistics_text.pack(side=tk.TOP)
         self.current_gauge_statistics_position = 0
         self.current_gauge_statistics_text_list = []
 
@@ -408,10 +443,13 @@ class GaugeCustomizationPanel(ttk.Frame):
 
         self.saveButton = ttk.Button(self, text="Save Data", command=self.save_data)
         self.saveButton.pack(pady=2)
+        self.current_gauge_view_and_settings = tk.Frame(self)
+        self.current_gauge_view_and_settings.pack(side=tk.TOP)
 
-        # Set up all of the frames for the gauge settings
-        self.current_gauge_settings_frame = tk.Frame(self)
-        self.current_gauge_settings_frame.pack(side=tk.TOP)
+        # Set up all the frames for the gauge settings
+        self.current_gauge_settings_frame = tk.Frame(self.current_gauge_view_and_settings)
+        self.current_gauge_settings_frame.pack(side=tk.LEFT)
+        
         self.name_frame = tk.Frame(self.current_gauge_settings_frame)
         self.name_frame.pack(side=tk.TOP)
         self.blue_frame = tk.Frame(self.current_gauge_settings_frame)
@@ -427,54 +465,112 @@ class GaugeCustomizationPanel(ttk.Frame):
         self.current_gauge_name_label.pack(side=tk.LEFT)
         self.current_gauge_name_entry = tk.Entry(self.name_frame)
         self.current_gauge_name_entry.pack(side=tk.LEFT)
-        self.current_gauge_name_btn = tk.Button(self.name_frame, text="Change Name", command=self.change_name)
+        self.current_gauge_name_btn = tk.Button(self.name_frame, text="Submit", command=self.change_name)
         self.current_gauge_name_btn.pack(side=tk.LEFT)
 
         self.current_gauge_blue_label = tk.Label(self.blue_frame, font=("Roboto Medium", 10), text="Blue Range:")
         self.current_gauge_blue_label.pack(side=tk.LEFT)
-        self.current_gauge_blue_one_entry = tk.Entry(self.blue_frame)
+        self.current_gauge_blue_one_entry = tk.Entry(self.blue_frame, width=5)
         self.current_gauge_blue_one_entry.pack(side=tk.LEFT)
-        self.current_gauge_blue_two_entry = tk.Entry(self.blue_frame)
+        self.current_gauge_blue_two_entry = tk.Entry(self.blue_frame, width=5)
         self.current_gauge_blue_two_entry.pack(side=tk.LEFT)
-        self.current_gauge_blue_btn = tk.Button(self.blue_frame, text="Change Blue Range", command=self.change_blue)
+        self.current_gauge_blue_btn = tk.Button(self.blue_frame, text="Submit", command=self.change_blue)
         self.current_gauge_blue_btn.pack(side=tk.LEFT)
 
         self.current_gauge_green_label = tk.Label(self.green_frame, font=("Roboto Medium", 10), text="Green Range:")
         self.current_gauge_green_label.pack(side=tk.LEFT)
-        self.current_gauge_green_one_entry = tk.Entry(self.green_frame)
+        self.current_gauge_green_one_entry = tk.Entry(self.green_frame, width=5)
         self.current_gauge_green_one_entry.pack(side=tk.LEFT)
-        self.current_gauge_green_two_entry = tk.Entry(self.green_frame)
+        self.current_gauge_green_two_entry = tk.Entry(self.green_frame, width=5)
         self.current_gauge_green_two_entry.pack(side=tk.LEFT)
-        self.current_gauge_green_btn = tk.Button(self.green_frame, text="Change Green Range", command=self.change_green)
+        self.current_gauge_green_btn = tk.Button(self.green_frame, text="Submit", command=self.change_green)
         self.current_gauge_green_btn.pack(side=tk.LEFT)
 
         self.current_gauge_yellow_label = tk.Label(self.yellow_frame, font=("Roboto Medium", 10), text="Yellow Range:")
         self.current_gauge_yellow_label.pack(side=tk.LEFT)
-        self.current_gauge_yellow_one_entry = tk.Entry(self.yellow_frame)
+        self.current_gauge_yellow_one_entry = tk.Entry(self.yellow_frame, width=5)
         self.current_gauge_yellow_one_entry.pack(side=tk.LEFT)
-        self.current_gauge_yellow_two_entry = tk.Entry(self.yellow_frame)
+        self.current_gauge_yellow_two_entry = tk.Entry(self.yellow_frame, width=5)
         self.current_gauge_yellow_two_entry.pack(side=tk.LEFT)
-        self.current_gauge_yellow_btn = tk.Button(self.yellow_frame, text="Change Yellow Range",
+        self.current_gauge_yellow_btn = tk.Button(self.yellow_frame, text="Submit",
                                                   command=self.change_yellow)
         self.current_gauge_yellow_btn.pack(side=tk.LEFT)
 
         self.current_gauge_red_label = tk.Label(self.red_frame, font=("Roboto Medium", 10), text="Red Range:")
         self.current_gauge_red_label.pack(side=tk.LEFT)
-        self.current_gauge_red_one_entry = tk.Entry(self.red_frame)
+        self.current_gauge_red_one_entry = tk.Entry(self.red_frame, width=5)
         self.current_gauge_red_one_entry.pack(side=tk.LEFT)
-        self.current_gauge_red_two_entry = tk.Entry(self.red_frame)
+        self.current_gauge_red_two_entry = tk.Entry(self.red_frame, width=5)
         self.current_gauge_red_two_entry.pack(side=tk.LEFT)
-        self.current_gauge_red_btn = tk.Button(self.red_frame, text="Change Red Range", command=self.change_red)
+        self.current_gauge_red_btn = tk.Button(self.red_frame, text="Submit", command=self.change_red)
         self.current_gauge_red_btn.pack(side=tk.LEFT)
 
+        # Frame that will hold the current way the gauge looks
+
+        self.current_gauge_view = tk.Frame(self.current_gauge_view_and_settings)
+        self.current_gauge_view.pack(side=tk.LEFT)
+
         # TODO: Add widgets to display statistics like min, max, average, etc.
+
+    def draw_range_options(self):
+        self.current_gauge_blue_label = tk.Label(self.blue_frame, font=("Roboto Medium", 10), text="Blue Range:")
+        self.current_gauge_blue_label.pack(side=tk.LEFT)
+        self.current_gauge_blue_one_entry = tk.Entry(self.blue_frame, width=5)
+        self.current_gauge_blue_one_entry.pack(side=tk.LEFT)
+        self.current_gauge_blue_two_entry = tk.Entry(self.blue_frame, width=5)
+        self.current_gauge_blue_two_entry.pack(side=tk.LEFT)
+        self.current_gauge_blue_btn = tk.Button(self.blue_frame, text="Submit", command=self.change_blue)
+        self.current_gauge_blue_btn.pack(side=tk.LEFT)
+
+        self.current_gauge_green_label = tk.Label(self.green_frame, font=("Roboto Medium", 10), text="Green Range:")
+        self.current_gauge_green_label.pack(side=tk.LEFT)
+        self.current_gauge_green_one_entry = tk.Entry(self.green_frame, width=5)
+        self.current_gauge_green_one_entry.pack(side=tk.LEFT)
+        self.current_gauge_green_two_entry = tk.Entry(self.green_frame, width=5)
+        self.current_gauge_green_two_entry.pack(side=tk.LEFT)
+        self.current_gauge_green_btn = tk.Button(self.green_frame, text="Submit", command=self.change_green)
+        self.current_gauge_green_btn.pack(side=tk.LEFT)
+
+        self.current_gauge_yellow_label = tk.Label(self.yellow_frame, font=("Roboto Medium", 10), text="Yellow Range:")
+        self.current_gauge_yellow_label.pack(side=tk.LEFT)
+        self.current_gauge_yellow_one_entry = tk.Entry(self.yellow_frame, width=5)
+        self.current_gauge_yellow_one_entry.pack(side=tk.LEFT)
+        self.current_gauge_yellow_two_entry = tk.Entry(self.yellow_frame, width=5)
+        self.current_gauge_yellow_two_entry.pack(side=tk.LEFT)
+        self.current_gauge_yellow_btn = tk.Button(self.yellow_frame, text="Submit",
+                                                  command=self.change_yellow)
+        self.current_gauge_yellow_btn.pack(side=tk.LEFT)
+
+        self.current_gauge_red_label = tk.Label(self.red_frame, font=("Roboto Medium", 10), text="Red Range:")
+        self.current_gauge_red_label.pack(side=tk.LEFT)
+        self.current_gauge_red_one_entry = tk.Entry(self.red_frame, width=5)
+        self.current_gauge_red_one_entry.pack(side=tk.LEFT)
+        self.current_gauge_red_two_entry = tk.Entry(self.red_frame, width=5)
+        self.current_gauge_red_two_entry.pack(side=tk.LEFT)
+        self.current_gauge_red_btn = tk.Button(self.red_frame, text="Submit", command=self.change_red)
+        self.current_gauge_red_btn.pack(side=tk.LEFT)
+
+    def delete_range_options(self):
+        for widget in self.red_frame.winfo_children():
+            widget.destroy()
+        for widget in self.blue_frame.winfo_children():
+            widget.destroy()
+        for widget in self.green_frame.winfo_children():
+            widget.destroy()
+        for widget in self.yellow_frame.winfo_children():
+            widget.destroy()
 
     def change_name(self):
         if len(self.data_manager.user_selected_gauges_list) != 0:
             new_name = self.current_gauge_name_entry.get()
             self.data_manager.user_selected_gauges_list[self.current_gauge_position].name = new_name
-            self.current_gauge_text_label.config(text=new_name)
+            #self.current_gauge_text_label.config(text=new_name)
             print(new_name)
+            for widget in self.current_gauge_view.winfo_children():
+                widget.destroy()
+            self.gauge_manager.draw_gauge(self.current_gauge_view,
+                                          self.data_manager.user_selected_gauges_list[self.current_gauge_position])
+
         self.current_gauge_name_entry.delete(0, 'end')
 
     def change_blue(self):
@@ -538,6 +634,17 @@ class GaugeCustomizationPanel(ttk.Frame):
         if reset_position:
             self.current_gauge_position = 0
         if len(self.data_manager.user_selected_gauges_list) > 0:
+            self.delete_range_options()
+            print("Current Position")
+            print(self.current_gauge_position)
+            print(self.data_manager.user_selected_gauges_list[self.current_gauge_position].gauge_name)
+            g_name = self.data_manager.user_selected_gauges_list[self.current_gauge_position].gauge_name
+            if g_name in ["Circle - 90°", "Circle - 180°", "Circle - 270°", "Circle - 360°", "Bar"]:
+                print("Drawing the range options!")
+                self.draw_range_options()
+            # Clears temp widget
+            for widget in self.current_gauge_view.winfo_children():
+                widget.destroy()
             self.current_gauge_text_list = self.data_manager.display_user_selections()
             self.current_gauge_statistics_text_list = self.data_manager.statistics_list
             self.current_gauge_text.config(state="normal")
@@ -545,16 +652,20 @@ class GaugeCustomizationPanel(ttk.Frame):
             self.current_gauge_text.delete("1.0", "end")
             self.current_gauge_statistics_text.delete("1.0", "end")
             self.current_gauge_text.insert(tk.END, self.current_gauge_text_list[self.current_gauge_position])
-            self.current_gauge_statistics_text.insert(tk.END, self.data_manager.user_selected_gauges_list[
-                self.current_gauge_position].statistics)
-            if self.data_manager.user_selected_gauges_list[self.current_gauge_position].name == "":
-                temp_text = "Gauge #" + str(self.data_manager.user_selected_gauges_list[self.current_gauge_position].id)
-                self.current_gauge_text_label.config(text=temp_text)
-            else:
-                temp_text = str(self.data_manager.user_selected_gauges_list[self.current_gauge_position].name)
-                self.current_gauge_text_label.config(text=temp_text)
+            temp_statistics = self.data_manager.user_selected_gauges_list[self.current_gauge_position].statistics + self.data_manager.user_selected_gauges_list[self.current_gauge_position].statistics_two
+            self.current_gauge_statistics_text.insert(tk.END, temp_statistics)
+            print(temp_statistics)
+            #if self.data_manager.user_selected_gauges_list[self.current_gauge_position].name == "":
+            temp_text = "Gauge #" + str(self.data_manager.user_selected_gauges_list[self.current_gauge_position].id)
+            self.current_gauge_text_label.config(text=temp_text)
+            #else:
+                #temp_text = str(self.data_manager.user_selected_gauges_list[self.current_gauge_position].name)
+                #self.current_gauge_text_label.config(text=temp_text)
             self.current_gauge_text.config(state="disabled")
             self.current_gauge_statistics_text.config(state="disabled")
+            self.gauge_manager.draw_gauge(self.current_gauge_view,
+                                          self.data_manager.user_selected_gauges_list[self.current_gauge_position])
+            # Going to need to save the temporary widget that is created
 
     def save_data(self):
         self.fileManager.save_gauges(self.data_manager.user_selected_gauges_list)
