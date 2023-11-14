@@ -7,6 +7,7 @@ class GaugeBase(tk.Frame):
         self.name = name
         self.title_text = title
         self.description_text = description
+        #self.data_set1 = data_set.copy()
         self.color_ranges = {'blue': 25, 'green': 50, 'yellow': 75, 'red': 90}  # Default values, use update_colors to change
         self.red_limit = int(self.color_ranges['red'] + 1)  # Value at which the alarm is triggered (default is 1 above the red limit)
         self.alarm_times = 0  # Number of times the alarm has been triggered
