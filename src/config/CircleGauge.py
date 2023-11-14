@@ -81,15 +81,16 @@ class CircleGauge(GaugeBase):
 
     def update_gauge_color(self, value):
         """Change the gauge color based on the value."""
-        if value >= self.red_limit:
-            color = 'red'
-        elif value >= self.color_ranges['yellow']:
-            color = 'yellow'
-        elif value >= self.color_ranges['green']:
-            color = 'green'
-        else:
-            color = 'blue'
-        #self.canvas.itemconfig(self.gauge_shape, outline=color)  # Uncomment this if you want to change the outline color
+        color = 'blue'  # Default color
+
+        # Check against each color range
+        for color_key, (lower_bound, upper_bound) in self.color_ranges.items():
+            if lower_bound <= value <= upper_bound:
+                color = color_key
+                break
+
+        # Update the color of the needle
+        # self.canvas.itemconfig(self.gauge_shape, outline=color)  # Uncomment this if you want to change the outline color
         self.canvas.itemconfig("needle", fill=color)
 
     def draw_needle(self):
