@@ -10,7 +10,7 @@ import traceback
 from tkinter import ttk, filedialog
 
 from src.config.ClockDisplayGauge import ClockGauge
-from src.config.GaugeManager import GaugeManager
+from src.config.CustomizationGaugeManager import CustomizationGaugeManager
 from src.config.TextDisplayGauge import TextDisplayGauge
 from src.playback.video import VideoPlayer
 from src.data.input import DataManager
@@ -396,7 +396,7 @@ class GaugeCustomizationPanel(ttk.Frame):
         self.label = ttk.Label(self, font=("Roboto Black", 14), text="Gauge Customization Panel")
         self.label.pack(pady=10)
         self.data_manager = None
-        self.gauge_manager = GaugeManager()
+        self.gauge_manager = CustomizationGaugeManager()
 
         # Frame to hold the gauge viewer
         self.gauge_viewer_frame = tk.Frame(self)

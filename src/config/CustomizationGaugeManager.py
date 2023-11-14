@@ -25,7 +25,7 @@ from src.data.input import DataManager
 # from src.gui.window import GaugeWindow
 
 # Manager class for the gauges
-class GaugeManager:
+class CustomizationGaugeManager:
 
     def draw_gauge(self, root, element):
         match element.gauge_name:
@@ -53,25 +53,25 @@ class GaugeManager:
                 v_bar_gauge.set_bounds(y_bounds=(element.statistics_values.get('Minimum'), element.statistics_values.get('Maximum')))
             # Case for getting the data and drawing  the 90 degree circle graph
             case "Circle - 90°":
-                circle_gauge = CircleGauge(root, title=element.name, degrees=90)
+                circle_gauge = CircleGauge(root, title=element.name, max_degree=90)
                 circle_gauge.pack(padx=10, pady=10)
                 circle_gauge.update_value(10)  # Update to a sample value
 
             # Case for getting the data and drawing  the 180 degree circle graph
             case "Circle - 180°":
-                circle_gauge = CircleGauge(root, title=element.name, degrees=180)
+                circle_gauge = CircleGauge(root, title=element.name, max_degree=180)
                 circle_gauge.pack(padx=10, pady=10)
                 circle_gauge.update_value(10)  # Update to a sample value
 
             # Case for getting the data and drawing  the 270 degree circle graph
             case "Circle - 270°":
-                circle_gauge = CircleGauge(root, title=element.name, degrees=270)
+                circle_gauge = CircleGauge(root, title=element.name, max_degree=270)
                 circle_gauge.pack(padx=10, pady=10)
                 circle_gauge.update_value(10)  # Update to a sample value
 
             # Case for getting the data and drawing  the 360 degree circle graph
             case "Circle - 360°":
-                circle_gauge = CircleGauge(root, title=element.name, degrees=360)
+                circle_gauge = CircleGauge(root, title=element.name, max_degree=360)
                 circle_gauge.pack(padx=10, pady=10)
                 circle_gauge.update_value(10)  # Update to a sample value
 
