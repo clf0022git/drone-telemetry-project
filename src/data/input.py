@@ -408,10 +408,10 @@ class TemporaryGauge:
     def __init__(self, f_name, g_name, t_stamp):
         self.id = None
         self.field_name = f_name
-        self.second_field_name = ""
+        self.second_field_name = "No secondary field viable"
         self.gauge_name = g_name
         self.timestamp_value = t_stamp
-        self.name = ""
+        self.name = "No name applied"
         self.statistics = "This gauge has no statistics associated with it."
         self.blue_range_low = 0
         self.blue_range_high = 0
