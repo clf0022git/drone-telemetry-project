@@ -43,7 +43,7 @@ class GaugeBase(tk.Frame):
         if red_limit is not None:
             self.red_limit = red_limit
         else:
-            self.red_limit = self.color_ranges['red'][1] + 1  # Default to 1 above the upper bound of the red range
+            self.red_limit = int(self.color_ranges['red'][1] + 1)  # Default to 1 above the upper bound of the red range
 
     def check_alarm(self, value):
         """Check if the value exceeds the red limit and trigger an alarm if necessary."""
