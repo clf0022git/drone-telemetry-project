@@ -842,15 +842,50 @@ class PlaybackPanel(ttk.Frame):
         else:
             try:
                 # Use ffmpeg to reverse the video
-                command = [
-                    'ffmpeg',
-                    '-i', self.video_path,
-                    '-vf', 'reverse',
-                    '-af', 'areverse',
-                    reversed_video_path
-                ]
-                subprocess.run(command, check=True)
-                print(f"Reversed video saved to {reversed_video_path}")
+                def run_command(command):
+                    subprocess.run(command, shell=True, check=True)
+
+                def get_file_extension(file_path):
+                    return os.path.splitext(file_path)[1].lower()
+
+                def split_video(input_vdeo, segment_length=30):
+                    # Create a directory to store the segments
+                    if not os.path.exists('../../assets/segments'):
+                        os.makedirs('../../assets/segments')
+
+                    file_extension = get_file_extension(input_vdeo)
+                    # Ensure that the segment files are in a consistent format (.mp4)
+                    cmd = f'ffmpeg -i {input_vdeo} -c copy -map 0 -segment_time {segment_length} -f segment -reset_timestamps 1 segments/output%03d.mp4'
+                    run_command(cmd)
+
+                def reverse_segments():
+                    files = os.listdir('../../assets/segments')
+                    reversed_fls = []
+
+                    for file in files:
+                        if file.endswith('.mp4'):
+                            reversed_fl = 'reversed_' + file
+                            cmd = f'ffmpeg -i segments/{file} -vf reverse -af areverse ../../assets/segments/{reversed_fl}'
+                            run_command(cmd)
+                            reversed_fls.append(f'segments/{reversed_fl}')
+
+                    return reversed_fls
+
+                def combine_videos(files, output_video=reversed_video_path):
+                    with open('file_list.txt', 'w') as f:
+                        for file in files:
+                            f.write(f"file '{file}'\n")
+
+                    cmd = f'ffmpeg -f concat -safe 0 -i file_list.txt -c copy {output_video}'
+                    run_command(cmd)
+
+                    # Cleanup
+                    os.remove('file_list.txt')
+
+                input_video = self.video_path
+                split_video(input_video)
+                reversed_files = reverse_segments()
+                combine_videos(reversed_files)
 
                 # Replace the old video path with the new reversed video path
                 self.is_video_reversed = True
