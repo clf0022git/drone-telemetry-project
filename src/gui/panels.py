@@ -845,16 +845,11 @@ class PlaybackPanel(ttk.Frame):
                 def run_command(command):
                     subprocess.run(command, shell=True, check=True)
 
-                def get_file_extension(file_path):
-                    return os.path.splitext(file_path)[1].lower()
-
                 def split_video(input_vdeo, segment_length=30):
                     # Create a directory to store the segments
                     if not os.path.exists('../../assets/segments'):
                         os.makedirs('../../assets/segments')
 
-                    file_extension = get_file_extension(input_vdeo)
-                    # Ensure that the segment files are in a consistent format (.mp4)
                     cmd = f'ffmpeg -i {input_vdeo} -c copy -map 0 -segment_time {segment_length} -f segment -reset_timestamps 1 segments/output%03d.mp4'
                     run_command(cmd)
 
