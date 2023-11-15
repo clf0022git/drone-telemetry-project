@@ -169,7 +169,7 @@ class ConfigurationPanel(ttk.Frame):
         self.speed_frame = ttk.Frame(self)
         self.speed_frame.pack(pady=5)
 
-        self.playback_speed_list = ['1X', '5X', '10X', '1X backwards']
+        self.playback_speed_list = ['1X', '5X', '1X backwards']
         self.playback_speed = tk.StringVar(value=self.playback_speed_list[0])
 
         self.speed_combobox = ttk.Combobox(self.speed_frame, textvariable=self.playback_speed,
