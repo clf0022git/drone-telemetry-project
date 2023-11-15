@@ -847,20 +847,20 @@ class PlaybackPanel(ttk.Frame):
 
                 def split_video(input_vdeo, segment_length=30):
                     # Create a directory to store the segments
-                    if not os.path.exists('../../assets/segments'):
-                        os.makedirs('../../assets/segments')
+                    if not os.path.exists('segments'):
+                        os.makedirs('segments')
 
                     cmd = f'ffmpeg -i {input_vdeo} -c copy -map 0 -segment_time {segment_length} -f segment -reset_timestamps 1 segments/output%03d.mp4'
                     run_command(cmd)
 
                 def reverse_segments():
-                    files = os.listdir('../../assets/segments')
+                    files = os.listdir('segments')
                     reversed_fls = []
 
                     for file in files:
                         if file.endswith('.mp4'):
                             reversed_fl = 'reversed_' + file
-                            cmd = f'ffmpeg -i segments/{file} -vf reverse -af areverse ../../assets/segments/{reversed_fl}'
+                            cmd = f'ffmpeg -i segments/{file} -vf reverse -af areverse segments/{reversed_fl}'
                             run_command(cmd)
                             reversed_fls.append(f'segments/{reversed_fl}')
 
