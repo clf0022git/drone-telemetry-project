@@ -888,6 +888,7 @@ class PlaybackPanel(ttk.Frame):
             except subprocess.CalledProcessError as e:
                 self.is_video_reversed = False
                 print(f"ffmpeg error: {e}")
+                traceback.print_exc(file=sys.stderr)
             except Exception as e:
                 self.is_video_reversed = False
                 print(f"An error occurred while reversing the video: {e}")
