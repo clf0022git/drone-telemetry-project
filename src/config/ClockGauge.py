@@ -28,19 +28,25 @@ class ClockGauge(GaugeBase):
         self.alarm_timestamps = []
 
     def add_alarm(self, timestamp_str):
-        """Add an alarm timestamp."""
-        try:
-            datetime.strptime(timestamp_str, "%m/%d/%Y %H:%M:%S")
-            self.alarm_timestamps.append(timestamp_str)
-        except ValueError as e:
-            print(f"Invalid timestamp format: {e}")
+        """Add an alarm timestamp for clock_csv case."""
+        if self.mode == 'clock_csv':
+            try:
+                datetime.strptime(timestamp_str, "%m/%d/%Y %H:%M:%S")
+                self.alarm_timestamps.append(timestamp_str)
+            except ValueError as e:
+                print(f"Invalid timestamp format: {e}")
+        else:
+            raise ValueError("Cannot add alarm timestamp for non-clock_csv mode.")
 
     def remove_alarm(self, timestamp_str):
-        """Remove an alarm timestamp."""
-        try:
-            self.alarm_timestamps.remove(timestamp_str)
-        except ValueError:
-            print(f"Timestamp not found in alarm list: {timestamp_str}")
+        """Remove an alarm timestamp for clock_csv case."""
+        if self.mode == 'clock_csv':
+            try:
+                self.alarm_timestamps.remove(timestamp_str)
+            except ValueError:
+                print(f"Timestamp not found in alarm list: {timestamp_str}")
+        else:
+            raise ValueError("Cannot remove alarm timestamp for non-clock_csv mode.")
 
     def check_alarm(self, value):
         """Check if the value (timestamp) is in the alarm list."""
