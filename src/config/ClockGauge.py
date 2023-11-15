@@ -24,6 +24,22 @@ class ClockGauge(GaugeBase):
         self.date_label = tk.Label(self, textvariable=self.date_var, font=('Arial', 16))
         self.date_label.pack()
 
+        # List of timestamps to alarm for in clock_csv mode
+        self.alarm_times = []
+
+    def add_alarm(self, timestamp):
+        """Add a timestamp to alarm for in clock_csv mode."""
+        self.alarm_times.append(timestamp)
+
+    def remove_alarm(self, timestamp):
+        """Remove a timestamp to alarm for in clock_csv mode."""
+        self.alarm_times.remove(timestamp)
+
+    def check_alarm(self, value):
+        """Check if the value is in the list of timestamps to alarm for."""
+        if value in self.alarm_times:
+            self.trigger_alarm()
+
     def get_initial_time_display(self):
         if self.mode == 'clock':
             return datetime.now().strftime("%H:%M:%S")
@@ -59,6 +75,7 @@ class ClockGauge(GaugeBase):
                 date_time_obj = datetime.strptime(value, "%m/%d/%Y %H:%M:%S")
                 self.time_var.set(date_time_obj.strftime("%H:%M:%S"))
                 self.date_var.set(date_time_obj.strftime("%m/%d/%Y"))
+                self.check_alarm(date_time_obj.strftime("%H:%M:%S"))
             except ValueError as e:
                 print(f"Value provided is not in the expected format: {e}")
         else:
