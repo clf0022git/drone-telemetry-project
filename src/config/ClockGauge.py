@@ -24,20 +24,27 @@ class ClockGauge(GaugeBase):
         self.date_label = tk.Label(self, textvariable=self.date_var, font=('Arial', 16))
         self.date_label.pack()
 
-        # List of timestamps to alarm for in clock_csv mode
-        self.alarm_times = []
+        # List of alarm timestamps for clock_csv mode
+        self.alarm_timestamps = []
 
-    def add_alarm(self, timestamp):
-        """Add a timestamp to alarm for in clock_csv mode."""
-        self.alarm_times.append(timestamp)
+    def add_alarm(self, timestamp_str):
+        """Add an alarm timestamp."""
+        try:
+            datetime.strptime(timestamp_str, "%m/%d/%Y %H:%M:%S")
+            self.alarm_timestamps.append(timestamp_str)
+        except ValueError as e:
+            print(f"Invalid timestamp format: {e}")
 
-    def remove_alarm(self, timestamp):
-        """Remove a timestamp to alarm for in clock_csv mode."""
-        self.alarm_times.remove(timestamp)
+    def remove_alarm(self, timestamp_str):
+        """Remove an alarm timestamp."""
+        try:
+            self.alarm_timestamps.remove(timestamp_str)
+        except ValueError:
+            print(f"Timestamp not found in alarm list: {timestamp_str}")
 
     def check_alarm(self, value):
-        """Check if the value is in the list of timestamps to alarm for."""
-        if value in self.alarm_times:
+        """Check if the value (timestamp) is in the alarm list."""
+        if self.mode == 'clock_csv' and value in self.alarm_timestamps:
             self.trigger_alarm()
 
     def get_initial_time_display(self):
@@ -75,7 +82,7 @@ class ClockGauge(GaugeBase):
                 date_time_obj = datetime.strptime(value, "%m/%d/%Y %H:%M:%S")
                 self.time_var.set(date_time_obj.strftime("%H:%M:%S"))
                 self.date_var.set(date_time_obj.strftime("%m/%d/%Y"))
-                self.check_alarm(date_time_obj.strftime("%H:%M:%S"))
+                self.check_alarm(value)
             except ValueError as e:
                 print(f"Value provided is not in the expected format: {e}")
         else:
@@ -158,6 +165,7 @@ if __name__ == "__main__":
 
     # Update the clock with a value from a CSV file (format: "MM/DD/YYYY HH:MM:SS")
     csv_time_str = "1/25/2020 20:08:03"
+    csv_clock_gauge.add_alarm(csv_time_str)
     csv_clock_gauge.update_value(csv_time_str)
 
     update_stopwatch()
