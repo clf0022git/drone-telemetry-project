@@ -9,7 +9,7 @@ import sys
 import traceback
 from tkinter import ttk, filedialog
 
-from src.config.ClockGauge import ClockGauge
+from src.config.ClockDisplayGauge import ClockGauge
 from src.config.CustomizationGaugeManager import CustomizationGaugeManager
 from src.config.TextDisplayGauge import TextDisplayGauge
 from src.playback.video import VideoPlayer
