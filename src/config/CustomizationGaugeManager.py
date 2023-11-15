@@ -13,7 +13,7 @@ import matplotlib.animation as animation
 
 from src.config.BarGauge import BarGauge
 from src.config.CircleGauge import CircleGauge
-from src.config.ClockDisplayGauge import ClockGauge
+from src.config.ClockGauge import ClockGauge
 from src.config.LightIndicatorGauge import LightIndicatorGauge
 from src.config.NumberDisplayGauge import NumberDisplayGauge
 from src.config.TextDisplayGauge import TextDisplayGauge
