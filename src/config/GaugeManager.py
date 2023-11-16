@@ -225,30 +225,61 @@ class GaugeManager:
                         data_manager.data_file.at[current_time, element.second_field_name],
                         data_manager.data_file.at[current_time, element.second_field_name])
 
+                    current_value = data_manager.data_file.at[current_time, element.field_name[0]]
+                    current_value_two = data_manager.data_file.at[current_time, element.second_field_name]
+                    current_value = "Current value: " + str(current_value) + " and " + str(current_value_two)
+
+                    self.gauge_instance_list[i].gauge.description_label.config(text=current_value)
+
                 # Case for animating the x-graph
                 case "X-Plot":
                     self.gauge_instance_list[i].gauge.update_value(
                         data_manager.data_file.at[current_time, element.field_name[0]])
+
+                    current_value = data_manager.data_file.at[current_time, element.field_name[0]]
+                    current_value = str(current_value)
+
+                    self.gauge_instance_list[i].gauge.description_label.config(text=current_value)
 
                 # Case for animating the bar graph
                 case "Bar-Graph":
                     self.gauge_instance_list[i].gauge.update_value(
                         data_manager.data_file.at[current_time, element.field_name[0]])
 
+                    current_value = data_manager.data_file.at[current_time, element.field_name[0]]
+                    current_value = str(current_value)
+
+                    self.gauge_instance_list[i].gauge.description_label.config(text=current_value)
+
                 # Case for animating the 90 degree circle graph
                 case "Circle - 90°":
                     self.gauge_instance_list[i].gauge.update_value(
                         data_manager.data_file.at[current_time, element.field_name[0]])
+
+                    current_value = data_manager.data_file.at[current_time, element.field_name[0]]
+                    current_value = str(current_value)
+
+                    self.gauge_instance_list[i].gauge.description_label.config(text=current_value)
 
                 # Case for animating the 180 degree circle graph
                 case "Circle - 180°":
                     self.gauge_instance_list[i].gauge.update_value(
                         data_manager.data_file.at[current_time, element.field_name[0]])
 
+                    current_value = data_manager.data_file.at[current_time, element.field_name[0]]
+                    current_value = str(current_value)
+
+                    self.gauge_instance_list[i].gauge.description_label.config(text=current_value)
+
                 # Case for animating the 270 degree circle graph
                 case "Circle - 270°":
                     self.gauge_instance_list[i].gauge.update_value(
                         data_manager.data_file.at[current_time, element.field_name[0]])
+
+                    current_value = data_manager.data_file.at[current_time, element.field_name[0]]
+                    current_value = str(current_value)
+
+                    self.gauge_instance_list[i].gauge.description_label.config(text=current_value)
 
                 # Case for animating the 360 degree circle graph
                 case "Circle - 360°":
@@ -256,32 +287,67 @@ class GaugeManager:
                     self.gauge_instance_list[i].gauge.update_value(
                         data_manager.data_file.at[current_time, element.field_name[0]])
 
+                    current_value = data_manager.data_file.at[current_time, element.field_name[0]]
+                    current_value = str(current_value)
+
+                    self.gauge_instance_list[i].gauge.description_label.config(text=current_value)
+
                 # Case for animating the text display
                 case "Text Display":
                     self.gauge_instance_list[i].gauge.update_value(
                         data_manager.data_file.at[current_time, element.field_name[0]])
+
+                    current_value = data_manager.data_file.at[current_time, element.field_name[0]]
+                    current_value = str(current_value)
+
+                    self.gauge_instance_list[i].gauge.description_label.config(text=current_value)
 
                 # Case for animating the number/character display
                 case "Number or Character Display":
                     self.gauge_instance_list[i].gauge.update_value(
                         data_manager.data_file.at[current_time, element.field_name[0]])
 
+                    current_value = data_manager.data_file.at[current_time, element.field_name[0]]
+                    current_value = str(current_value)
+
+                    self.gauge_instance_list[i].gauge.description_label.config(text=current_value)
+
                 # Case for animating the clock
                 case "Clock":
                     self.gauge_instance_list[i].gauge.update_value(data_manager.data_file.at[current_time, element.field_name[0]])
+
+                    current_value = data_manager.data_file.at[current_time, element.field_name[0]]
+                    current_value = str(current_value)
+
+                    self.gauge_instance_list[i].gauge.description_label.config(text=current_value)
 
                 # Case for animating the stopwatch
                 case "Stopwatch":
                     self.gauge_instance_list[i].gauge.update_value()
 
+                    current_value = data_manager.data_file.at[current_time, element.field_name[0]]
+                    current_value = str(current_value)
+
+                    self.gauge_instance_list[i].gauge.description_label.config(text=current_value)
+
                 # Case for animating the running time gauge
                 case "Running Time":
                     self.gauge_instance_list[i].gauge.update_value(current_time)
+
+                    current_value = data_manager.data_file.at[current_time, element.field_name[0]]
+                    current_value = str(current_value)
+
+                    self.gauge_instance_list[i].gauge.description_label.config(text=current_value)
 
                 # Case for animating the on/off light
                 case "On/off light":
                     self.gauge_instance_list[i].gauge.update_value(
                         data_manager.data_file.at[current_time, element.field_name[0]])
+
+                    current_value = data_manager.data_file.at[current_time, element.field_name[0]]
+                    current_value = str(current_value)
+
+                    self.gauge_instance_list[i].gauge.description_label.config(text=current_value)
 
                 # Default case
                 case _:
