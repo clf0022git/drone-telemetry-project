@@ -26,60 +26,11 @@ class GaugeManager:
 
     def __init__(self):
         self.name = None
-        # self.render_window = GaugeWindow()
-        self.gauge_container = []
-
-        # Variables for instantiating each of the gauges
-        self.x_y_graph = None
-        self.x_plot = None
-        self.bar_graph = None
-        self.circle_gauge_90 = None
-        self.circle_gauge_180 = None
-        self.circle_gauge_270 = None
-        self.circle_gauge_360 = None
-        self.text_gauge = None
-        self.num_gauge = None
-        self.clock_gauge = None
-        self.stopwatch_gauge = None
-        self.running_gauge = None
-        self.indicator_light = None
-
-        # List containers for each of the gauges' data sets
-        self.x_axis_list = []
-        self.y_axis_list = []
-        self.x_plot_list = []
-        self.bar_graph_list = []
-        self.circle_gauge_90_list = []
-        self.circle_gauge_180_list = []
-        self.circle_gauge_270_list = []
-        self.circle_gauge_360_list = []
-        self.text_gauge_list = []
-        self.num_gauge_list = []
-        self.clock_gauge_list = []
-        self.stopwatch_gauge_list = []
-        self.running_gauge_list = []
-        self.indicator_light_list = []
-
-        # Alarm values
-        self.x_y_alarm = None
-        self.x_alarm = None
-        self.bar_alarm = None
-        self.circle_alarm_90 = None
-        self.circle_alarm_180 = None
-        self.circle_alarm_270 = None
-        self.circle_alarm_360 = None
-        self.text_alarm = None
-        self.num_alarm = None
-        self.clock_alarm = None
-        self.stopwatch_alarm = None
-        self.running_alarm = None
-        self.indicator_alarm = None
-
-        # Increment for animation
-        self.anim_inc = 0
-
         # List for the gauges that are created during runtimer
         self.gauge_instance_list = []
+
+    def delete_gauges(self):
+        self.gauge_instance_list.clear()
 
     # Function for drawing each of the functions out
     def draw_gauges(self, data_manager: DataManager, gauge_window):

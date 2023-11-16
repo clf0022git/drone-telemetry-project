@@ -522,6 +522,9 @@ class GaugeCustomizationPanel(ttk.Frame):
         # TODO: Add widgets to display statistics like min, max, average, etc.
 
     def create_window(self):
+        if self.gauge_window is not None:
+            self.gauge_window.destroy()
+            self.display_gauge_manager.delete_gauges()
         self.gauge_window = tk.Toplevel()
         self.gauge_window.title("Gauge View")
         self.gauge_window.geometry("1000x700")
