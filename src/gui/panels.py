@@ -398,7 +398,7 @@ class GaugeCustomizationPanel(ttk.Frame):
         self.label.pack(pady=10)
         self.data_manager = None
         self.gauge_manager = CustomizationGaugeManager()
-        self.fileManager = FileManager
+        self.config_panel = None
 
         # Frame to hold the gauge viewer
         self.gauge_viewer_frame = tk.Frame(self)
@@ -445,6 +445,10 @@ class GaugeCustomizationPanel(ttk.Frame):
 
         self.saveButton = ttk.Button(self, text="Save Data", command=self.save_data)
         self.saveButton.pack(pady=2)
+
+        self.loadButton = ttk.Button(self, text="Load Data", command=self.load_data)
+        self.loadButton.pack(pady=2)
+
         self.current_gauge_view_and_settings = tk.Frame(self)
         self.current_gauge_view_and_settings.pack(side=tk.TOP)
 
@@ -524,6 +528,10 @@ class GaugeCustomizationPanel(ttk.Frame):
         self.display_gauge_window_btn = tk.Button(self, text="Show Gauges on Window", command=self.create_window)
         self.display_gauge_window_btn.pack(side=tk.TOP)
 
+        self.alarm_listbox = None
+        self.alarm_add_button = None
+        self.alarm_list = []
+
         self.gauge_window = None
 
         self.display_gauge_manager = GaugeManager()  # Ryan's gauge manager
@@ -564,7 +572,7 @@ class GaugeCustomizationPanel(ttk.Frame):
         self.gauge_window.title("Gauge View")
         self.gauge_window.geometry("1000x700")
         self.gauge_window.resizable(True, True)
-        self.display_gauge_manager.draw_gauges(self.data_manager, self.gauge_window, self.input_position)
+        self.display_gauge_manager.draw_gauges(self.data_manager, self.gauge_window, self.input_position, self.alarm_list)
         self.display_gauge_manager.update_color_ranges(self.data_manager)
 
     def draw_range_options(self):
@@ -744,6 +752,27 @@ class GaugeCustomizationPanel(ttk.Frame):
 
     def set_data_manager(self, config_panel: ConfigurationPanel):
         self.data_manager = config_panel.data_manager
+        self.config_panel = config_panel
+
+    def draw_clock_alarm_options(self):
+        self.alarm_listbox = tk.Listbox(self, selectmode=tk.SINGLE, height=5,
+                                        exportselection=0, width=30)
+        self.alarm_listbox.pack(pady=5)
+
+        for alarm in self.data_manager.data_file["CUSTOM.updateTime"]:
+            self.alarm_listbox.insert(tk.END, alarm)
+
+        self.alarm_listbox.bind("<Double-1>", self.add_alarm)
+
+    def add_alarm(self, event=None):
+        #from datetime import datetime
+        index = self.alarm_listbox.curselection()
+        if index:
+            alarm_item: str = self.alarm_listbox.get(index)
+            #alarm_item.replace("-", "/")
+            #datetime.strptime(alarm_item, "%m/%d/%Y %H:%M:%S")
+            self.alarm_list.append(alarm_item)
+            print(alarm_item)
 
     def update_gauges(self, reset_position):
         if reset_position:
@@ -758,6 +787,8 @@ class GaugeCustomizationPanel(ttk.Frame):
                 print("Drawing the range options!")
                 self.draw_range_options()
             self.clicked.set(self.data_manager.user_selected_gauges_list[self.current_gauge_position].position)
+            if g_name in ["Clock"]:
+                self.draw_clock_alarm_options()
             # Clears temp widget
             for widget in self.current_gauge_view.winfo_children():
                 widget.destroy()
@@ -790,7 +821,28 @@ class GaugeCustomizationPanel(ttk.Frame):
             print(self.data_manager.user_selected_gauges_list[self.current_gauge_position].name)
 
     def save_data(self):
-        self.fileManager.save_gauges(self.data_manager.user_selected_gauges_list)
+        json_path = filedialog.asksaveasfilename(filetypes=[("JSON files", "*.json")], title="Save as...")
+        if json_path:  # If a file is selected
+            print(f"JSON File Loaded: {json_path}")
+
+        if not json_path:
+            return
+
+        FileManager.save_gauges(self.data_manager.user_selected_gauges_list, json_path)
+
+    def load_data(self):
+        json_path = filedialog.askopenfilename(filetypes=[("JSON files", "*.json")], title="Select a JSON File")
+        if json_path:  # If a file is selected
+            print(f"JSON File Loaded: {json_path}")
+
+        if not json_path:
+            return
+        FileManager.load_gauges(self.data_manager, json_path)
+        statistics_list = []
+        for gauge in self.data_manager.user_selected_gauges_list:
+            statistics_list.append(gauge.statistics)
+        self.data_manager.statistics_list = statistics_list
+        self.update_gauges(True)
 
 
 class PlaybackPanel(ttk.Frame):

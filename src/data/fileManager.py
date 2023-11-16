@@ -1,7 +1,6 @@
-from src.config.NumberDisplayGauge import NumberDisplayGauge
-from src.config.XYPlotGauge import XYPlotGauge
 import json
 import os
+from src.data.input import *
 
 
 class FileManager:
@@ -18,6 +17,11 @@ class FileManager:
                 'gauge_name': gauge.gauge_name,
                 'timestamp_value': gauge.timestamp_value,
                 'name': gauge.name,
+                'data': gauge.data,
+                'statistics': gauge.statistics,
+                'statistics_two': gauge.statistics_two,
+                'statistics_values': gauge.statistics_values,
+                'statistics_values_two': gauge.statistics_values_two,
                 'statistics': gauge.statistics,
                 'blue_range': (gauge.blue_range_low, gauge.blue_range_high),
                 'green_range': (gauge.green_range_low, gauge.green_range_high),
@@ -31,7 +35,7 @@ class FileManager:
             json.dump(gauge_data, outfile, indent=4)
 
     @staticmethod
-    def load_gauges(master, data_manager, filename="savedGauges.json"):
+    def load_gauges(data_manager, filename="savedGauges.json"):
         # Load data from a file
         with open(filename, 'r') as infile:
             gauge_data = json.load(infile)
@@ -39,12 +43,23 @@ class FileManager:
         # Deserialize the JSON data back into gauge objects
         gauge_list = []
         for data in gauge_data:
-            pass
-            #  Create gauge objects here based on the data
-            # if data.gauge_name == 'X-by-Y-plot':
-            #     gauge = XYPlotGauge(master)
-            # elif data.gauge_name == 'Number or Character Display':
-            #     gauge = NumberDisplayGauge(master)
-            #gauge_list.append(gauge)
+            # Create gauge objects here based on the data
+            gauge = TemporaryGauge([data["field_name"]], data["gauge_name"], data["timestamp_value"], data["data"])
+            gauge.id = data["id"]
+            gauge.name = data["name"]
+            gauge.statistics = data["statistics"]
+            gauge.statistics_two = data["statistics_two"]
+            gauge.statistics_values = data["statistics_values"]
+            gauge.statistics_values_two = data["statistics_values_two"]
+            gauge.blue_range_low = data["blue_range"][0]
+            gauge.blue_range_high = data["blue_range"][1]
+            gauge.green_range_low = data["green_range"][0]
+            gauge.green_range_high = data["green_range"][1]
+            gauge.yellow_range_low = data["yellow_range"][0]
+            gauge.yellow_range_high = data["yellow_range"][1]
+            gauge.red_range_low = data["red_range"][0]
+            gauge.red_range_high = data["red_range"][1]
+            gauge_list.append(gauge)
 
+        data_manager.user_selected_gauges_list = gauge_list
         return gauge_list

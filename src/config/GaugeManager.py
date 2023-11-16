@@ -34,7 +34,7 @@ class GaugeManager:
         self.gauge_instance_list.clear()
 
     # Function for drawing each of the functions out
-    def draw_gauges(self, data_manager: DataManager, gauge_window, position_l):
+    def draw_gauges(self, data_manager: DataManager, gauge_window, alarm_list, position_l):
         position_list = position_l
         for i, element in enumerate(data_manager.user_selected_gauges_list):
             print(type(element.statistics_values))
@@ -208,7 +208,7 @@ class GaugeManager:
                     gauge_instance = GaugeInstance()
                     self.gauge_instance_list.append(gauge_instance)
 
-                    gauge_instance.gauge = ClockGauge(gauge_window, title=element.name, description="Local Time")
+                    gauge_instance.gauge = ClockGauge(gauge_window, title=element.name, description='CSV Timestamp', mode='clock_csv')
 
                     if element.position == 0:
                         position = position_list.pop() - 1
@@ -218,6 +218,10 @@ class GaugeManager:
                         gauge_instance.gauge.grid(row=0, column=position)
                     else:
                         gauge_instance.gauge.grid(row=1, column=position - 5)
+                        
+                    for alarm in alarm_list:
+                        gauge_instance.gauge.add_alarm(alarm)
+                        
                 # Case for drawing the stopwatch
                 case "Stopwatch":
                     gauge_instance = GaugeInstance()
@@ -373,7 +377,7 @@ class GaugeManager:
 
                 # Case for animating the clock
                 case "Clock":
-                    self.gauge_instance_list[i].gauge.update_value()
+                    self.gauge_instance_list[i].gauge.update_value(data_manager.data_file.at[current_time, element.field_name[0]])
 
                     current_value = data_manager.data_file.at[current_time, element.field_name[0]]
                     current_value = str(current_value)
@@ -391,7 +395,7 @@ class GaugeManager:
 
                 # Case for animating the running time gauge
                 case "Running Time":
-                    self.gauge_instance_list[i].gauge.update_value()
+                    self.gauge_instance_list[i].gauge.update_value(current_time)
 
                     current_value = data_manager.data_file.at[current_time, element.field_name[0]]
                     current_value = str(current_value)
