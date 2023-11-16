@@ -521,6 +521,7 @@ class GaugeCustomizationPanel(ttk.Frame):
 
         self.alarm_listbox = None
         self.alarm_add_button = None
+        self.alarm_list = []
 
         self.gauge_window = None
 
@@ -536,7 +537,7 @@ class GaugeCustomizationPanel(ttk.Frame):
         self.gauge_window.title("Gauge View")
         self.gauge_window.geometry("1000x700")
         self.gauge_window.resizable(True, True)
-        self.display_gauge_manager.draw_gauges(self.data_manager, self.gauge_window)
+        self.display_gauge_manager.draw_gauges(self.data_manager, self.gauge_window, self.alarm_list)
         self.display_gauge_manager.update_color_ranges(self.data_manager)
 
     def draw_range_options(self):
@@ -723,13 +724,20 @@ class GaugeCustomizationPanel(ttk.Frame):
                                         exportselection=0, width=30)
         self.alarm_listbox.pack(pady=5)
 
-        #self.alarm_add_button = tk.Button(self, text="Add Alarm", command=self.add_alarm)
-
         for alarm in self.data_manager.data_file["CUSTOM.updateTime"]:
             self.alarm_listbox.insert(tk.END, alarm)
 
-    #def add_alarm(self):
+        self.alarm_listbox.bind("<Double-1>", self.add_alarm)
 
+    def add_alarm(self, event=None):
+        #from datetime import datetime
+        index = self.alarm_listbox.curselection()
+        if index:
+            alarm_item: str = self.alarm_listbox.get(index)
+            #alarm_item.replace("-", "/")
+            #datetime.strptime(alarm_item, "%m/%d/%Y %H:%M:%S")
+            self.alarm_list.append(alarm_item)
+            print(alarm_item)
 
     def update_gauges(self, reset_position):
         if reset_position:

@@ -33,7 +33,7 @@ class GaugeManager:
         self.gauge_instance_list.clear()
 
     # Function for drawing each of the functions out
-    def draw_gauges(self, data_manager: DataManager, gauge_window):
+    def draw_gauges(self, data_manager: DataManager, gauge_window, alarm_list):
         for i, element in enumerate(data_manager.user_selected_gauges_list):
             print(type(element.statistics_values))
             match element.gauge_name:
@@ -168,6 +168,10 @@ class GaugeManager:
                         gauge_instance.gauge.grid(row=0, column=i)
                     else:
                         gauge_instance.gauge.grid(row=1, column=i - 5)
+
+                    for alarm in alarm_list:
+                        gauge_instance.gauge.add_alarm(alarm)
+
                 # Case for drawing the stopwatch
                 case "Stopwatch":
                     gauge_instance = GaugeInstance()

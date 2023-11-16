@@ -32,8 +32,8 @@ class ClockGauge(GaugeBase):
         """Add an alarm timestamp for clock_csv case."""
         if self.mode == 'clock_csv':
             try:
-                #datetime.strptime(timestamp_str, "%m/%d/%Y %H:%M:%S")
-                timestamp.strftime("%m/%d/%Y %H:%M:%S")
+                datetime.strptime(timestamp, "%m/%d/%Y %H:%M:%S")
+                #timestamp.strftime("%m/%d/%Y %H:%M:%S")
                 self.alarm_timestamps.append(timestamp)
             except ValueError as e:
                 print(f"Invalid timestamp format: {e}")
