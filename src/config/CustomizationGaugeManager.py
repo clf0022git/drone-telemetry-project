@@ -13,7 +13,7 @@ import matplotlib.animation as animation
 
 from src.config.BarGauge import BarGauge
 from src.config.CircleGauge import CircleGauge
-from src.config.ClockDisplayGauge import ClockGauge
+from src.config.ClockGauge import ClockGauge
 from src.config.LightIndicatorGauge import LightIndicatorGauge
 from src.config.NumberDisplayGauge import NumberDisplayGauge
 from src.config.TextDisplayGauge import TextDisplayGauge
@@ -50,30 +50,43 @@ class CustomizationGaugeManager:
                 v_bar_gauge.set_figure_size(4, 3)
 
                 # Set the bounds for the bar gauges
-                v_bar_gauge.set_bounds(y_bounds=(element.statistics_values.get('Minimum'), element.statistics_values.get('Maximum')))
+                v_bar_gauge.set_bounds(
+                    y_bounds=(0, element.statistics_values.get('Maximum')))
             # Case for getting the data and drawing  the 90 degree circle graph
             case "Circle - 90°":
-                circle_gauge = CircleGauge(root, title=element.name, max_degree=90)
+                circle_gauge = CircleGauge(root, title=element.name, max_degree=90,
+                                           number_range=(0,
+                                                         element.statistics_values.get('Maximum')),
+                                           number_step=1)
                 circle_gauge.pack(padx=10, pady=10)
-                circle_gauge.update_value(10)  # Update to a sample value
+                circle_gauge.update_value(element.statistics_values.get('Maximum'))
 
             # Case for getting the data and drawing  the 180 degree circle graph
             case "Circle - 180°":
-                circle_gauge = CircleGauge(root, title=element.name, max_degree=180)
+                circle_gauge = CircleGauge(root, title=element.name, max_degree=180,
+                                           number_range=(0,
+                                                         element.statistics_values.get('Maximum')),
+                                           number_step=1)
                 circle_gauge.pack(padx=10, pady=10)
-                circle_gauge.update_value(10)  # Update to a sample value
+                circle_gauge.update_value(element.statistics_values.get('Maximum'))  # Update to a sample value
 
             # Case for getting the data and drawing  the 270 degree circle graph
             case "Circle - 270°":
-                circle_gauge = CircleGauge(root, title=element.name, max_degree=270)
+                circle_gauge = CircleGauge(root, title=element.name, max_degree=270,
+                                           number_range=(0,
+                                                         element.statistics_values.get('Maximum')),
+                                           number_step=1)
                 circle_gauge.pack(padx=10, pady=10)
-                circle_gauge.update_value(10)  # Update to a sample value
+                circle_gauge.update_value(element.statistics_values.get('Maximum'))
 
             # Case for getting the data and drawing  the 360 degree circle graph
             case "Circle - 360°":
-                circle_gauge = CircleGauge(root, title=element.name, max_degree=360)
+                circle_gauge = CircleGauge(root, title=element.name, max_degree=360,
+                                           number_range=(0,
+                                                         element.statistics_values.get('Maximum')),
+                                           number_step=1)
                 circle_gauge.pack(padx=10, pady=10)
-                circle_gauge.update_value(10)  # Update to a sample value
+                circle_gauge.update_value(element.statistics_values.get('Maximum'))
 
             # Case for getting data and drawing  the text display
             case "Text Display":

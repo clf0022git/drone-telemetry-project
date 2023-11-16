@@ -5,11 +5,11 @@ from matplotlib.figure import Figure
 
 
 class XYPlotGauge(GaugeBase):
-    def __init__(self, master, name=f'XY Plot Gauge', title='XY Plot', description='', connect_dots=False, *args, **kwargs):
+    def __init__(self, master, name=f'XY Plot Gauge', title='XY Plot', description='', connect_dots=False, crosshair_colormatch=False, *args, **kwargs):
         super().__init__(master, name=f'{name}-{id(self)}', title=title, description=description, *args, **kwargs)
 
         # Initialize the figure and axis for the plot
-        self.figsize = kwargs.get('figsize', (5, 4))  # Default figure size can be overridden with kwargs
+        self.figsize = kwargs.get('figsize', (4, 3))  # Default figure size can be overridden with kwargs
         self.figure = Figure(figsize=self.figsize, dpi=100)
         self.axis = self.figure.add_subplot(111)
 
@@ -23,29 +23,64 @@ class XYPlotGauge(GaugeBase):
         self.y_values = []
         self.colors = []
 
+        self.current_color = None
+
         self.connect_dots = connect_dots
         if self.connect_dots:
             self.line, = self.axis.plot([], [], color='black')
 
+        # Holds the matplotlib scatter plot objects
+        self.current_point = None
+        self.previous_point = None
+
+        # Initialize default plot bounds
+        self.x_bounds = (-15, 15)
+        self.y_bounds = (-15, 15)
+
+        # Color matching for crosshairs
+        self.crosshair_colormatch = crosshair_colormatch
+
         # Additional text for the matplotlib figure
         self.figure_text = None
 
-    def update_value(self, x, y, value):
-        """Update the plot with a new data point and its value."""
-        # Add the new data point and its color based on the value
-        self.x_values.append(x)
-        self.y_values.append(y)
-        color = self.get_color_for_value(value)
-        self.colors.append(color)
+    def draw_crosshairs(self, x, y):
+        """Draw crosshairs on the current dot."""
+        # Clear existing crosshairs
+        if hasattr(self, 'crosshair_hline') and hasattr(self, 'crosshair_vline'):
+            self.crosshair_hline.remove()
+            self.crosshair_vline.remove()
 
-        # Plot the new data point
-        self.axis.scatter(x, y, color=color)
+        # Draw horizontal and vertical lines for crosshairs
+        self.crosshair_hline = self.axis.axhline(y, color=(self.current_color if self.crosshair_colormatch else 'black'), linestyle='--')
+        self.crosshair_vline = self.axis.axvline(x, color=(self.current_color if self.crosshair_colormatch else 'black'), linestyle='--')
         self.canvas.draw_idle()
 
-        # If connect_dots is True, update the line with the new data point
-        if self.connect_dots:
-            self.line.set_data(self.x_values, self.y_values)
-            self.canvas.draw_idle()
+    def update_value(self, x, y, value):
+        """Update the plot with a new data point and its value."""
+        # Store the current point as the previous point
+        self.previous_point = self.current_point
+        # Update the current point
+        self.current_point = (x, y, value)
+
+        # Clear the plot and reset bounds
+        self.axis.clear()
+        self.set_bounds(x_bounds=self.x_bounds, y_bounds=self.y_bounds)
+
+        # Redraw the previous point if it exists
+        if self.previous_point:
+            px, py, pvalue = self.previous_point
+            pcolor = self.get_color_for_value(pvalue)
+            self.axis.scatter(px, py, color=pcolor)
+
+        # Draw the current point
+        self.current_color = color = self.get_color_for_value(value)
+        self.axis.scatter(x, y, color=color)
+
+        # Add crosshairs to the current dot
+        self.draw_crosshairs(x, y)
+
+        # Redraw the plot
+        self.canvas.draw_idle()
 
         # Check for alarm condition
         self.check_alarm(value)
@@ -79,9 +114,11 @@ class XYPlotGauge(GaugeBase):
     def set_bounds(self, x_bounds=None, y_bounds=None):
         """Set the x/y bounds of the plot."""
         if x_bounds:
-            self.axis.set_xlim(x_bounds)
+            self.x_bounds = x_bounds
         if y_bounds:
-            self.axis.set_ylim(y_bounds)
+            self.y_bounds = y_bounds
+        self.axis.set_xlim(self.x_bounds)
+        self.axis.set_ylim(self.y_bounds)
         self.canvas.draw_idle()
 
 
@@ -90,10 +127,10 @@ if __name__ == "__main__":
     root = tk.Tk()
     root.title("XY Plot Gauge Example")
 
-    xy_plot_gauge = XYPlotGauge(root, title='Drone Position', description='Drone X-Y Plot', connect_dots=True)
+    xy_plot_gauge = XYPlotGauge(root, title='Drone Position', description='Drone X-Y Plot', crosshair_colormatch=False)
     xy_plot_gauge.pack(fill=tk.BOTH, expand=True)
 
-    xy_plot_gauge.set_bounds(x_bounds=(-10, 10), y_bounds=(-10, 10))
+    # xy_plot_gauge.set_bounds(x_bounds=(-10, 10), y_bounds=(-10, 10))  # Uncomment to set custom bounds
 
     xy_plot_gauge.set_figure_title("Drone Position")
 

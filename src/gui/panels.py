@@ -9,7 +9,7 @@ import sys
 import traceback
 from tkinter import ttk, filedialog
 
-from src.config.ClockDisplayGauge import ClockGauge
+from src.config.ClockGauge import ClockGauge
 from src.config.CustomizationGaugeManager import CustomizationGaugeManager
 from src.config.TextDisplayGauge import TextDisplayGauge
 from src.playback.video import VideoPlayer
@@ -159,8 +159,8 @@ class ConfigurationPanel(ttk.Frame):
         self.select_field_btn.pack(pady=10)
 
         # Button to select field with gauge
-        #self.generate_gauges_btn = ttk.Button(self, text="Generate Gauges", command=self.generate_gauges)
-        #self.generate_gauges_btn.pack(pady=10, side=tk.TOP)
+        # self.generate_gauges_btn = ttk.Button(self, text="Generate Gauges", command=self.generate_gauges)
+        # self.generate_gauges_btn.pack(pady=10, side=tk.TOP)
 
         self.speed_label = ttk.Label(self, font=("Roboto Light", 10), text="Playback Speed:")
         self.speed_label.pack(pady=5)
@@ -169,7 +169,7 @@ class ConfigurationPanel(ttk.Frame):
         self.speed_frame = ttk.Frame(self)
         self.speed_frame.pack(pady=5)
 
-        self.playback_speed_list = ['1X', '5X', '10X', '1X backwards']
+        self.playback_speed_list = ['1X', '5X', '1X backwards']
         self.playback_speed = tk.StringVar(value=self.playback_speed_list[0])
 
         self.speed_combobox = ttk.Combobox(self.speed_frame, textvariable=self.playback_speed,
@@ -203,6 +203,7 @@ class ConfigurationPanel(ttk.Frame):
         for element in self.data_manager.user_selected_gauges_list:
             field = element.field_name[0]
             print(element.field_name[0])
+            print("Help me")
             if self.data_manager.data_file[field].dtype == "int64" or self.data_manager.data_file[
                 field].dtype == "float64":
                 stats = self.data_processor.calc_statistics(self.data_manager.data_file[field], field)
@@ -316,7 +317,8 @@ class ConfigurationPanel(ttk.Frame):
             self.user_selection_list.delete(0, 'end')  # clear list before each call to update
             print("Called!")
             gt_list = self.data_manager.confirm_selection(selected_gauge, self.fieldnames_gauge_group,
-                                                          self.user_selection_list, self.gauge_customization_panel, self)
+                                                          self.user_selection_list, self.gauge_customization_panel,
+                                                          self)
             if len(gt_list) <= 10:
                 self.user_selection_list.insert(0, *gt_list)
                 # Functionality to ask user about the type of the data probably in between identifying gauges and
@@ -453,7 +455,7 @@ class GaugeCustomizationPanel(ttk.Frame):
         # Set up all the frames for the gauge settings
         self.current_gauge_settings_frame = tk.Frame(self.current_gauge_view_and_settings)
         self.current_gauge_settings_frame.pack(side=tk.LEFT)
-        
+
         self.name_frame = tk.Frame(self.current_gauge_settings_frame)
         self.name_frame.pack(side=tk.TOP)
         self.blue_frame = tk.Frame(self.current_gauge_settings_frame)
@@ -514,7 +516,25 @@ class GaugeCustomizationPanel(ttk.Frame):
         self.current_gauge_view = tk.Frame(self.current_gauge_view_and_settings)
         self.current_gauge_view.pack(side=tk.LEFT)
 
+        self.display_gauge_window_btn = tk.Button(self, text="Show Gauges on Window", command=self.create_window)
+        self.display_gauge_window_btn.pack(side=tk.TOP)
+
+        self.gauge_window = None
+
+        self.display_gauge_manager = GaugeManager()  # Ryan's gauge manager
+
         # TODO: Add widgets to display statistics like min, max, average, etc.
+
+    def create_window(self):
+        if self.gauge_window is not None:
+            self.gauge_window.destroy()
+            self.display_gauge_manager.delete_gauges()
+        self.gauge_window = tk.Toplevel()
+        self.gauge_window.title("Gauge View")
+        self.gauge_window.geometry("1000x700")
+        self.gauge_window.resizable(True, True)
+        self.display_gauge_manager.draw_gauges(self.data_manager, self.gauge_window)
+        self.display_gauge_manager.update_color_ranges(self.data_manager)
 
     def draw_range_options(self):
         self.current_gauge_blue_label = tk.Label(self.blue_frame, font=("Roboto Medium", 10), text="Blue Range:")
@@ -568,7 +588,7 @@ class GaugeCustomizationPanel(ttk.Frame):
         if len(self.data_manager.user_selected_gauges_list) != 0:
             new_name = self.current_gauge_name_entry.get()
             self.data_manager.user_selected_gauges_list[self.current_gauge_position].name = new_name
-            #self.current_gauge_text_label.config(text=new_name)
+            # self.current_gauge_text_label.config(text=new_name)
             print(new_name)
             for widget in self.current_gauge_view.winfo_children():
                 widget.destroy()
@@ -580,14 +600,25 @@ class GaugeCustomizationPanel(ttk.Frame):
     def change_blue(self):
         """Only changes the blue range if it fits within the detected minimum and maximum and the blue high is above
         the blue low"""
-        current_gauge_stats = self.data_manager.user_selected_gauges_list[self.current_gauge_position].statistics_values
+        current_gauge_stats = self.data_manager.user_selected_gauges_list[self.current_gauge_position]
 
         if len(self.data_manager.user_selected_gauges_list) != 0:
-            blue_low = self.current_gauge_blue_one_entry.get()
-            if current_gauge_stats.get('Minimum') <= blue_low <= current_gauge_stats.get('Maximum'):
+            if self.current_gauge_blue_one_entry.get() == "":
+                blue_low = 0
+            else:
+                blue_low = float(self.current_gauge_blue_one_entry.get())
+
+            if current_gauge_stats.statistics_values.get(
+                    'Minimum') <= blue_low <= current_gauge_stats.statistics_values.get('Maximum'):
                 current_gauge_stats.blue_range_low = blue_low
-            blue_high = self.current_gauge_blue_two_entry.get()
-            if current_gauge_stats.get('Minimum') <= blue_low <= current_gauge_stats.get('Maximum') and blue_high > blue_low:
+            if self.current_gauge_blue_two_entry.get() == "":
+                blue_high = 0
+            else:
+                blue_high = float(self.current_gauge_blue_two_entry.get())
+
+            if current_gauge_stats.statistics_values.get(
+                    'Minimum') <= blue_low <= current_gauge_stats.statistics_values.get(
+                    'Maximum') and blue_high > blue_low:
                 current_gauge_stats.blue_range_high = blue_high
             print(blue_low)
             print(blue_high)
@@ -595,13 +626,24 @@ class GaugeCustomizationPanel(ttk.Frame):
         self.current_gauge_blue_two_entry.delete(0, 'end')
 
     def change_green(self):
-        current_gauge_stats = self.data_manager.user_selected_gauges_list[self.current_gauge_position].statistics_values
+        current_gauge_stats = self.data_manager.user_selected_gauges_list[self.current_gauge_position]
         if len(self.data_manager.user_selected_gauges_list) != 0:
-            green_low = self.current_gauge_green_one_entry.get()
-            if current_gauge_stats.get('Minimum') <= green_low <= current_gauge_stats.get('Maximum'):
+            if self.current_gauge_green_one_entry.get() == "":
+                green_low = 0
+            else:
+                green_low = float(self.current_gauge_green_one_entry.get())
+
+            if current_gauge_stats.statistics_values.get(
+                    'Minimum') <= green_low <= current_gauge_stats.statistics_values.get('Maximum'):
                 current_gauge_stats.green_range_low = green_low
-            green_high = self.current_gauge_green_two_entry.get()
-            if current_gauge_stats.get('Minimum') <= green_high <= current_gauge_stats.get('Maximum') and green_high > green_low:
+            if self.current_gauge_green_two_entry.get() == "":
+                green_high = 0
+            else:
+                green_high = float(self.current_gauge_green_two_entry.get())
+
+            if current_gauge_stats.statistics_values.get(
+                    'Minimum') <= green_high <= current_gauge_stats.statistics_values.get(
+                    'Maximum') and green_high > green_low:
                 current_gauge_stats.green_range_high = green_high
             print(green_low)
             print(green_high)
@@ -609,13 +651,24 @@ class GaugeCustomizationPanel(ttk.Frame):
         self.current_gauge_green_two_entry.delete(0, 'end')
 
     def change_yellow(self):
-        current_gauge_stats = self.data_manager.user_selected_gauges_list[self.current_gauge_position].statistics_values
+        current_gauge_stats = self.data_manager.user_selected_gauges_list[self.current_gauge_position]
         if len(self.data_manager.user_selected_gauges_list) != 0:
-            yellow_low = self.current_gauge_yellow_one_entry.get()
-            if current_gauge_stats.get('Minimum') <= yellow_low <= current_gauge_stats.get('Maximum'):
+            if self.current_gauge_yellow_one_entry.get() == "":
+                yellow_low = 0
+            else:
+                yellow_low = float(self.current_gauge_yellow_one_entry.get())
+
+            if current_gauge_stats.statistics_values.get(
+                    'Minimum') <= yellow_low <= current_gauge_stats.statistics_values.get('Maximum'):
                 current_gauge_stats.yellow_range_low = yellow_low
-            yellow_high = self.current_gauge_yellow_two_entry.get()
-            if current_gauge_stats.get('Minimum') <= yellow_high <= current_gauge_stats.get('Maximum') and yellow_high > yellow_low:
+
+            if self.current_gauge_yellow_two_entry.get() == "":
+                yellow_high = 0
+            else:
+                yellow_high = float(self.current_gauge_yellow_two_entry.get())
+            if current_gauge_stats.statistics_values.get(
+                    'Minimum') <= yellow_high <= current_gauge_stats.statistics_values.get(
+                    'Maximum') and yellow_high > yellow_low:
                 current_gauge_stats.yellow_range_high = yellow_high
             print(yellow_low)
             print(yellow_high)
@@ -623,13 +676,25 @@ class GaugeCustomizationPanel(ttk.Frame):
         self.current_gauge_yellow_two_entry.delete(0, 'end')
 
     def change_red(self):
-        current_gauge_stats = self.data_manager.user_selected_gauges_list[self.current_gauge_position].statistics_values
+        current_gauge_stats = self.data_manager.user_selected_gauges_list[self.current_gauge_position]
         if len(self.data_manager.user_selected_gauges_list) != 0:
-            red_low = self.current_gauge_red_one_entry.get()
-            if current_gauge_stats.get('Minimum') <= red_low <= current_gauge_stats.get('Maximum'):
+            if self.current_gauge_red_one_entry.get() == "":
+                red_low = 0
+            else:
+                red_low = float(self.current_gauge_red_one_entry.get())
+
+            if current_gauge_stats.statistics_values.get(
+                    'Minimum') <= red_low <= current_gauge_stats.statistics_values.get('Maximum'):
                 current_gauge_stats.red_range_low = red_low
-            red_high = self.current_gauge_red_two_entry.get()
-            if current_gauge_stats.get('Minimum') <= red_high <= current_gauge_stats.get('Maximum') and red_high > red_low:
+
+            if self.current_gauge_red_two_entry.get() == "":
+                red_high = 0
+            else:
+                red_high = float(self.current_gauge_red_two_entry.get())
+
+            if current_gauge_stats.statistics_values.get(
+                    'Minimum') <= red_high <= current_gauge_stats.statistics_values.get(
+                    'Maximum') and red_high > red_low:
                 current_gauge_stats.red_range_high = red_high
             print(red_low)
             print(red_high)
@@ -672,15 +737,16 @@ class GaugeCustomizationPanel(ttk.Frame):
             self.current_gauge_text.delete("1.0", "end")
             self.current_gauge_statistics_text.delete("1.0", "end")
             self.current_gauge_text.insert(tk.END, self.current_gauge_text_list[self.current_gauge_position])
-            temp_statistics = self.data_manager.user_selected_gauges_list[self.current_gauge_position].statistics + self.data_manager.user_selected_gauges_list[self.current_gauge_position].statistics_two
+            temp_statistics = self.data_manager.user_selected_gauges_list[self.current_gauge_position].statistics + \
+                              self.data_manager.user_selected_gauges_list[self.current_gauge_position].statistics_two
             self.current_gauge_statistics_text.insert(tk.END, temp_statistics)
             print(temp_statistics)
-            #if self.data_manager.user_selected_gauges_list[self.current_gauge_position].name == "":
+            # if self.data_manager.user_selected_gauges_list[self.current_gauge_position].name == "":
             temp_text = "Gauge #" + str(self.data_manager.user_selected_gauges_list[self.current_gauge_position].id)
             self.current_gauge_text_label.config(text=temp_text)
-            #else:
-                #temp_text = str(self.data_manager.user_selected_gauges_list[self.current_gauge_position].name)
-                #self.current_gauge_text_label.config(text=temp_text)
+            # else:
+            # temp_text = str(self.data_manager.user_selected_gauges_list[self.current_gauge_position].name)
+            # self.current_gauge_text_label.config(text=temp_text)
             self.current_gauge_text.config(state="disabled")
             self.current_gauge_statistics_text.config(state="disabled")
             self.gauge_manager.draw_gauge(self.current_gauge_view,
@@ -766,6 +832,9 @@ class PlaybackPanel(ttk.Frame):
 
         self.update_ui()
 
+        # Ref to customization panel
+        self.gauge_customization_panel = None
+
     def set_video_path(self, video_path):
         self.video_path = video_path
         if self.video_path:  # if a file is selected
@@ -773,14 +842,22 @@ class PlaybackPanel(ttk.Frame):
             if self.video_player is None:
                 self.video_player = VideoPlayer(self, self.video_path)
                 self.video_player.pack(fill="both", expand=True)
+                self.video_player.bind_event("second-changed", self.update_graphs)
+                self.video_player.is_video_backwards = False
                 # self.video_player.bind_event("second-changed", self.on_second_changed)
                 # self.video_player.bind_event("duration-changed", self.on_duration_changed)
             else:
                 self.video_player.set_video_path(self.video_path)
+                self.video_player.is_video_backwards = False
 
             # Enable control buttons now that a video is loaded
             self.play_button.config(state=tk.NORMAL)
             self.pause_button.config(state=tk.NORMAL)
+
+    def update_graphs(self, current_time):
+        """Updates the gauges with current information"""
+        self.gauge_customization_panel.display_gauge_manager.update_gauges(self.gauge_customization_panel.data_manager,
+                                                                           current_time - 1)
 
     def play_video(self):
         if self.video_player:
@@ -837,28 +914,63 @@ class PlaybackPanel(ttk.Frame):
         if os.path.exists(reversed_video_path):
             print(f"Reversed video already exists: {reversed_video_path}")
             self.is_video_reversed = True
+            self.video_player.is_video_backwards = True
             self.set_video_path(reversed_video_path)
         else:
             try:
                 # Use ffmpeg to reverse the video
-                command = [
-                    'ffmpeg',
-                    '-i', self.video_path,
-                    '-vf', 'reverse',
-                    '-af', 'areverse',
-                    reversed_video_path
-                ]
-                subprocess.run(command, check=True)
-                print(f"Reversed video saved to {reversed_video_path}")
+                def run_command(command):
+                    subprocess.run(command, shell=True, check=True)
+
+                def split_video(input_vdeo, segment_length=30):
+                    # Create a directory to store the segments
+                    if not os.path.exists('segments'):
+                        os.makedirs('segments')
+
+                    cmd = f'ffmpeg -i {input_vdeo} -c copy -map 0 -segment_time {segment_length} -f segment -reset_timestamps 1 segments/output%03d.mp4'
+                    run_command(cmd)
+
+                def reverse_segments():
+                    files = os.listdir('segments')
+                    reversed_fls = []
+
+                    for file in files:
+                        if file.endswith('.mp4'):
+                            reversed_fl = 'reversed_' + file
+                            cmd = f'ffmpeg -i segments/{file} -vf reverse -af areverse segments/{reversed_fl}'
+                            run_command(cmd)
+                            reversed_fls.append(f'segments/{reversed_fl}')
+
+                    return reversed_fls
+
+                def combine_videos(files, output_video=reversed_video_path):
+                    with open('file_list.txt', 'w') as f:
+                        for file in files:
+                            f.write(f"file '{file}'\n")
+
+                    cmd = f'ffmpeg -f concat -safe 0 -i file_list.txt -c copy {output_video}'
+                    run_command(cmd)
+
+                    # Cleanup
+                    os.remove('file_list.txt')
+
+                input_video = self.video_path
+                split_video(input_video)
+                reversed_files = reverse_segments()
+                combine_videos(reversed_files)
 
                 # Replace the old video path with the new reversed video path
                 self.is_video_reversed = True
+                self.video_player.is_video_backwards = True
                 self.set_video_path(reversed_video_path)
             except subprocess.CalledProcessError as e:
                 self.is_video_reversed = False
+                self.video_player.is_video_backwards = False
                 print(f"ffmpeg error: {e}")
+                traceback.print_exc(file=sys.stderr)
             except Exception as e:
                 self.is_video_reversed = False
+                self.video_player.is_video_backwards = False
                 print(f"An error occurred while reversing the video: {e}")
                 traceback.print_exc(file=sys.stderr)
 

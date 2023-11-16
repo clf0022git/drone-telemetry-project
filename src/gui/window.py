@@ -28,6 +28,9 @@ class MainWindow(tk.Tk):
         # Pass a reference of the gauge customization panel to the config panel
         self.config_panel.gauge_customization_panel = self.gauge_panel
 
+        # Pass a reference of the customization_panel to the playback_panel
+        self.playback_panel.gauge_customization_panel = self.gauge_panel
+
         self.notebook.add(self.config_panel, text="Configuration")
         self.notebook.add(self.gauge_panel, text="Gauge Customization")
         self.notebook.add(self.playback_panel, text="Playback")

@@ -22,6 +22,7 @@ class FileManager:
                 'statistics_two': gauge.statistics_two,
                 'statistics_values': gauge.statistics_values,
                 'statistics_values_two': gauge.statistics_values_two,
+                'statistics': gauge.statistics,
                 'blue_range': (gauge.blue_range_low, gauge.blue_range_high),
                 'green_range': (gauge.green_range_low, gauge.green_range_high),
                 'yellow_range': (gauge.yellow_range_low, gauge.yellow_range_high),
