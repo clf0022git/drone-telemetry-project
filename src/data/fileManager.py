@@ -1,6 +1,7 @@
 import json
 import os
 from src.data.input import *
+import pandas as pd
 
 
 class FileManager:
@@ -45,7 +46,7 @@ class FileManager:
         gauge_list = []
         for data in gauge_data:
             # Create gauge objects here based on the data
-            gauge = TemporaryGauge([data["field_name"]], data["gauge_name"], data["timestamp_value"], data["data"])
+            gauge = TemporaryGauge([data["field_name"]], data["gauge_name"], pd.to_datetime(data["timestamp_value"]), data["data"])
             gauge.id = data["id"]
             gauge.name = data["name"]
             gauge.statistics = data["statistics"]

@@ -828,6 +828,10 @@ class GaugeCustomizationPanel(ttk.Frame):
         if not json_path:
             return
 
+        for gauge in self.data_manager.user_selected_gauges_list:
+            gauge = gauge.with_timestamp_as_string()
+
+        print(self.data_manager.user_selected_gauges_list)
         FileManager.save_gauges(self.data_manager.user_selected_gauges_list, json_path)
 
     def load_data(self):

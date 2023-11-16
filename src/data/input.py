@@ -478,3 +478,36 @@ class TemporaryGauge:
             stats.get('Average')) + "\n" + "Standard Deviation: " + str(
             stats.get('Standard Deviation')) + "\n"
         self.statistics_two = user_stats_string
+
+    def with_timestamp_as_string(self):
+        """Converts Pandas timestamp to string and returns a new instance of the class with copied attributes."""
+        timestamp_string = self.timestamp_value.strftime("%m/%d/%Y %H:%M:%S")
+        new_instance = TemporaryGauge(self.field_name, self.gauge_name, timestamp_string, self.data)
+        self._copy_attributes_to(new_instance)
+        return new_instance
+
+    def with_string_as_timestamp(self, timestamp_string):
+        """Converts a string to Pandas timestamp and returns a new instance of the class with copied attributes."""
+        timestamp = pd.to_datetime(timestamp_string)
+        new_instance = TemporaryGauge(self.field_name, self.gauge_name, timestamp, self.data)
+        self._copy_attributes_to(new_instance)
+        return new_instance
+
+    def _copy_attributes_to(self, new_instance):
+        """Copies attributes from the current instance to the new instance."""
+        new_instance.id = self.id
+        new_instance.second_field_name = self.second_field_name
+        new_instance.name = self.name
+        new_instance.statistics = self.statistics
+        new_instance.statistics_two = self.statistics_two
+        new_instance.statistics_values = self.statistics_values
+        new_instance.statistics_values_two = self.statistics_values_two
+        new_instance.blue_range_low = self.blue_range_low
+        new_instance.blue_range_high = self.blue_range_high
+        new_instance.green_range_low = self.green_range_low
+        new_instance.green_range_high = self.green_range_high
+        new_instance.yellow_range_low = self.yellow_range_low
+        new_instance.yellow_range_high = self.yellow_range_high
+        new_instance.red_range_low = self.red_range_low
+        new_instance.red_range_high = self.red_range_high
+        new_instance.position = self.position
