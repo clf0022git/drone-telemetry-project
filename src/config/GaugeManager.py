@@ -242,7 +242,7 @@ class GaugeManager:
                     self.gauge_instance_list[i].gauge.description_label.config(text=current_value)
 
                 # Case for animating the bar graph
-                case "Bar-Graph":
+                case "Bar":
                     self.gauge_instance_list[i].gauge.update_value(
                         data_manager.data_file.at[current_time, element.field_name[0]])
 
