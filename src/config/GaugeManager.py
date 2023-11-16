@@ -45,6 +45,7 @@ class GaugeManager:
                     self.gauge_instance_list.append(gauge_instance)
 
                     gauge_instance.gauge = XYPlotGauge(gauge_window, title=element.name)
+                    gauge_instance.gauge.set_bounds(x_bounds=(element.statistics_values.get('Minimum'), (element.statistics_values.get('Maximum'))), y_bounds=(element.statistics_values_two.get('Minimum'), (element.statistics_values_two.get('Maximum'))))
                     if i < 5:
                         gauge_instance.gauge.grid(row=0, column=i)
                     else:
@@ -55,6 +56,7 @@ class GaugeManager:
                     self.gauge_instance_list.append(gauge_instance)
 
                     gauge_instance.gauge = XPlotGauge(gauge_window, title=element.name)
+                    gauge_instance.gauge.set_bounds(x_bounds=(element.statistics_values.get('Minimum'), (element.statistics_values.get('Maximum'))))
                     if i < 5:
                         gauge_instance.gauge.grid(row=0, column=i)
                     else:
@@ -290,38 +292,6 @@ class GaugeManager:
                 green=(element.green_range_low, element.green_range_high),
                 yellow=(element.yellow_range_low, element.yellow_range_high),
                 red=(element.red_range_low, element.red_range_high))
-
-    """
-    def swap_gauges(self, gauge1, gauge2, initial_gauge):
-        target_gauge = gauge1.grid_info()
-        gauge1.grid(row=initial_gauge['row'], column=initial_gauge['column'])
-        gauge2.grid(row=target_gauge['row'], column=target_gauge['column'])
-
-    def on_click(self, event, main_window):
-        gauge = event.widget
-        if isinstance(gauge, GaugeInstance):
-            start_pos = (event.x, event.y)
-            grid_info = gauge.gauge.grid_info()
-            gauge.gauge.bind("<B1-Motion>", lambda event: self.drag_motion(event, gauge.gauge, start_pos))
-            gauge.gauge.bind("<ButtonRelease-1>", lambda event: self.drag_release(event, gauge.gauge, grid_info))
-        else:
-            main_window.unbind("<ButtonRelease-1>")
-
-    def drag_motion(self, event, widget, start):
-        x = widget.winfo_x() + event.x - start[0]
-        y = widget.winfo_y() + event.y - start[1]
-        widget.lift()
-        widget.place(x=x, y=y)
-
-    def drag_release(self, event, main_window, widget, grid_info):
-        widget.lower()
-        x, y = main_window.winfo_pointerxy()
-        target_widget = main_window.winfo_containing(x, y)
-        if isinstance(target_widget, GaugeInstance):
-            self.changeOrder(target_widget, widget, grid_info)
-        else:
-            widget.grid(row=grid_info['row'], column=grid_info['column'])
-    """
 
 
 # Example render
