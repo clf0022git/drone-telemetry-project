@@ -519,6 +519,9 @@ class GaugeCustomizationPanel(ttk.Frame):
         self.display_gauge_window_btn = tk.Button(self, text="Show Gauges on Window", command=self.create_window)
         self.display_gauge_window_btn.pack(side=tk.TOP)
 
+        self.alarm_listbox = None
+        self.alarm_add_button = None
+
         self.gauge_window = None
 
         self.display_gauge_manager = GaugeManager()  # Ryan's gauge manager
@@ -715,6 +718,19 @@ class GaugeCustomizationPanel(ttk.Frame):
         self.data_manager = config_panel.data_manager
         self.config_panel = config_panel
 
+    def draw_clock_alarm_options(self):
+        self.alarm_listbox = tk.Listbox(self, selectmode=tk.SINGLE, height=5,
+                                        exportselection=0, width=30)
+        self.alarm_listbox.pack(pady=5)
+
+        #self.alarm_add_button = tk.Button(self, text="Add Alarm", command=self.add_alarm)
+
+        for alarm in self.data_manager.data_file["CUSTOM.updateTime"]:
+            self.alarm_listbox.insert(tk.END, alarm)
+
+    #def add_alarm(self):
+
+
     def update_gauges(self, reset_position):
         if reset_position:
             self.current_gauge_position = 0
@@ -727,6 +743,8 @@ class GaugeCustomizationPanel(ttk.Frame):
             if g_name in ["Circle - 90°", "Circle - 180°", "Circle - 270°", "Circle - 360°", "Bar"]:
                 print("Drawing the range options!")
                 self.draw_range_options()
+            if g_name in ["Clock"]:
+                self.draw_clock_alarm_options()
             # Clears temp widget
             for widget in self.current_gauge_view.winfo_children():
                 widget.destroy()

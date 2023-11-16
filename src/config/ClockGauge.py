@@ -1,6 +1,7 @@
 import tkinter as tk
 from src.config.GaugeBase import GaugeBase
 from datetime import datetime, timedelta
+import pandas as pd
 
 
 class ClockGauge(GaugeBase):
@@ -27,24 +28,25 @@ class ClockGauge(GaugeBase):
         # List of alarm timestamps for clock_csv mode
         self.alarm_timestamps = []
 
-    def add_alarm(self, timestamp_str):
+    def add_alarm(self, timestamp):
         """Add an alarm timestamp for clock_csv case."""
         if self.mode == 'clock_csv':
             try:
-                datetime.strptime(timestamp_str, "%m/%d/%Y %H:%M:%S")
-                self.alarm_timestamps.append(timestamp_str)
+                #datetime.strptime(timestamp_str, "%m/%d/%Y %H:%M:%S")
+                timestamp.strftime("%m/%d/%Y %H:%M:%S")
+                self.alarm_timestamps.append(timestamp)
             except ValueError as e:
                 print(f"Invalid timestamp format: {e}")
         else:
             raise ValueError("Cannot add alarm timestamp for non-clock_csv mode.")
 
-    def remove_alarm(self, timestamp_str):
+    def remove_alarm(self, timestamp):
         """Remove an alarm timestamp for clock_csv case."""
         if self.mode == 'clock_csv':
             try:
-                self.alarm_timestamps.remove(timestamp_str)
+                self.alarm_timestamps.remove(timestamp)
             except ValueError:
-                print(f"Timestamp not found in alarm list: {timestamp_str}")
+                print(f"Timestamp not found in alarm list: {timestamp}")
         else:
             raise ValueError("Cannot remove alarm timestamp for non-clock_csv mode.")
 
@@ -85,10 +87,17 @@ class ClockGauge(GaugeBase):
         elif self.mode == 'clock_csv':
             # Expecting value in the format "MM/DD/YYYY HH:MM:SS"
             try:
-                date_time_obj = datetime.strptime(value, "%m/%d/%Y %H:%M:%S")
-                self.time_var.set(date_time_obj.strftime("%H:%M:%S"))
-                self.date_var.set(date_time_obj.strftime("%m/%d/%Y"))
-                self.check_alarm(value)
+                # date_time_obj = datetime.strptime(value, "%m/%d/%Y %H:%M:%S")
+                # self.time_var.set(date_time_obj.strftime("%H:%M:%S"))
+                # self.date_var.set(date_time_obj.strftime("%m/%d/%Y"))
+                # self.check_alarm(value)
+                # In this mode, 'value' is expected to be a pandas datetime object
+                if isinstance(value, pd.Timestamp):  # Check if value is a pandas Timestamp
+                    self.time_var.set(value.strftime("%H:%M:%S"))
+                    self.date_var.set(value.strftime("%m/%d/%Y"))
+                    self.check_alarm(value.strftime("%m/%d/%Y %H:%M:%S"))  # Format for alarm check
+                else:
+                    print("Value provided is not a pandas datetime object")
             except ValueError as e:
                 print(f"Value provided is not in the expected format: {e}")
         else:

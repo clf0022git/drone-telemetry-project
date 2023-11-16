@@ -163,7 +163,7 @@ class GaugeManager:
                     gauge_instance = GaugeInstance()
                     self.gauge_instance_list.append(gauge_instance)
 
-                    gauge_instance.gauge = ClockGauge(gauge_window, title=element.name, description="Local Time")
+                    gauge_instance.gauge = ClockGauge(gauge_window, title=element.name, description='CSV Timestamp', mode='clock_csv')
                     if i < 5:
                         gauge_instance.gauge.grid(row=0, column=i)
                     else:
@@ -262,7 +262,7 @@ class GaugeManager:
 
                 # Case for animating the clock
                 case "Clock":
-                    self.gauge_instance_list[i].gauge.update_value()
+                    self.gauge_instance_list[i].gauge.update_value(data_manager.data_file.at[current_time, element.field_name[0]])
 
                 # Case for animating the stopwatch
                 case "Stopwatch":
@@ -270,7 +270,7 @@ class GaugeManager:
 
                 # Case for animating the running time gauge
                 case "Running Time":
-                    self.gauge_instance_list[i].gauge.update_value()
+                    self.gauge_instance_list[i].gauge.update_value(current_time)
 
                 # Case for animating the on/off light
                 case "On/off light":
