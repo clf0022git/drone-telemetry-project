@@ -462,6 +462,8 @@ class GaugeCustomizationPanel(ttk.Frame):
         self.yellow_frame.pack(side=tk.TOP)
         self.red_frame = tk.Frame(self.current_gauge_settings_frame)
         self.red_frame.pack(side=tk.TOP)
+        self.position_frame = tk.Frame(self.current_gauge_settings_frame)
+        self.position_frame.pack(side=tk.TOP)
 
         self.current_gauge_name_label = tk.Label(self.name_frame, font=("Roboto Medium", 10), text="Gauge Name:")
         self.current_gauge_name_label.pack(side=tk.LEFT)
@@ -507,6 +509,13 @@ class GaugeCustomizationPanel(ttk.Frame):
         self.current_gauge_red_btn = tk.Button(self.red_frame, text="Submit", command=self.change_red)
         self.current_gauge_red_btn.pack(side=tk.LEFT)
 
+        self.position = ["No Position", 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+        self.input_position = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+        self.clicked = tk.StringVar()
+        self.dropdown_position = tk.OptionMenu(self.position_frame, self.clicked, *self.position,
+                                               command=self.option_menu)
+        self.dropdown_position.pack()
+
         # Frame that will hold the current way the gauge looks
 
         self.current_gauge_view = tk.Frame(self.current_gauge_view_and_settings)
@@ -521,6 +530,32 @@ class GaugeCustomizationPanel(ttk.Frame):
 
         # TODO: Add widgets to display statistics like min, max, average, etc.
 
+    def option_menu(self, number):
+        print("Working")
+        if len(self.data_manager.user_selected_gauges_list) != 0:
+            if number == "None":
+                self.data_manager.user_selected_gauges_list[self.current_gauge_position].position = 0
+            else:
+                self.data_manager.user_selected_gauges_list[self.current_gauge_position].position = number
+            print(self.data_manager.user_selected_gauges_list[self.current_gauge_position].position)
+
+            self.position.clear()
+            self.position = ["No Position", 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+            self.input_position = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+            for element in self.data_manager.user_selected_gauges_list:
+                if element.position != 0:
+                    index = self.position.index(element.position)
+                    self.position.pop(index)
+                    self.input_position.pop(index-1)
+                    print("Removed")
+                    print(index)
+
+            self.dropdown_position['menu'].delete(0, 'end')
+            for position in self.position:
+                self.dropdown_position['menu'].add_command(label=position,
+                                                           command=lambda x=position: self.option_menu(x))
+            self.clicked.set(number)
+
     def create_window(self):
         if self.gauge_window is not None:
             self.gauge_window.destroy()
@@ -529,7 +564,7 @@ class GaugeCustomizationPanel(ttk.Frame):
         self.gauge_window.title("Gauge View")
         self.gauge_window.geometry("1000x700")
         self.gauge_window.resizable(True, True)
-        self.display_gauge_manager.draw_gauges(self.data_manager, self.gauge_window)
+        self.display_gauge_manager.draw_gauges(self.data_manager, self.gauge_window, self.input_position)
         self.display_gauge_manager.update_color_ranges(self.data_manager)
 
     def draw_range_options(self):
@@ -614,7 +649,7 @@ class GaugeCustomizationPanel(ttk.Frame):
 
             if current_gauge_stats.statistics_values.get(
                     'Minimum') <= blue_low <= current_gauge_stats.statistics_values.get(
-                    'Maximum') and blue_high > blue_low:
+                'Maximum') and blue_high > blue_low:
                 current_gauge_stats.blue_range_high = blue_high
             print(blue_low)
             print(blue_high)
@@ -639,7 +674,7 @@ class GaugeCustomizationPanel(ttk.Frame):
 
             if current_gauge_stats.statistics_values.get(
                     'Minimum') <= green_high <= current_gauge_stats.statistics_values.get(
-                    'Maximum') and green_high > green_low:
+                'Maximum') and green_high > green_low:
                 current_gauge_stats.green_range_high = green_high
             print(green_low)
             print(green_high)
@@ -664,7 +699,7 @@ class GaugeCustomizationPanel(ttk.Frame):
                 yellow_high = float(self.current_gauge_yellow_two_entry.get())
             if current_gauge_stats.statistics_values.get(
                     'Minimum') <= yellow_high <= current_gauge_stats.statistics_values.get(
-                    'Maximum') and yellow_high > yellow_low:
+                'Maximum') and yellow_high > yellow_low:
                 current_gauge_stats.yellow_range_high = yellow_high
             print(yellow_low)
             print(yellow_high)
@@ -690,7 +725,7 @@ class GaugeCustomizationPanel(ttk.Frame):
 
             if current_gauge_stats.statistics_values.get(
                     'Minimum') <= red_high <= current_gauge_stats.statistics_values.get(
-                    'Maximum') and red_high > red_low:
+                'Maximum') and red_high > red_low:
                 current_gauge_stats.red_range_high = red_high
             print(red_low)
             print(red_high)
@@ -722,6 +757,7 @@ class GaugeCustomizationPanel(ttk.Frame):
             if g_name in ["Circle - 90°", "Circle - 180°", "Circle - 270°", "Circle - 360°", "Bar"]:
                 print("Drawing the range options!")
                 self.draw_range_options()
+            self.clicked.set(self.data_manager.user_selected_gauges_list[self.current_gauge_position].position)
             # Clears temp widget
             for widget in self.current_gauge_view.winfo_children():
                 widget.destroy()
@@ -739,17 +775,19 @@ class GaugeCustomizationPanel(ttk.Frame):
             # if self.data_manager.user_selected_gauges_list[self.current_gauge_position].name == "":
             temp_text = "Gauge #" + str(self.data_manager.user_selected_gauges_list[self.current_gauge_position].id)
             self.current_gauge_text_label.config(text=temp_text)
-            self.data_manager.user_selected_gauges_list[self.current_gauge_position].name = str(self.data_manager.user_selected_gauges_list[self.current_gauge_position].field_name[0])
-            if self.data_manager.user_selected_gauges_list[self.current_gauge_position].second_field_name:
-                self.data_manager.user_selected_gauges_list[self.current_gauge_position].name = str(self.data_manager.user_selected_gauges_list[self.current_gauge_position].name) + " X " + str(self.data_manager.user_selected_gauges_list[self.current_gauge_position].second_field_name)
             # else:
-            temp_text = str(self.data_manager.user_selected_gauges_list[self.current_gauge_position].name)
+            if str(self.data_manager.user_selected_gauges_list[self.current_gauge_position].name) == "No name applied":
+                temp_text = self.data_manager.user_selected_gauges_list[self.current_gauge_position].field_name[0]
+                if self.data_manager.user_selected_gauges_list[self.current_gauge_position].second_field_name != "":
+                    temp_text = temp_text + " X " + self.data_manager.user_selected_gauges_list[self.current_gauge_position].second_field_name
+                self.data_manager.user_selected_gauges_list[self.current_gauge_position].name = temp_text
             # self.current_gauge_text_label.config(text=temp_text)
             self.current_gauge_text.config(state="disabled")
             self.current_gauge_statistics_text.config(state="disabled")
             self.gauge_manager.draw_gauge(self.current_gauge_view,
                                           self.data_manager.user_selected_gauges_list[self.current_gauge_position])
             # Going to need to save the temporary widget that is created
+            print(self.data_manager.user_selected_gauges_list[self.current_gauge_position].name)
 
     def save_data(self):
         self.fileManager.save_gauges(self.data_manager.user_selected_gauges_list)
@@ -843,12 +881,12 @@ class PlaybackPanel(ttk.Frame):
             allow_update = True
 
         if allow_update:
-            self.gauge_customization_panel.display_gauge_manager.update_gauges(self.gauge_customization_panel.data_manager, time_temp/timestamp)
+            self.gauge_customization_panel.display_gauge_manager.update_gauges(
+                self.gauge_customization_panel.data_manager, time_temp / timestamp)
             print("It updated on this timestamp: ")
             print(time_temp)
-            print(time_temp/timestamp)
+            print(time_temp / timestamp)
             print(timestamp)
-
 
     def play_video(self):
         if self.video_player:

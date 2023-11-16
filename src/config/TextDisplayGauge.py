@@ -18,7 +18,8 @@ class TextDisplayGauge(GaugeBase):
         # Check if value is a string, as it should display text
         if isinstance(value, str):
             self.text_var.set(value)
-            self.check_alarm(len(value))  # Example: trigger an alarm based on the length of the string
+            #self.check_alarm(len(value))
+            # Example: trigger an alarm based on the length of the string
         else:
             raise ValueError("TextDisplayGauge can only display string values.")
 

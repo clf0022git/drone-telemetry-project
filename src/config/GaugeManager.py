@@ -18,6 +18,7 @@ class GaugeInstance:
     def __init__(self):
         self.gauge = None
         self.isShowing = False  # Could be used to temporarily show and hide gauges on the window
+        self.position = 0
 
 
 # Manager class for the gauges
@@ -33,7 +34,8 @@ class GaugeManager:
         self.gauge_instance_list.clear()
 
     # Function for drawing each of the functions out
-    def draw_gauges(self, data_manager: DataManager, gauge_window):
+    def draw_gauges(self, data_manager: DataManager, gauge_window, position_l):
+        position_list = position_l
         for i, element in enumerate(data_manager.user_selected_gauges_list):
             print(type(element.statistics_values))
             match element.gauge_name:
@@ -46,10 +48,15 @@ class GaugeManager:
 
                     gauge_instance.gauge = XYPlotGauge(gauge_window, title=element.name)
                     gauge_instance.gauge.set_bounds(x_bounds=(element.statistics_values.get('Minimum'), (element.statistics_values.get('Maximum'))), y_bounds=(element.statistics_values_two.get('Minimum'), (element.statistics_values_two.get('Maximum'))))
-                    if i < 5:
-                        gauge_instance.gauge.grid(row=0, column=i)
+
+                    if element.position == 0:
+                        position = position_list.pop() - 1
                     else:
-                        gauge_instance.gauge.grid(row=1, column=i - 5)
+                        position = element.position - 1
+                    if position < 5:
+                        gauge_instance.gauge.grid(row=0, column=position)
+                    else:
+                        gauge_instance.gauge.grid(row=1, column=position - 5)
                 # Case for getting the data and drawing the x-graph
                 case "X-Plot":
                     gauge_instance = GaugeInstance()
@@ -57,10 +64,15 @@ class GaugeManager:
 
                     gauge_instance.gauge = XPlotGauge(gauge_window, title=element.name)
                     gauge_instance.gauge.set_bounds(x_bounds=(element.statistics_values.get('Minimum'), (element.statistics_values.get('Maximum'))))
-                    if i < 5:
-                        gauge_instance.gauge.grid(row=0, column=i)
+
+                    if element.position == 0:
+                        position = position_list.pop() - 1
                     else:
-                        gauge_instance.gauge.grid(row=1, column=i - 5)
+                        position = element.position - 1
+                    if position < 5:
+                        gauge_instance.gauge.grid(row=0, column=position)
+                    else:
+                        gauge_instance.gauge.grid(row=1, column=position - 5)
                 # Case for getting the data and drawing the bar graph
                 case "Bar":
                     gauge_instance = GaugeInstance()
@@ -69,10 +81,15 @@ class GaugeManager:
                     gauge_instance.gauge = BarGauge(gauge_window, title=element.name, orientation='vertical')
                     gauge_instance.gauge.set_bounds(
                         y_bounds=(element.statistics_values.get('Minimum'), element.statistics_values.get('Maximum')))
-                    if i < 5:
-                        gauge_instance.gauge.grid(row=0, column=i)
+
+                    if element.position == 0:
+                        position = position_list.pop() - 1
                     else:
-                        gauge_instance.gauge.grid(row=1, column=i - 5)
+                        position = element.position - 1
+                    if position < 5:
+                        gauge_instance.gauge.grid(row=0, column=position)
+                    else:
+                        gauge_instance.gauge.grid(row=1, column=position - 5)
 
                 # Case for getting the data and drawing the 90 degree circle graph
                 case "Circle - 90°":
@@ -83,10 +100,14 @@ class GaugeManager:
                                                        number_range=(element.statistics_values.get('Minimum'),
                                                                      element.statistics_values.get('Maximum')),
                                                        number_step=1)
-                    if i < 5:
-                        gauge_instance.gauge.grid(row=0, column=i)
+                    if element.position == 0:
+                        position = position_list.pop() - 1
                     else:
-                        gauge_instance.gauge.grid(row=1, column=i - 5)
+                        position = element.position - 1
+                    if position < 5:
+                        gauge_instance.gauge.grid(row=0, column=position)
+                    else:
+                        gauge_instance.gauge.grid(row=1, column=position - 5)
 
                     gauge_instance.gauge.update_value(element.statistics_values.get('Maximum'))
 
@@ -99,10 +120,14 @@ class GaugeManager:
                                                        number_range=(element.statistics_values.get('Minimum'),
                                                                      element.statistics_values.get('Maximum')),
                                                        number_step=1)
-                    if i < 5:
-                        gauge_instance.gauge.grid(row=0, column=i)
+                    if element.position == 0:
+                        position = position_list.pop() - 1
                     else:
-                        gauge_instance.gauge.grid(row=1, column=i - 5)
+                        position = element.position - 1
+                    if position < 5:
+                        gauge_instance.gauge.grid(row=0, column=position)
+                    else:
+                        gauge_instance.gauge.grid(row=1, column=position - 5)
 
                     gauge_instance.gauge.update_value(element.statistics_values.get('Maximum'))
 
@@ -115,10 +140,14 @@ class GaugeManager:
                                                        number_range=(element.statistics_values.get('Minimum'),
                                                                      element.statistics_values.get('Maximum')),
                                                        number_step=1)
-                    if i < 5:
-                        gauge_instance.gauge.grid(row=0, column=i)
+                    if element.position == 0:
+                        position = position_list.pop() - 1
                     else:
-                        gauge_instance.gauge.grid(row=1, column=i - 5)
+                        position = element.position - 1
+                    if position < 5:
+                        gauge_instance.gauge.grid(row=0, column=position)
+                    else:
+                        gauge_instance.gauge.grid(row=1, column=position - 5)
 
                     gauge_instance.gauge.update_value(element.statistics_values.get('Maximum'))
 
@@ -131,10 +160,14 @@ class GaugeManager:
                                                        number_range=(element.statistics_values.get('Minimum'),
                                                                      element.statistics_values.get('Maximum')),
                                                        number_step=1)
-                    if i < 5:
-                        gauge_instance.gauge.grid(row=0, column=i)
+                    if element.position == 0:
+                        position = position_list.pop() - 1
                     else:
-                        gauge_instance.gauge.grid(row=1, column=i - 5)
+                        position = element.position - 1
+                    if position < 5:
+                        gauge_instance.gauge.grid(row=0, column=position)
+                    else:
+                        gauge_instance.gauge.grid(row=1, column=position - 5)
 
                     gauge_instance.gauge.update_value(element.statistics_values.get('Maximum'))
 
@@ -144,10 +177,15 @@ class GaugeManager:
                     self.gauge_instance_list.append(gauge_instance)
 
                     gauge_instance.gauge = TextDisplayGauge(gauge_window, title=element.name)
-                    if i < 5:
-                        gauge_instance.gauge.grid(row=0, column=i)
+
+                    if element.position == 0:
+                        position = position_list.pop() - 1
                     else:
-                        gauge_instance.gauge.grid(row=1, column=i - 5)
+                        position = element.position - 1
+                    if position < 5:
+                        gauge_instance.gauge.grid(row=0, column=position)
+                    else:
+                        gauge_instance.gauge.grid(row=1, column=position - 5)
 
                 # Case for getting the data and drawing the number/character display
                 case "Number or Character Display":
@@ -155,10 +193,15 @@ class GaugeManager:
                     self.gauge_instance_list.append(gauge_instance)
 
                     gauge_instance.gauge = NumberDisplayGauge(gauge_window, title=element.name)
-                    if i < 5:
-                        gauge_instance.gauge.grid(row=0, column=i)
+
+                    if element.position == 0:
+                        position = position_list.pop() - 1
                     else:
-                        gauge_instance.gauge.grid(row=1, column=i - 5)
+                        position = element.position - 1
+                    if position < 5:
+                        gauge_instance.gauge.grid(row=0, column=position)
+                    else:
+                        gauge_instance.gauge.grid(row=1, column=position - 5)
 
                 # Case for drawing the clock
                 case "Clock":
@@ -166,10 +209,15 @@ class GaugeManager:
                     self.gauge_instance_list.append(gauge_instance)
 
                     gauge_instance.gauge = ClockGauge(gauge_window, title=element.name, description="Local Time")
-                    if i < 5:
-                        gauge_instance.gauge.grid(row=0, column=i)
+
+                    if element.position == 0:
+                        position = position_list.pop() - 1
                     else:
-                        gauge_instance.gauge.grid(row=1, column=i - 5)
+                        position = element.position - 1
+                    if position < 5:
+                        gauge_instance.gauge.grid(row=0, column=position)
+                    else:
+                        gauge_instance.gauge.grid(row=1, column=position - 5)
                 # Case for drawing the stopwatch
                 case "Stopwatch":
                     gauge_instance = GaugeInstance()
@@ -177,10 +225,15 @@ class GaugeManager:
 
                     gauge_instance.gauge = ClockGauge(gauge_window, title=element.name, description='Elapsed Time',
                                                       mode='stopwatch')
-                    if i < 5:
-                        gauge_instance.gauge.grid(row=0, column=i)
+
+                    if element.position == 0:
+                        position = position_list.pop() - 1
                     else:
-                        gauge_instance.gauge.grid(row=1, column=i - 5)
+                        position = element.position - 1
+                    if position < 5:
+                        gauge_instance.gauge.grid(row=0, column=position)
+                    else:
+                        gauge_instance.gauge.grid(row=1, column=position - 5)
                 # Case for drawing the running time gauge
                 case "Running Time":
                     gauge_instance = GaugeInstance()
@@ -188,10 +241,15 @@ class GaugeManager:
 
                     gauge_instance.gauge = ClockGauge(gauge_window, title=element.name, description='Video Time',
                                                       mode='running_time')
-                    if i < 5:
-                        gauge_instance.gauge.grid(row=0, column=i)
+
+                    if element.position == 0:
+                        position = position_list.pop() - 1
                     else:
-                        gauge_instance.gauge.grid(row=1, column=i - 5)
+                        position = element.position - 1
+                    if position < 5:
+                        gauge_instance.gauge.grid(row=0, column=position)
+                    else:
+                        gauge_instance.gauge.grid(row=1, column=position - 5)
 
                 # Case for drawing the on/off light
                 case "On/off light":
@@ -200,10 +258,15 @@ class GaugeManager:
 
                     gauge_instance.gauge = LightIndicatorGauge(gauge_window, title=element.name,
                                                                description='System Power')
-                    if i < 5:
-                        gauge_instance.gauge.grid(row=0, column=i)
+
+                    if element.position == 0:
+                        position = position_list.pop() - 1
                     else:
-                        gauge_instance.gauge.grid(row=1, column=i - 5)
+                        position = element.position - 1
+                    if position < 5:
+                        gauge_instance.gauge.grid(row=0, column=position)
+                    else:
+                        gauge_instance.gauge.grid(row=1, column=position - 5)
                 # Default case
                 case _:
                     print("Gauge not found")
@@ -238,7 +301,7 @@ class GaugeManager:
                     self.gauge_instance_list[i].gauge.description_label.config(text=current_value)
 
                 # Case for animating the bar graph
-                case "Bar-Graph":
+                case "Bar":
                     self.gauge_instance_list[i].gauge.update_value(
                         data_manager.data_file.at[current_time, element.field_name[0]])
 

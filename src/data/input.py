@@ -456,6 +456,7 @@ class TemporaryGauge:
         self.yellow_range_high = 0
         self.red_range_low = 0
         self.red_range_high = 0
+        self.position = 0
 
     def set_second_field(self, second_field):
         self.second_field_name = second_field

@@ -118,7 +118,7 @@ class CustomizationGaugeManager:
                 running_time_gauge.pack(padx=10, pady=10)
             # Case for drawing the on/off light
             case "On/off light":
-                light_gauge = LightIndicatorGauge(root, title=element.name, description='System Power')
+                light_gauge = LightIndicatorGauge(root, title=element.name)
                 light_gauge.pack(padx=10, pady=10)
 
             case _:
