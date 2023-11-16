@@ -756,7 +756,7 @@ class GaugeCustomizationPanel(ttk.Frame):
     def save_data(self):
         json_path = filedialog.asksaveasfilename(filetypes=[("JSON files", "*.json")], title="Save as...")
         if json_path:  # If a file is selected
-            print(f"CSV File Loaded: {json_path}")
+            print(f"JSON File Loaded: {json_path}")
 
         if not json_path:
             return
