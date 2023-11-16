@@ -396,7 +396,7 @@ class GaugeCustomizationPanel(ttk.Frame):
         self.label.pack(pady=10)
         self.data_manager = None
         self.gauge_manager = CustomizationGaugeManager()
-        self.fileManager = FileManager
+        self.config_panel = None
 
         # Frame to hold the gauge viewer
         self.gauge_viewer_frame = tk.Frame(self)
@@ -443,6 +443,10 @@ class GaugeCustomizationPanel(ttk.Frame):
 
         self.saveButton = ttk.Button(self, text="Save Data", command=self.save_data)
         self.saveButton.pack(pady=2)
+
+        self.loadButton = ttk.Button(self, text="Load Data", command=self.load_data)
+        self.loadButton.pack(pady=2)
+
         self.current_gauge_view_and_settings = tk.Frame(self)
         self.current_gauge_view_and_settings.pack(side=tk.TOP)
 
@@ -644,6 +648,7 @@ class GaugeCustomizationPanel(ttk.Frame):
 
     def set_data_manager(self, config_panel: ConfigurationPanel):
         self.data_manager = config_panel.data_manager
+        self.config_panel = config_panel
 
     def update_gauges(self, reset_position):
         if reset_position:
@@ -683,7 +688,28 @@ class GaugeCustomizationPanel(ttk.Frame):
             # Going to need to save the temporary widget that is created
 
     def save_data(self):
-        self.fileManager.save_gauges(self.data_manager.user_selected_gauges_list)
+        json_path = filedialog.asksaveasfilename(filetypes=[("JSON files", "*.json")], title="Save as...")
+        if json_path:  # If a file is selected
+            print(f"CSV File Loaded: {json_path}")
+
+        if not json_path:
+            return
+
+        FileManager.save_gauges(self.data_manager.user_selected_gauges_list, json_path)
+
+    def load_data(self):
+        json_path = filedialog.askopenfilename(filetypes=[("JSON files", "*.json")], title="Select a JSON File")
+        if json_path:  # If a file is selected
+            print(f"JSON File Loaded: {json_path}")
+
+        if not json_path:
+            return
+        FileManager.load_gauges(self.data_manager, json_path)
+        statistics_list = []
+        for gauge in self.data_manager.user_selected_gauges_list:
+            statistics_list.append(gauge.statistics)
+        self.data_manager.statistics_list = statistics_list
+        self.update_gauges(True)
 
 
 class PlaybackPanel(ttk.Frame):
