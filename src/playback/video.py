@@ -30,7 +30,7 @@ class VideoPlayer(tk.Frame):
         self.timer_running = False
         self.event_handlers = {"second-changed": [], "duration-changed": [], "play-video": [], "pause-video": []}  # Custom event handlers
 
-        self.video_length = self.player.get_length()
+        self.video_length = self.player.get_length() // 1000  # Get video length in seconds
 
         self.playing_backward = False
         self.paused_backward = False
@@ -187,7 +187,7 @@ class VideoPlayer(tk.Frame):
         self.video_path = video_path
         self.media = self.instance.media_new(self.video_path)
         self.player.set_media(self.media)
-        self.video_length = self.player.get_length()
+        self.video_length = self.player.get_length() // 1000  # Get video length in seconds
         self.check_duration_update()
 
     def set_speed(self, speed_multiplier):
