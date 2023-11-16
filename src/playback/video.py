@@ -187,6 +187,7 @@ class VideoPlayer(tk.Frame):
         self.video_path = video_path
         self.media = self.instance.media_new(self.video_path)
         self.player.set_media(self.media)
+        self.video_length = self.player.get_length()
         self.check_duration_update()
 
     def set_speed(self, speed_multiplier):
