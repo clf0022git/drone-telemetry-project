@@ -36,6 +36,8 @@ class GaugeManager:
     # Function for drawing each of the functions out
     def draw_gauges(self, data_manager: DataManager, gauge_window, alarm_list, position_l):
         position_list = position_l
+        if len(position_list) == 0:
+            position_list = [1,2,3,4,5,6,7,8,9,10]
         for i, element in enumerate(data_manager.user_selected_gauges_list):
             print(type(element.statistics_values))
             match element.gauge_name:
