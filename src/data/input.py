@@ -445,7 +445,7 @@ class TemporaryGauge:
     def __init__(self, f_name, g_name, t_stamp):
         self.id = None
         self.field_name = f_name
-        self.second_field_name = "No secondary field viable"
+        self.second_field_name = ""
         self.gauge_name = g_name
         self.timestamp_value = t_stamp
         self.name = "No name applied"

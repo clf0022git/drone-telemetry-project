@@ -51,15 +51,23 @@ class CircleGauge(GaugeBase):
         """Draw the numbers for the gauge."""
         if self.show_numbers:
             start, end = self.number_range
-            for num in range(start, end + 1, self.number_step):
+
+            # Check to prevent division by zero
+            if start == end:
+                print("Start and end values of number_range are the same. Numbers will not be drawn.")
+                return
+
+            step = self.number_step
+            num = start
+            while num <= end:
                 # Calculate the angle for each number
                 angle_deg = (num - start) / (end - start) * max_degree
                 if max_degree == 90:
-                    angle_rad = pi * (0.5 - angle_deg / 180)  # Adjust for 90-degree gauge
+                    angle_rad = pi * (0.5 - angle_deg / 180)
                 elif max_degree == 180:
-                    angle_rad = pi * (1 - angle_deg / 180)  # Adjust for 180-degree gauge
+                    angle_rad = pi * (1 - angle_deg / 180)
                 else:
-                    angle_rad = pi * (1.5 - 2 * angle_deg / 360)  # For other gauges
+                    angle_rad = pi * (1.5 - 2 * angle_deg / 360)
                 x = center_x + number_radius * cos(angle_rad)
                 y = center_y - number_radius * sin(angle_rad)
 
@@ -68,9 +76,13 @@ class CircleGauge(GaugeBase):
                     self.canvas.create_text(x, y, text=str(num), font=('Arial', 8))
                 else:
                     if max_degree == 360:
-                        self.canvas.create_text(x, y+20, text=str(num), font=('Arial', 8))
+                        self.canvas.create_text(x, y + 20, text=str(num), font=('Arial', 8))
                     else:
                         self.canvas.create_text(x, y, text=str(num), font=('Arial', 8))
+
+                # Increment the number by the step
+                num += step
+                num = round(num, 10)  # To avoid floating point arithmetic issues
 
     def update_value(self, value):
         """Update the gauge's value."""
@@ -103,6 +115,12 @@ class CircleGauge(GaugeBase):
 
         # Adjust the needle to point based on the value and number range
         start, end = self.number_range
+
+        # Check to prevent division by zero
+        if start == end:
+            print("Start and end values of number_range are the same. Numbers will not be drawn.")
+            return
+
         if start <= self.current_value <= end:
             # Normalize the value within the range
             normalized_value = (self.current_value - start) / (end - start)
@@ -136,35 +154,34 @@ class CircleGauge(GaugeBase):
 
 if __name__ == "__main__":
     root = tk.Tk()
-    root.title("Circle Gauge Examples")
+    root.title("Circle Gauge Examples with Floats")
 
-    # Configuration for each gauge
+    # Configuration for each gauge with floating-point number ranges
     gauge_configs = [
-        {'max_degree': 90, 'number_range': (0, 90), 'number_step': 10},
-        {'max_degree': 180, 'number_range': (0, 180), 'number_step': 20},
-        {'max_degree': 270, 'number_range': (0, 270), 'number_step': 30},
-        {'max_degree': 360, 'number_range': (0, 360), 'number_step': 40}
+        {'max_degree': 90, 'number_range': (0.0, 45.0), 'number_step': 5.0},
+        {'max_degree': 180, 'number_range': (0.0, 90.0), 'number_step': 10.0},
+        {'max_degree': 270, 'number_range': (0.0, 135.0), 'number_step': 15.0},
+        {'max_degree': 360, 'number_range': (0.0, 180.0), 'number_step': 20.0}
     ]
 
-    gauge_alarms = [70, 120, 200, 300]
+    gauge_alarms = [35.0, 70.0, 105.0, 150.0]
 
     gauges = []
     for i, config in enumerate(gauge_configs):
         gauge = CircleGauge(root, name=f'Circle-{config["max_degree"]}', title=f'Circle {config["max_degree"]}°',
                             show_numbers=True, **config)
-        # Organize gauges in 2 columns
         gauge.grid(row=i//2, column=i%2, padx=20, pady=20)
         gauges.append(gauge)
 
     for i, alarm in enumerate(gauge_alarms):
         gauges[i].update_colors(red_limit=alarm)
 
-    # Function to update gauge values for demonstration
+    # Function to update gauge values for demonstration with floating-point values
     def update_gauges():
         import random
         for gauge in root.winfo_children():
             if isinstance(gauge, CircleGauge):
-                new_value = random.randint(0, gauge.number_range[1])
+                new_value = round(random.uniform(0, gauge.number_range[1]), 1)
                 gauge.update_value(new_value)
                 gauge.set_description(f'Current value: {new_value}')
         root.after(1000, update_gauges)  # Update the gauge values every 1 second
