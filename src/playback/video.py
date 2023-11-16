@@ -40,6 +40,8 @@ class VideoPlayer(tk.Frame):
 
         self.last_duration = None
 
+        self.is_video_backwards = False
+
         # Add play button
         # self.play_button = tk.Button(self.master, text="Play", command=self.play)
         # self.play_button.pack(side=tk.BOTTOM)
@@ -132,7 +134,10 @@ class VideoPlayer(tk.Frame):
 
                 # If the time has changed since the last check and it's not the same second
                 if self.last_time is not None and current_time != self.last_time:
-                    self.trigger_event("second-changed", current_time)
+                    if not self.is_video_backwards:
+                        self.trigger_event("second-changed", current_time)
+                    else:
+                        self.trigger_event("second-changed", self.video_length - current_time)
 
                 self.last_time = current_time
 

@@ -770,10 +770,12 @@ class PlaybackPanel(ttk.Frame):
                 self.video_player = VideoPlayer(self, self.video_path)
                 self.video_player.pack(fill="both", expand=True)
                 self.video_player.bind_event("second-changed", self.update_graphs)
+                self.video_player.is_video_backwards = False
                 # self.video_player.bind_event("second-changed", self.on_second_changed)
                 # self.video_player.bind_event("duration-changed", self.on_duration_changed)
             else:
                 self.video_player.set_video_path(self.video_path)
+                self.video_player.is_video_backwards = False
 
             # Enable control buttons now that a video is loaded
             self.play_button.config(state=tk.NORMAL)
@@ -838,6 +840,7 @@ class PlaybackPanel(ttk.Frame):
         if os.path.exists(reversed_video_path):
             print(f"Reversed video already exists: {reversed_video_path}")
             self.is_video_reversed = True
+            self.video_player.is_video_backwards = True
             self.set_video_path(reversed_video_path)
         else:
             try:
@@ -884,13 +887,16 @@ class PlaybackPanel(ttk.Frame):
 
                 # Replace the old video path with the new reversed video path
                 self.is_video_reversed = True
+                self.video_player.is_video_backwards = True
                 self.set_video_path(reversed_video_path)
             except subprocess.CalledProcessError as e:
                 self.is_video_reversed = False
+                self.video_player.is_video_backwards = False
                 print(f"ffmpeg error: {e}")
                 traceback.print_exc(file=sys.stderr)
             except Exception as e:
                 self.is_video_reversed = False
+                self.video_player.is_video_backwards = False
                 print(f"An error occurred while reversing the video: {e}")
                 traceback.print_exc(file=sys.stderr)
 
