@@ -209,7 +209,10 @@ class DataManager:
         gauge_name_list.append(timestamp_string)
 
         if len(self.user_selected_gauges_list) < 10:
-            current_saved_gauge = TemporaryGauge(self.current_selected_field, selected_gauge[0], self.timestamp_value)
+            data_list = []
+            for element in self.data_file[self.current_selected_field[0]]:
+                data_list.append(element)
+            current_saved_gauge = TemporaryGauge(self.current_selected_field, selected_gauge[0], self.timestamp_value, data_list)
             self.current_gauge_temp = current_saved_gauge
             print(selected_gauge)
 
@@ -442,7 +445,7 @@ class DataManager:
 class TemporaryGauge:
     """Stores a gauge's related information after a user completes a selection"""
 
-    def __init__(self, f_name, g_name, t_stamp):
+    def __init__(self, f_name, g_name, t_stamp, input_data):
         self.id = None
         self.field_name = f_name
         self.second_field_name = ""
@@ -461,6 +464,7 @@ class TemporaryGauge:
         self.yellow_range_high = 0
         self.red_range_low = 0
         self.red_range_high = 0
+        self.data = input_data
 
     def set_second_field(self, second_field):
         self.second_field_name = second_field
