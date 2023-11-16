@@ -51,6 +51,12 @@ class CircleGauge(GaugeBase):
         """Draw the numbers for the gauge."""
         if self.show_numbers:
             start, end = self.number_range
+
+            # Check to prevent division by zero
+            if start == end:
+                print("Start and end values of number_range are the same. Numbers will not be drawn.")
+                return
+
             step = self.number_step
             num = start
             while num <= end:
@@ -109,6 +115,12 @@ class CircleGauge(GaugeBase):
 
         # Adjust the needle to point based on the value and number range
         start, end = self.number_range
+
+        # Check to prevent division by zero
+        if start == end:
+            print("Start and end values of number_range are the same. Numbers will not be drawn.")
+            return
+
         if start <= self.current_value <= end:
             # Normalize the value within the range
             normalized_value = (self.current_value - start) / (end - start)
