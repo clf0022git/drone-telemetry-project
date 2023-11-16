@@ -770,8 +770,11 @@ class GaugeCustomizationPanel(ttk.Frame):
             # if self.data_manager.user_selected_gauges_list[self.current_gauge_position].name == "":
             temp_text = "Gauge #" + str(self.data_manager.user_selected_gauges_list[self.current_gauge_position].id)
             self.current_gauge_text_label.config(text=temp_text)
+            self.data_manager.user_selected_gauges_list[self.current_gauge_position].name = str(self.data_manager.user_selected_gauges_list[self.current_gauge_position].field_name[0])
+            if self.data_manager.user_selected_gauges_list[self.current_gauge_position].second_field_name:
+                self.data_manager.user_selected_gauges_list[self.current_gauge_position].name = str(self.data_manager.user_selected_gauges_list[self.current_gauge_position].name) + " X " + str(self.data_manager.user_selected_gauges_list[self.current_gauge_position].second_field_name)
             # else:
-            # temp_text = str(self.data_manager.user_selected_gauges_list[self.current_gauge_position].name)
+            temp_text = str(self.data_manager.user_selected_gauges_list[self.current_gauge_position].name)
             # self.current_gauge_text_label.config(text=temp_text)
             self.current_gauge_text.config(state="disabled")
             self.current_gauge_statistics_text.config(state="disabled")
@@ -882,8 +885,22 @@ class PlaybackPanel(ttk.Frame):
 
     def update_graphs(self, current_time):
         """Updates the gauges with current information"""
-        self.gauge_customization_panel.display_gauge_manager.update_gauges(self.gauge_customization_panel.data_manager,
-                                                                           current_time - 1)
+
+        # Change the input based on the timestamp
+        allow_update = False
+        time_temp = current_time
+        timestamp = int(self.gauge_customization_panel.data_manager.timestamp_value)
+
+        if time_temp % timestamp == 0:
+            allow_update = True
+
+        if allow_update:
+            self.gauge_customization_panel.display_gauge_manager.update_gauges(self.gauge_customization_panel.data_manager, time_temp/timestamp)
+            print("It updated on this timestamp: ")
+            print(time_temp)
+            print(time_temp/timestamp)
+            print(timestamp)
+
 
     def play_video(self):
         if self.video_player:

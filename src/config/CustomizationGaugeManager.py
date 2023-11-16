@@ -121,8 +121,5 @@ class CustomizationGaugeManager:
                 light_gauge = LightIndicatorGauge(root, title=element.name, description='System Power')
                 light_gauge.pack(padx=10, pady=10)
 
-                # Button to toggle the light on/off
-                toggle_button = tk.Button(root, text="Toggle Light", command=light_gauge.toggle_light)
-                toggle_button.pack(pady=5)
             case _:
                 print("Gauge not found")

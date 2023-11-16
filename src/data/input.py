@@ -133,7 +133,6 @@ class DataManager:
 
         if selected_field[0] == "CUSTOM.updateTime":
             self.current_selected_field_gauges = ["Clock",
-                                                  "Stopwatch",
                                                   "Running Time"]
             self.combo.current(0)
         elif self.data_file[self.current_selected_field[0]].dtype == "bool":
@@ -233,7 +232,6 @@ class DataManager:
             if len(gauge_name_list) <= 10:
                 element.id = i + 1
                 temp_gauge = "Gauge #" + str(element.id)
-                element.name = temp_gauge
                 gauge_name_list.append(temp_gauge)
 
         return gauge_name_list
@@ -253,7 +251,6 @@ class DataManager:
         for i, element in enumerate(self.user_selected_gauges_list):
             element.id = i + 1
             temp_gauge = "Gauge #" + str(element.id)
-            element.name = temp_gauge
             gauge_name_list.append(temp_gauge)
 
         print("Updated!")
@@ -394,7 +391,6 @@ class DataManager:
                 if len(gauge_name_list) <= 11:
                     element.id = i + 1
                     temp_gauge = "Gauge #" + str(element.id)
-                    element.name = temp_gauge
                     gauge_name_list.append(temp_gauge)
 
             if len(gauge_name_list) <= 11:
@@ -420,7 +416,6 @@ class DataManager:
             if len(gauge_name_list) <= 10:
                 element.id = i + 1
                 temp_gauge = "Gauge #" + str(element.id)
-                element.name = temp_gauge
                 gauge_name_list.append(temp_gauge)
             print("Working!2")
 
