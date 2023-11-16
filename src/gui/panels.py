@@ -204,7 +204,8 @@ class ConfigurationPanel(ttk.Frame):
             field = element.field_name[0]
             print(element.field_name[0])
             print("Help me")
-            if self.data_manager.data_file[field].dtype == "int64" or self.data_manager.data_file[field].dtype == "float64":
+            if self.data_manager.data_file[field].dtype == "int64" or self.data_manager.data_file[
+                field].dtype == "float64":
                 stats = self.data_processor.calc_statistics(self.data_manager.data_file[field], field)
                 print(type(self.statistics_list))
                 self.statistics_list.append(stats)
@@ -524,7 +525,9 @@ class GaugeCustomizationPanel(ttk.Frame):
         self.gauge_window = tk.Toplevel()
         self.gauge_window.title("Gauge View")
         self.gauge_window.geometry("1000x700")
+        self.gauge_window.resizable(True, True)
         self.display_gauge_manager.draw_gauges(self.data_manager, self.gauge_window)
+        self.display_gauge_manager.update_color_ranges(self.data_manager)
 
     def draw_range_options(self):
         self.current_gauge_blue_label = tk.Label(self.blue_frame, font=("Roboto Medium", 10), text="Blue Range:")
@@ -590,14 +593,24 @@ class GaugeCustomizationPanel(ttk.Frame):
     def change_blue(self):
         """Only changes the blue range if it fits within the detected minimum and maximum and the blue high is above
         the blue low"""
-        current_gauge_stats = self.data_manager.user_selected_gauges_list[self.current_gauge_position].statistics_values
+        current_gauge_stats = self.data_manager.user_selected_gauges_list[self.current_gauge_position]
 
         if len(self.data_manager.user_selected_gauges_list) != 0:
-            blue_low = self.current_gauge_blue_one_entry.get()
-            if current_gauge_stats.get('Minimum') <= blue_low <= current_gauge_stats.get('Maximum'):
+            if self.current_gauge_blue_one_entry.get() == "":
+                blue_low = 0
+            else:
+                blue_low = float(self.current_gauge_blue_one_entry.get())
+
+            if current_gauge_stats.statistics_values.get(
+                    'Minimum') <= blue_low <= current_gauge_stats.statistics_values.get('Maximum'):
                 current_gauge_stats.blue_range_low = blue_low
-            blue_high = self.current_gauge_blue_two_entry.get()
-            if current_gauge_stats.get('Minimum') <= blue_low <= current_gauge_stats.get(
+            if self.current_gauge_blue_two_entry.get() == "":
+                blue_high = 0
+            else:
+                blue_high = float(self.current_gauge_blue_two_entry.get())
+
+            if current_gauge_stats.statistics_values.get(
+                    'Minimum') <= blue_low <= current_gauge_stats.statistics_values.get(
                     'Maximum') and blue_high > blue_low:
                 current_gauge_stats.blue_range_high = blue_high
             print(blue_low)
@@ -606,13 +619,23 @@ class GaugeCustomizationPanel(ttk.Frame):
         self.current_gauge_blue_two_entry.delete(0, 'end')
 
     def change_green(self):
-        current_gauge_stats = self.data_manager.user_selected_gauges_list[self.current_gauge_position].statistics_values
+        current_gauge_stats = self.data_manager.user_selected_gauges_list[self.current_gauge_position]
         if len(self.data_manager.user_selected_gauges_list) != 0:
-            green_low = self.current_gauge_green_one_entry.get()
-            if current_gauge_stats.get('Minimum') <= green_low <= current_gauge_stats.get('Maximum'):
+            if self.current_gauge_green_one_entry.get() == "":
+                green_low = 0
+            else:
+                green_low = float(self.current_gauge_green_one_entry.get())
+
+            if current_gauge_stats.statistics_values.get(
+                    'Minimum') <= green_low <= current_gauge_stats.statistics_values.get('Maximum'):
                 current_gauge_stats.green_range_low = green_low
-            green_high = self.current_gauge_green_two_entry.get()
-            if current_gauge_stats.get('Minimum') <= green_high <= current_gauge_stats.get(
+            if self.current_gauge_green_two_entry.get() == "":
+                green_high = 0
+            else:
+                green_high = float(self.current_gauge_green_two_entry.get())
+
+            if current_gauge_stats.statistics_values.get(
+                    'Minimum') <= green_high <= current_gauge_stats.statistics_values.get(
                     'Maximum') and green_high > green_low:
                 current_gauge_stats.green_range_high = green_high
             print(green_low)
@@ -621,13 +644,23 @@ class GaugeCustomizationPanel(ttk.Frame):
         self.current_gauge_green_two_entry.delete(0, 'end')
 
     def change_yellow(self):
-        current_gauge_stats = self.data_manager.user_selected_gauges_list[self.current_gauge_position].statistics_values
+        current_gauge_stats = self.data_manager.user_selected_gauges_list[self.current_gauge_position]
         if len(self.data_manager.user_selected_gauges_list) != 0:
-            yellow_low = self.current_gauge_yellow_one_entry.get()
-            if current_gauge_stats.get('Minimum') <= yellow_low <= current_gauge_stats.get('Maximum'):
+            if self.current_gauge_yellow_one_entry.get() == "":
+                yellow_low = 0
+            else:
+                yellow_low = float(self.current_gauge_yellow_one_entry.get())
+
+            if current_gauge_stats.statistics_values.get(
+                    'Minimum') <= yellow_low <= current_gauge_stats.statistics_values.get('Maximum'):
                 current_gauge_stats.yellow_range_low = yellow_low
-            yellow_high = self.current_gauge_yellow_two_entry.get()
-            if current_gauge_stats.get('Minimum') <= yellow_high <= current_gauge_stats.get(
+
+            if self.current_gauge_yellow_two_entry.get() == "":
+                yellow_high = 0
+            else:
+                yellow_high = float(self.current_gauge_yellow_two_entry.get())
+            if current_gauge_stats.statistics_values.get(
+                    'Minimum') <= yellow_high <= current_gauge_stats.statistics_values.get(
                     'Maximum') and yellow_high > yellow_low:
                 current_gauge_stats.yellow_range_high = yellow_high
             print(yellow_low)
@@ -636,13 +669,24 @@ class GaugeCustomizationPanel(ttk.Frame):
         self.current_gauge_yellow_two_entry.delete(0, 'end')
 
     def change_red(self):
-        current_gauge_stats = self.data_manager.user_selected_gauges_list[self.current_gauge_position].statistics_values
+        current_gauge_stats = self.data_manager.user_selected_gauges_list[self.current_gauge_position]
         if len(self.data_manager.user_selected_gauges_list) != 0:
-            red_low = self.current_gauge_red_one_entry.get()
-            if current_gauge_stats.get('Minimum') <= red_low <= current_gauge_stats.get('Maximum'):
+            if self.current_gauge_red_one_entry.get() == "":
+                red_low = 0
+            else:
+                red_low = float(self.current_gauge_red_one_entry.get())
+
+            if current_gauge_stats.statistics_values.get(
+                    'Minimum') <= red_low <= current_gauge_stats.statistics_values.get('Maximum'):
                 current_gauge_stats.red_range_low = red_low
-            red_high = self.current_gauge_red_two_entry.get()
-            if current_gauge_stats.get('Minimum') <= red_high <= current_gauge_stats.get(
+
+            if self.current_gauge_red_two_entry.get() == "":
+                red_high = 0
+            else:
+                red_high = float(self.current_gauge_red_two_entry.get())
+
+            if current_gauge_stats.statistics_values.get(
+                    'Minimum') <= red_high <= current_gauge_stats.statistics_values.get(
                     'Maximum') and red_high > red_low:
                 current_gauge_stats.red_range_high = red_high
             print(red_low)
@@ -783,7 +827,8 @@ class PlaybackPanel(ttk.Frame):
 
     def update_graphs(self, current_time):
         """Updates the gauges with current information"""
-        self.gauge_customization_panel.display_gauge_manager.update_gauges(self.gauge_customization_panel.data_manager, current_time-1)
+        self.gauge_customization_panel.display_gauge_manager.update_gauges(self.gauge_customization_panel.data_manager,
+                                                                           current_time - 1)
 
     def play_video(self):
         if self.video_player:

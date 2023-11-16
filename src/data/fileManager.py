@@ -39,7 +39,8 @@ class FileManager:
         # Deserialize the JSON data back into gauge objects
         gauge_list = []
         for data in gauge_data:
-            # # Create gauge objects here based on the data
+            pass
+            #  Create gauge objects here based on the data
             # if data.gauge_name == 'X-by-Y-plot':
             #     gauge = XYPlotGauge(master)
             # elif data.gauge_name == 'Number or Character Display':
