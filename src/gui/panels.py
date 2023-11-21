@@ -528,7 +528,17 @@ class GaugeCustomizationPanel(ttk.Frame):
         self.display_gauge_window_btn = tk.Button(self, text="Show Gauges on Window", command=self.create_window)
         self.display_gauge_window_btn.pack(side=tk.TOP)
 
-        self.alarm_listbox = None
+
+        # Alarm initialization
+
+        self.alarm_frame = tk.Frame(self)
+        self.alarm_frame.pack(side=tk.TOP)
+
+        self.alarm_listbox = tk.Listbox(self.alarm_frame, selectmode=tk.SINGLE, height=5,
+                                        exportselection=0, width=30)
+        self.alarm_listbox.pack(pady=5)
+
+        self.alarm_listbox.bind("<Double-1>", self.add_alarm)
         self.alarm_add_button = None
         self.alarm_list = []
 
@@ -541,7 +551,7 @@ class GaugeCustomizationPanel(ttk.Frame):
     def option_menu(self, number):
         print("Working")
         if len(self.data_manager.user_selected_gauges_list) != 0:
-            if number == "None":
+            if number == "No Position":
                 self.data_manager.user_selected_gauges_list[self.current_gauge_position].position = 0
             else:
                 self.data_manager.user_selected_gauges_list[self.current_gauge_position].position = number
@@ -755,7 +765,7 @@ class GaugeCustomizationPanel(ttk.Frame):
         self.config_panel = config_panel
 
     def draw_clock_alarm_options(self):
-        self.alarm_listbox = tk.Listbox(self, selectmode=tk.SINGLE, height=5,
+        self.alarm_listbox = tk.Listbox(self.alarm_frame, selectmode=tk.SINGLE, height=5,
                                         exportselection=0, width=30)
         self.alarm_listbox.pack(pady=5)
 
@@ -763,6 +773,10 @@ class GaugeCustomizationPanel(ttk.Frame):
             self.alarm_listbox.insert(tk.END, alarm)
 
         self.alarm_listbox.bind("<Double-1>", self.add_alarm)
+
+    def delete_clock_options(self):
+        for widget in self.alarm_frame.winfo_children():
+            widget.destroy()
 
     def add_alarm(self, event=None):
         #from datetime import datetime
@@ -779,11 +793,12 @@ class GaugeCustomizationPanel(ttk.Frame):
             self.current_gauge_position = 0
         if len(self.data_manager.user_selected_gauges_list) > 0:
             self.delete_range_options()
+            self.delete_clock_options()
             print("Current Position")
             print(self.current_gauge_position)
             print(self.data_manager.user_selected_gauges_list[self.current_gauge_position].gauge_name)
             g_name = self.data_manager.user_selected_gauges_list[self.current_gauge_position].gauge_name
-            if g_name in ["Circle - 90°", "Circle - 180°", "Circle - 270°", "Circle - 360°", "Bar"]:
+            if g_name in ["Circle - 90°", "Circle - 180°", "Circle - 270°", "Circle - 360°", "Bar", "X-by-Y-plot", "X-Plot"]:
                 print("Drawing the range options!")
                 self.draw_range_options()
             self.clicked.set(self.data_manager.user_selected_gauges_list[self.current_gauge_position].position)
