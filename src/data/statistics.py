@@ -26,8 +26,8 @@ class DataProcessor:
         statistics = {
             'Minimum': minimum,
             'Maximum': maximum,
-            'Average': average,
-            'Standard Deviation': standard_dev
+            'Average': round(average, 2),
+            'Standard Deviation': round(standard_dev, 2)
         }
 
         print(f"{field_name}" + '\n')
