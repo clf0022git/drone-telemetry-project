@@ -18,7 +18,7 @@ from src.data.statistics import DataProcessor
 from src.config.GaugeManager import *
 from src.data.fileManager import FileManager
 
-m_or_f = 0  # 0 = f and 1 = m
+m_or_f = 0  # 0 = m or C, and 1 = f or F
 
 
 class ConfigurationPanel(ttk.Frame):
@@ -209,7 +209,7 @@ class ConfigurationPanel(ttk.Frame):
                 stats = self.data_processor.calc_statistics(self.data_manager.data_file[field], field)
                 print(type(self.statistics_list))
                 self.statistics_list.append(stats)
-                element.set_statistics_text(stats)
+                element.set_statistics_text(stats, m_or_f)
                 element.statistics_values = stats
             else:
                 # This entry has no statistics
@@ -220,7 +220,7 @@ class ConfigurationPanel(ttk.Frame):
                 if self.data_manager.data_file[field].dtype == "int64" or self.data_manager.data_file[
                     field].dtype == "float64":
                     stats = self.data_processor.calc_statistics(self.data_manager.data_file[field], field)
-                    element.set_statistics_two_text(stats)
+                    element.set_statistics_two_text(stats, m_or_f)
                     element.statistics_values_two = stats
                 else:
                     # This entry has no statistics
@@ -528,7 +528,6 @@ class GaugeCustomizationPanel(ttk.Frame):
         self.display_gauge_window_btn = tk.Button(self, text="Show Gauges on Window", command=self.create_window)
         self.display_gauge_window_btn.pack(side=tk.TOP)
 
-
         # Alarm initialization
 
         self.alarm_frame = tk.Frame(self)
@@ -564,7 +563,7 @@ class GaugeCustomizationPanel(ttk.Frame):
                 if element.position != 0:
                     index = self.position.index(element.position)
                     self.position.pop(index)
-                    self.input_position.pop(index-1)
+                    self.input_position.pop(index - 1)
                     print("Removed")
                     print(index)
 
@@ -582,7 +581,8 @@ class GaugeCustomizationPanel(ttk.Frame):
         self.gauge_window.title("Gauge View")
         self.gauge_window.geometry("1000x700")
         self.gauge_window.resizable(True, True)
-        self.display_gauge_manager.draw_gauges(self.data_manager, self.gauge_window, self.input_position, self.alarm_list)
+        self.display_gauge_manager.draw_gauges(self.data_manager, self.gauge_window, self.input_position,
+                                               self.alarm_list)
         self.display_gauge_manager.update_color_ranges(self.data_manager)
 
     def draw_range_options(self):
@@ -779,16 +779,17 @@ class GaugeCustomizationPanel(ttk.Frame):
             widget.destroy()
 
     def add_alarm(self, event=None):
-        #from datetime import datetime
+        # from datetime import datetime
         index = self.alarm_listbox.curselection()
         if index:
             alarm_item: str = self.alarm_listbox.get(index)
-            #alarm_item.replace("-", "/")
-            #datetime.strptime(alarm_item, "%m/%d/%Y %H:%M:%S")
+            # alarm_item.replace("-", "/")
+            # datetime.strptime(alarm_item, "%m/%d/%Y %H:%M:%S")
             self.alarm_list.append(alarm_item)
             print(alarm_item)
 
     def update_gauges(self, reset_position):
+        global m_or_f
         if reset_position:
             self.current_gauge_position = 0
         if len(self.data_manager.user_selected_gauges_list) > 0:
@@ -798,7 +799,8 @@ class GaugeCustomizationPanel(ttk.Frame):
             print(self.current_gauge_position)
             print(self.data_manager.user_selected_gauges_list[self.current_gauge_position].gauge_name)
             g_name = self.data_manager.user_selected_gauges_list[self.current_gauge_position].gauge_name
-            if g_name in ["Circle - 90°", "Circle - 180°", "Circle - 270°", "Circle - 360°", "Bar", "X-by-Y-plot", "X-Plot"]:
+            if g_name in ["Circle - 90°", "Circle - 180°", "Circle - 270°", "Circle - 360°", "Bar", "X-by-Y-plot",
+                          "X-Plot"]:
                 print("Drawing the range options!")
                 self.draw_range_options()
             self.clicked.set(self.data_manager.user_selected_gauges_list[self.current_gauge_position].position)
@@ -825,7 +827,8 @@ class GaugeCustomizationPanel(ttk.Frame):
             if str(self.data_manager.user_selected_gauges_list[self.current_gauge_position].name) == "No name applied":
                 temp_text = self.data_manager.user_selected_gauges_list[self.current_gauge_position].field_name[0]
                 if self.data_manager.user_selected_gauges_list[self.current_gauge_position].second_field_name != "":
-                    temp_text = temp_text + " X " + self.data_manager.user_selected_gauges_list[self.current_gauge_position].second_field_name
+                    temp_text = temp_text + " X " + self.data_manager.user_selected_gauges_list[
+                        self.current_gauge_position].second_field_name
                 self.data_manager.user_selected_gauges_list[self.current_gauge_position].name = temp_text
             # self.current_gauge_text_label.config(text=temp_text)
             self.current_gauge_text.config(state="disabled")
