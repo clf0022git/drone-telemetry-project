@@ -465,16 +465,78 @@ class TemporaryGauge:
     def set_second_field(self, second_field):
         self.second_field_name = second_field
 
-    def set_statistics_text(self, stats):
-        user_stats_string = "--Field One--\n" + "Minimum: " + str(stats.get('Minimum')) + "\n" + "Maximum: " + str(
-            stats.get('Maximum')) + "\n" + "Average: " + str(
-            stats.get('Average')) + "\n" + "Standard Deviation: " + str(
-            stats.get('Standard Deviation')) + "\n"
-        self.statistics = user_stats_string
+    def set_statistics_text(self, stats, metric_check):
+        if self.field_name[0].find("[m") != -1:
+            if metric_check == 0:
+                user_stats_string = "--Field One--\n" + "Minimum: " + str(
+                    stats.get('Minimum')) + " meters" + "\n" + "Maximum: " + str(
+                    stats.get('Maximum')) + " meters" + "\n" + "Average: " + str(
+                    stats.get('Average')) + " meters" + "\n" + "Standard Deviation: " + str(
+                    stats.get('Standard Deviation')) + " meters" + "\n"
+                self.statistics = user_stats_string
+            else:
+                user_stats_string = "--Field One--\n" + "Minimum: " + str(
+                    stats.get('Minimum')) + " feet" + "\n" + "Maximum: " + str(
+                    stats.get('Maximum')) + " feet" + "\n" + "Average: " + str(
+                    stats.get('Average')) + " feet" + "\n" + "Standard Deviation: " + str(
+                    stats.get('Standard Deviation')) + " feet" + "\n"
+                self.statistics = user_stats_string
+        elif self.field_name[0].find("[C") != -1:
+            if metric_check == 0:
+                user_stats_string = "--Field One--\n" + "Minimum: " + str(
+                    stats.get('Minimum')) + " Celsius" + "\n" + "Maximum: " + str(
+                    stats.get('Maximum')) + " Celsius" + "\n" + "Average: " + str(
+                    stats.get('Average')) + " Celsius" + "\n" + "Standard Deviation: " + str(
+                    stats.get('Standard Deviation')) + " Celsius" + "\n"
+                self.statistics = user_stats_string
+            else:
+                user_stats_string = "--Field One--\n" + "Minimum: " + str(
+                    stats.get('Minimum')) + " Fahrenheit" + "\n" + "Maximum: " + str(
+                    stats.get('Maximum')) + " Fahrenheit" + "\n" + "Average: " + str(
+                    stats.get('Average')) + " Fahrenheit" + "\n" + "Standard Deviation: " + str(
+                    stats.get('Standard Deviation')) + " Fahrenheit" + "\n"
+                self.statistics = user_stats_string
+        else:
+            user_stats_string = "--Field One--\n" + "Minimum: " + str(stats.get('Minimum')) + "\n" + "Maximum: " + str(
+                stats.get('Maximum')) + "\n" + "Average: " + str(
+                stats.get('Average')) + "\n" + "Standard Deviation: " + str(
+                stats.get('Standard Deviation')) + "\n"
+            self.statistics = user_stats_string
 
-    def set_statistics_two_text(self, stats):
-        user_stats_string = "--Field Two--\n" + "Minimum: " + str(stats.get('Minimum')) + "\n" + "Maximum: " + str(
-            stats.get('Maximum')) + "\n" + "Average: " + str(
-            stats.get('Average')) + "\n" + "Standard Deviation: " + str(
-            stats.get('Standard Deviation')) + "\n"
-        self.statistics_two = user_stats_string
+    def set_statistics_two_text(self, stats, metric_check):
+        if self.field_name[0].find("[m") != -1:
+            if metric_check == 0:
+                user_stats_string = "--Field Two--\n" + "Minimum: " + str(
+                    stats.get('Minimum')) + " meters" + "\n" + "Maximum: " + str(
+                    stats.get('Maximum')) + " meters" + "\n" + "Average: " + str(
+                    stats.get('Average')) + " meters" + "\n" + "Standard Deviation: " + str(
+                    stats.get('Standard Deviation')) + " meters" + "\n"
+                self.statistics = user_stats_string
+            else:
+                user_stats_string = "--Field Two--\n" + "Minimum: " + str(
+                    stats.get('Minimum')) + " feet" + "\n" + "Maximum: " + str(
+                    stats.get('Maximum')) + " feet" + "\n" + "Average: " + str(
+                    stats.get('Average')) + " feet" + "\n" + "Standard Deviation: " + str(
+                    stats.get('Standard Deviation')) + " feet" + "\n"
+                self.statistics = user_stats_string
+        elif self.field_name[0].find("[C") != -1:
+            if metric_check == 0:
+                user_stats_string = "--Field Two--\n" + "Minimum: " + str(
+                    stats.get('Minimum')) + " Celsius" + "\n" + "Maximum: " + str(
+                    stats.get('Maximum')) + " Celsius" + "\n" + "Average: " + str(
+                    stats.get('Average')) + " Celsius" + "\n" + "Standard Deviation: " + str(
+                    stats.get('Standard Deviation')) + " Celsius" + "\n"
+                self.statistics = user_stats_string
+            else:
+                user_stats_string = "--Field Two--\n" + "Minimum: " + str(
+                    stats.get('Minimum')) + " Fahrenheit" + "\n" + "Maximum: " + str(
+                    stats.get('Maximum')) + " Fahrenheit" + "\n" + "Average: " + str(
+                    stats.get('Average')) + " Fahrenheit" + "\n" + "Standard Deviation: " + str(
+                    stats.get('Standard Deviation')) + " Fahrenheit" + "\n"
+                self.statistics = user_stats_string
+        else:
+            user_stats_string = "--Field Two--\n" + "Minimum: " + str(stats.get('Minimum')) + "\n" + "Maximum: " + str(
+                stats.get('Maximum')) + "\n" + "Average: " + str(
+                stats.get('Average')) + "\n" + "Standard Deviation: " + str(
+                stats.get('Standard Deviation')) + "\n"
+            self.statistics = user_stats_string
