@@ -13,6 +13,10 @@ class CircleGauge(GaugeBase):
         self.current_value = 0
         self.gauge_shape = None
 
+        self.gauge_width = None
+        self.gauge_height = None
+        self.resize_mode = False
+
         self.canvas = tk.Canvas(self, width=200, height=200)
         self.canvas.pack()
         self.draw_gauge()
@@ -21,9 +25,15 @@ class CircleGauge(GaugeBase):
         """Draw the circle gauge with specific degree options."""
         self.canvas.delete("all")  # Clear the canvas before drawing
 
-        radius = 80
-        center_x, center_y = 100, 100
-        number_radius = radius * 0.85  # Slightly smaller radius for numbers
+        if not self.resize_mode:
+            radius = 80
+            center_x, center_y = 100, 100
+            number_radius = radius * 0.85  # Slightly smaller radius for numbers
+        else:
+            # Calculate the new radius based on the smaller of the width or height
+            radius = min(self.gauge_width, self.gauge_height) / 2 * 0.8
+            center_x, center_y = self.gauge_width / 2, self.gauge_height / 2
+            number_radius = radius * 0.85  # Adjusted radius for numbers
 
         # Draw based on specific degree cases
         if self.max_degree == 90:
@@ -151,6 +161,27 @@ class CircleGauge(GaugeBase):
         self.show_numbers = not self.show_numbers
         self.draw_gauge()
 
+    def resize(self, width, height):
+        """Resize the gauge/frame and redraw the gauge elements."""
+        # Update the frame size
+        super().resize(width, height)
+
+        # Update the canvas size
+        self.canvas.config(width=width, height=height)
+
+        # Store new dimensions for drawing elements
+        self.gauge_width = width
+        self.gauge_height = height
+
+        # Enable gauge resize mode
+        self.resize_mode = True if None not in (self.gauge_width, self.gauge_height) else False
+
+        # Redraw the gauge with the new dimensions
+        self.draw_gauge()
+
+        # Redraw the needle with the current value
+        self.update_value(self.current_value)
+
 
 if __name__ == "__main__":
     root = tk.Tk()
@@ -184,6 +215,7 @@ if __name__ == "__main__":
                 new_value = round(random.uniform(0, gauge.number_range[1]), 1)
                 gauge.update_value(new_value)
                 gauge.set_description(f'Current value: {new_value}')
+                #gauge.resize(200, random.randint(100, 200))
         root.after(1000, update_gauges)  # Update the gauge values every 1 second
 
     # Start the gauge value updates

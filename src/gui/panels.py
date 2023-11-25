@@ -18,7 +18,7 @@ from src.data.statistics import DataProcessor
 from src.config.GaugeManager import *
 from src.data.fileManager import FileManager
 
-m_or_f = 0  # 0 = f and 1 = m
+m_or_f = 0  # 0 = m or C, and 1 = f or F
 
 
 class ConfigurationPanel(ttk.Frame):
@@ -209,7 +209,7 @@ class ConfigurationPanel(ttk.Frame):
                 stats = self.data_processor.calc_statistics(self.data_manager.data_file[field], field)
                 print(type(self.statistics_list))
                 self.statistics_list.append(stats)
-                element.set_statistics_text(stats)
+                element.set_statistics_text(stats, m_or_f)
                 element.statistics_values = stats
             else:
                 # This entry has no statistics
@@ -220,7 +220,7 @@ class ConfigurationPanel(ttk.Frame):
                 if self.data_manager.data_file[field].dtype == "int64" or self.data_manager.data_file[
                     field].dtype == "float64":
                     stats = self.data_processor.calc_statistics(self.data_manager.data_file[field], field)
-                    element.set_statistics_two_text(stats)
+                    element.set_statistics_two_text(stats, m_or_f)
                     element.statistics_values_two = stats
                 else:
                     # This entry has no statistics
@@ -827,6 +827,7 @@ class GaugeCustomizationPanel(ttk.Frame):
             print(alarm_item)
 
     def update_gauges(self, reset_position):
+        global m_or_f
         if reset_position:
             self.current_gauge_position = 0
         if len(self.data_manager.user_selected_gauges_list) > 0:

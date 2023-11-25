@@ -88,6 +88,11 @@ class GaugeBase(tk.Frame):
         self.description_text = description
         self.description_label.config(text=self.description_text)
 
+    def resize(self, width, height):
+        """Resize the gauge/frame to the given dimensions."""
+        self.config(width=width, height=height)
+        self.pack_propagate(False)  # Prevents the frame from resizing to fit its contents
+
 
 # Example gauge subclass
 if __name__ == "__main__":
@@ -111,5 +116,6 @@ if __name__ == "__main__":
     number_gauge = NumberDisplayGauge(root, title='Speed', description='km/h')
     number_gauge.pack(padx=10, pady=10)
     number_gauge.update_value(42)  # Update value example
+    number_gauge.resize(200, 100)  # Resize example
 
     root.mainloop()
