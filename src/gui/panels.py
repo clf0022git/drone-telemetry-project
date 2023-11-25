@@ -468,6 +468,8 @@ class GaugeCustomizationPanel(ttk.Frame):
         self.red_frame.pack(side=tk.TOP)
         self.position_frame = tk.Frame(self.current_gauge_settings_frame)
         self.position_frame.pack(side=tk.TOP)
+        self.size_frame = tk.Frame(self.current_gauge_settings_frame)
+        self.size_frame.pack(side=tk.TOP)
 
         self.current_gauge_name_label = tk.Label(self.name_frame, font=("Roboto Medium", 10), text="Gauge Name:")
         self.current_gauge_name_label.pack(side=tk.LEFT)
@@ -520,6 +522,27 @@ class GaugeCustomizationPanel(ttk.Frame):
                                                command=self.option_menu)
         self.dropdown_position.pack()
 
+        # Slider that will handle size adjustments of gauges
+        self.slider_text = tk.Label(self.size_frame, text = "Gauge Size (0.5x-2x):", font=("Roboto Medium", 10))
+        self.slider_text.pack(side=tk.TOP)
+
+        self.scale_float = tk.DoubleVar(value=0)
+        self.gauge_scale_slider = ttk.Scale(self.size_frame,
+                                            command=lambda value: self.update_scale(),
+                                            from_=0.5,
+                                            to=2,
+                                            length=200,
+                                            orient='horizontal',
+                                            variable=self.scale_float)
+
+        self.gauge_scale_slider.pack(side=tk.TOP)
+
+        # Progress bar to show how far along is the slider, may change to show number
+        self.gauge_scale_progress = ttk.Progressbar(self.size_frame,
+                                                    variable=self.scale_float,
+                                                    maximum=2)
+        self.gauge_scale_progress.pack(side=tk.TOP)
+
         # Frame that will hold the current way the gauge looks
 
         self.current_gauge_view = tk.Frame(self.current_gauge_view_and_settings)
@@ -527,7 +550,6 @@ class GaugeCustomizationPanel(ttk.Frame):
 
         self.display_gauge_window_btn = tk.Button(self, text="Show Gauges on Window", command=self.create_window)
         self.display_gauge_window_btn.pack(side=tk.TOP)
-
 
         # Alarm initialization
 
@@ -548,6 +570,15 @@ class GaugeCustomizationPanel(ttk.Frame):
 
         # TODO: Add widgets to display statistics like min, max, average, etc.
 
+    def update_scale(self):
+        print("This is the epic number")
+        print(self.scale_float.get())
+        # Updates the size in a specific gauge
+        if len(self.data_manager.user_selected_gauges_list) != 0:
+            self.data_manager.user_selected_gauges_list[self.current_gauge_position].size = self.scale_float.get()
+
+            self.refresh_customization_gauge()
+
     def option_menu(self, number):
         print("Working")
         if len(self.data_manager.user_selected_gauges_list) != 0:
@@ -564,7 +595,7 @@ class GaugeCustomizationPanel(ttk.Frame):
                 if element.position != 0:
                     index = self.position.index(element.position)
                     self.position.pop(index)
-                    self.input_position.pop(index-1)
+                    self.input_position.pop(index - 1)
                     print("Removed")
                     print(index)
 
@@ -582,7 +613,8 @@ class GaugeCustomizationPanel(ttk.Frame):
         self.gauge_window.title("Gauge View")
         self.gauge_window.geometry("1000x700")
         self.gauge_window.resizable(True, True)
-        self.display_gauge_manager.draw_gauges(self.data_manager, self.gauge_window, self.input_position, self.alarm_list)
+        self.display_gauge_manager.draw_gauges(self.data_manager, self.gauge_window, self.input_position,
+                                               self.alarm_list)
         self.display_gauge_manager.update_color_ranges(self.data_manager)
 
     def draw_range_options(self):
@@ -646,6 +678,12 @@ class GaugeCustomizationPanel(ttk.Frame):
 
         self.current_gauge_name_entry.delete(0, 'end')
 
+    def refresh_customization_gauge(self):
+        if len(self.data_manager.user_selected_gauges_list) != 0:
+            for widget in self.current_gauge_view.winfo_children():
+                widget.destroy()
+            self.gauge_manager.draw_gauge(self.current_gauge_view,
+                                          self.data_manager.user_selected_gauges_list[self.current_gauge_position])
     def change_blue(self):
         """Only changes the blue range if it fits within the detected minimum and maximum and the blue high is above
         the blue low"""
@@ -779,12 +817,12 @@ class GaugeCustomizationPanel(ttk.Frame):
             widget.destroy()
 
     def add_alarm(self, event=None):
-        #from datetime import datetime
+        # from datetime import datetime
         index = self.alarm_listbox.curselection()
         if index:
             alarm_item: str = self.alarm_listbox.get(index)
-            #alarm_item.replace("-", "/")
-            #datetime.strptime(alarm_item, "%m/%d/%Y %H:%M:%S")
+            # alarm_item.replace("-", "/")
+            # datetime.strptime(alarm_item, "%m/%d/%Y %H:%M:%S")
             self.alarm_list.append(alarm_item)
             print(alarm_item)
 
@@ -798,7 +836,8 @@ class GaugeCustomizationPanel(ttk.Frame):
             print(self.current_gauge_position)
             print(self.data_manager.user_selected_gauges_list[self.current_gauge_position].gauge_name)
             g_name = self.data_manager.user_selected_gauges_list[self.current_gauge_position].gauge_name
-            if g_name in ["Circle - 90°", "Circle - 180°", "Circle - 270°", "Circle - 360°", "Bar", "X-by-Y-plot", "X-Plot"]:
+            if g_name in ["Circle - 90°", "Circle - 180°", "Circle - 270°", "Circle - 360°", "Bar", "X-by-Y-plot",
+                          "X-Plot"]:
                 print("Drawing the range options!")
                 self.draw_range_options()
             self.clicked.set(self.data_manager.user_selected_gauges_list[self.current_gauge_position].position)
@@ -825,7 +864,8 @@ class GaugeCustomizationPanel(ttk.Frame):
             if str(self.data_manager.user_selected_gauges_list[self.current_gauge_position].name) == "No name applied":
                 temp_text = self.data_manager.user_selected_gauges_list[self.current_gauge_position].field_name[0]
                 if self.data_manager.user_selected_gauges_list[self.current_gauge_position].second_field_name != "":
-                    temp_text = temp_text + " X " + self.data_manager.user_selected_gauges_list[self.current_gauge_position].second_field_name
+                    temp_text = temp_text + " X " + self.data_manager.user_selected_gauges_list[
+                        self.current_gauge_position].second_field_name
                 self.data_manager.user_selected_gauges_list[self.current_gauge_position].name = temp_text
             # self.current_gauge_text_label.config(text=temp_text)
             self.current_gauge_text.config(state="disabled")

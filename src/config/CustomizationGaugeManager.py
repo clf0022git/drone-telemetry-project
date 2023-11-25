@@ -35,9 +35,15 @@ class CustomizationGaugeManager:
                                             connect_dots=True)
                 xy_plot_gauge.pack(fill=tk.BOTH, expand=True)
 
-                xy_plot_gauge.set_bounds(x_bounds=(-10, 10), y_bounds=(-10, 10))
+                xy_plot_gauge.set_bounds(
+                    x_bounds=(element.statistics_values.get('Minimum'), (element.statistics_values.get('Maximum'))),
+                    y_bounds=(
+                    element.statistics_values_two.get('Minimum'), (element.statistics_values_two.get('Maximum'))))
+
             case "X-Plot":
                 x_plot_gauge = XPlotGauge(root, title=element.name, description='X values plotted over time')
+                x_plot_gauge.set_bounds(
+                    x_bounds=(element.statistics_values.get('Minimum'), (element.statistics_values.get('Maximum'))))
                 x_plot_gauge.pack(fill=tk.BOTH, expand=True)
             # Case for getting the data and drawing the bar graph
             case "Bar":
@@ -46,16 +52,17 @@ class CustomizationGaugeManager:
                                        orientation='vertical')
                 v_bar_gauge.pack(padx=10, pady=10)
 
+                # Set the bounds for the bar gauges
+                v_bar_gauge.set_bounds(
+                    y_bounds=(element.statistics_values.get('Minimum'), element.statistics_values.get('Maximum')))
+
                 # Change figure size as needed
                 v_bar_gauge.set_figure_size(4, 3)
 
-                # Set the bounds for the bar gauges
-                v_bar_gauge.set_bounds(
-                    y_bounds=(0, element.statistics_values.get('Maximum')))
             # Case for getting the data and drawing  the 90 degree circle graph
             case "Circle - 90°":
                 circle_gauge = CircleGauge(root, title=element.name, max_degree=90,
-                                           number_range=(0,
+                                           number_range=(element.statistics_values.get('Minimum'),
                                                          element.statistics_values.get('Maximum')),
                                            number_step=1)
                 circle_gauge.pack(padx=10, pady=10)
@@ -64,7 +71,7 @@ class CustomizationGaugeManager:
             # Case for getting the data and drawing  the 180 degree circle graph
             case "Circle - 180°":
                 circle_gauge = CircleGauge(root, title=element.name, max_degree=180,
-                                           number_range=(0,
+                                           number_range=(element.statistics_values.get('Minimum'),
                                                          element.statistics_values.get('Maximum')),
                                            number_step=1)
                 circle_gauge.pack(padx=10, pady=10)
@@ -73,7 +80,7 @@ class CustomizationGaugeManager:
             # Case for getting the data and drawing  the 270 degree circle graph
             case "Circle - 270°":
                 circle_gauge = CircleGauge(root, title=element.name, max_degree=270,
-                                           number_range=(0,
+                                           number_range=(element.statistics_values.get('Minimum'),
                                                          element.statistics_values.get('Maximum')),
                                            number_step=1)
                 circle_gauge.pack(padx=10, pady=10)
@@ -82,7 +89,7 @@ class CustomizationGaugeManager:
             # Case for getting the data and drawing  the 360 degree circle graph
             case "Circle - 360°":
                 circle_gauge = CircleGauge(root, title=element.name, max_degree=360,
-                                           number_range=(0,
+                                           number_range=(element.statistics_values.get('Minimum'),
                                                          element.statistics_values.get('Maximum')),
                                            number_step=1)
                 circle_gauge.pack(padx=10, pady=10)
