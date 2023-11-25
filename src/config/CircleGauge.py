@@ -215,7 +215,7 @@ if __name__ == "__main__":
                 new_value = round(random.uniform(0, gauge.number_range[1]), 1)
                 gauge.update_value(new_value)
                 gauge.set_description(f'Current value: {new_value}')
-                gauge.resize(200, random.randint(100, 200))
+                #gauge.resize(200, random.randint(100, 200))
         root.after(1000, update_gauges)  # Update the gauge values every 1 second
 
     # Start the gauge value updates
