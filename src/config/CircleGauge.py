@@ -68,7 +68,11 @@ class CircleGauge(GaugeBase):
                 return
 
             step = self.number_step
+            step = round(step, 2)
+            print("This is the step")
+            print(step)
             num = start
+            num = round(num, 2)
             while num <= end:
                 # Calculate the angle for each number
                 angle_deg = (num - start) / (end - start) * max_degree
