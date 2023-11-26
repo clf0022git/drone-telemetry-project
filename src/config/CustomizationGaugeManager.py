@@ -1,3 +1,5 @@
+import math
+
 import numpy as np
 from numpy import sin, cos, pi
 import plotly.graph_objects as go
@@ -37,14 +39,19 @@ class CustomizationGaugeManager:
 
                 xy_plot_gauge.set_bounds(
                     x_bounds=(element.statistics_values.get('Minimum'), (element.statistics_values.get('Maximum'))),
-                    y_bounds=(
-                    element.statistics_values_two.get('Minimum'), (element.statistics_values_two.get('Maximum'))))
+                    y_bounds=(element.statistics_values_two.get('Minimum'), (element.statistics_values_two.get('Maximum'))))
+                xy_plot_gauge.resize(element.size, element.size)
+                print("Generate size?")
+                print(element.size)
 
             case "X-Plot":
                 x_plot_gauge = XPlotGauge(root, title=element.name, description='X values plotted over time')
                 x_plot_gauge.set_bounds(
                     x_bounds=(element.statistics_values.get('Minimum'), (element.statistics_values.get('Maximum'))))
                 x_plot_gauge.pack(fill=tk.BOTH, expand=True)
+                x_plot_gauge.set_figure_size(element.size, element.size)
+                print("Generate size?")
+                print(element.size)
             # Case for getting the data and drawing the bar graph
             case "Bar":
                 # Initialize vertical bar gauge
@@ -61,37 +68,58 @@ class CustomizationGaugeManager:
 
             # Case for getting the data and drawing  the 90 degree circle graph
             case "Circle - 90°":
+                step_interval = 1
+                element_subtraction = element.statistics_values.get('Maximum') - element.statistics_values.get(
+                    'Minimum')
+                if element_subtraction != 0:
+                    step_interval = element_subtraction / 2
                 circle_gauge = CircleGauge(root, title=element.name, max_degree=90,
                                            number_range=(element.statistics_values.get('Minimum'),
                                                          element.statistics_values.get('Maximum')),
-                                           number_step=1)
+                                           number_step=step_interval)
                 circle_gauge.pack(padx=10, pady=10)
                 circle_gauge.update_value(element.statistics_values.get('Maximum'))
 
             # Case for getting the data and drawing  the 180 degree circle graph
             case "Circle - 180°":
+                step_interval = 1
+                element_subtraction = element.statistics_values.get('Maximum') - element.statistics_values.get(
+                    'Minimum')
+                if element_subtraction != 0:
+                    step_interval = element_subtraction / 5
                 circle_gauge = CircleGauge(root, title=element.name, max_degree=180,
                                            number_range=(element.statistics_values.get('Minimum'),
                                                          element.statistics_values.get('Maximum')),
-                                           number_step=1)
+                                           number_step=step_interval)
                 circle_gauge.pack(padx=10, pady=10)
                 circle_gauge.update_value(element.statistics_values.get('Maximum'))  # Update to a sample value
 
             # Case for getting the data and drawing  the 270 degree circle graph
             case "Circle - 270°":
+                step_interval = 1
+                element_subtraction = element.statistics_values.get('Maximum') - element.statistics_values.get(
+                    'Minimum')
+                if element_subtraction != 0:
+                    step_interval = element_subtraction / 7
                 circle_gauge = CircleGauge(root, title=element.name, max_degree=270,
                                            number_range=(element.statistics_values.get('Minimum'),
                                                          element.statistics_values.get('Maximum')),
-                                           number_step=1)
+                                           number_step=step_interval)
                 circle_gauge.pack(padx=10, pady=10)
                 circle_gauge.update_value(element.statistics_values.get('Maximum'))
 
             # Case for getting the data and drawing  the 360 degree circle graph
             case "Circle - 360°":
+
+                step_interval = 1
+                element_subtraction = element.statistics_values.get('Maximum') - element.statistics_values.get(
+                    'Minimum')
+                if element_subtraction != 0:
+                    step_interval = element_subtraction / 10
                 circle_gauge = CircleGauge(root, title=element.name, max_degree=360,
                                            number_range=(element.statistics_values.get('Minimum'),
                                                          element.statistics_values.get('Maximum')),
-                                           number_step=1)
+                                           number_step=step_interval)
                 circle_gauge.pack(padx=10, pady=10)
                 circle_gauge.update_value(element.statistics_values.get('Maximum'))
 
