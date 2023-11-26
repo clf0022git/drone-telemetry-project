@@ -40,7 +40,7 @@ class CustomizationGaugeManager:
                 xy_plot_gauge.set_bounds(
                     x_bounds=(element.statistics_values.get('Minimum'), (element.statistics_values.get('Maximum'))),
                     y_bounds=(element.statistics_values_two.get('Minimum'), (element.statistics_values_two.get('Maximum'))))
-                xy_plot_gauge.resize(element.size, element.size)
+                xy_plot_gauge.resize(element.size * 400, element.size * 300)
                 print("Generate size?")
                 print(element.size)
 
@@ -49,7 +49,7 @@ class CustomizationGaugeManager:
                 x_plot_gauge.set_bounds(
                     x_bounds=(element.statistics_values.get('Minimum'), (element.statistics_values.get('Maximum'))))
                 x_plot_gauge.pack(fill=tk.BOTH, expand=True)
-                x_plot_gauge.set_figure_size(element.size, element.size)
+                x_plot_gauge.resize(element.size *400, element.size*300)
                 print("Generate size?")
                 print(element.size)
             # Case for getting the data and drawing the bar graph
@@ -64,7 +64,7 @@ class CustomizationGaugeManager:
                     y_bounds=(element.statistics_values.get('Minimum'), element.statistics_values.get('Maximum')))
 
                 # Change figure size as needed
-                v_bar_gauge.set_figure_size(4, 3)
+                v_bar_gauge.resize(element.size * 400, element.size * 300)
 
             # Case for getting the data and drawing  the 90 degree circle graph
             case "Circle - 90°":
@@ -79,6 +79,7 @@ class CustomizationGaugeManager:
                                            number_step=step_interval)
                 circle_gauge.pack(padx=10, pady=10)
                 circle_gauge.update_value(element.statistics_values.get('Maximum'))
+                circle_gauge.resize(element.size * 400, element.size * 300)
 
             # Case for getting the data and drawing  the 180 degree circle graph
             case "Circle - 180°":
@@ -93,6 +94,7 @@ class CustomizationGaugeManager:
                                            number_step=step_interval)
                 circle_gauge.pack(padx=10, pady=10)
                 circle_gauge.update_value(element.statistics_values.get('Maximum'))  # Update to a sample value
+                circle_gauge.resize(element.size * 400, element.size * 300)
 
             # Case for getting the data and drawing  the 270 degree circle graph
             case "Circle - 270°":
@@ -107,6 +109,7 @@ class CustomizationGaugeManager:
                                            number_step=step_interval)
                 circle_gauge.pack(padx=10, pady=10)
                 circle_gauge.update_value(element.statistics_values.get('Maximum'))
+                circle_gauge.resize(element.size * 400, element.size * 300)
 
             # Case for getting the data and drawing  the 360 degree circle graph
             case "Circle - 360°":
@@ -122,6 +125,7 @@ class CustomizationGaugeManager:
                                            number_step=step_interval)
                 circle_gauge.pack(padx=10, pady=10)
                 circle_gauge.update_value(element.statistics_values.get('Maximum'))
+                circle_gauge.resize(element.size * 400, element.size * 300)
 
             # Case for getting data and drawing  the text display
             case "Text Display":
@@ -129,15 +133,20 @@ class CustomizationGaugeManager:
                 text_gauge = TextDisplayGauge(root, title=element.name, description='Current Text')
                 text_gauge.pack(padx=10, pady=10)
                 text_gauge.update_value("Sample Text")  # Update value example
+                text_gauge.resize(element.size * 400, element.size * 300)
+
             # Case for getting the data and drawing the number/character display
             case "Number or Character Display":
                 number_gauge = NumberDisplayGauge(root, title=element.name, description='km/h')
                 number_gauge.pack(padx=10, pady=10)
                 number_gauge.update_value(42)  # Update value example
+                number_gauge.resize(element.size * 400, element.size * 300)
+
             # Case for drawing the clock
             case "Clock":
                 clock_gauge = ClockGauge(root, title=element.name, description='Local Time')
                 clock_gauge.pack(padx=10, pady=10)
+                clock_gauge.resize(element.size * 400, element.size * 300)
             # Case for drawing the stopwatch
             case "Stopwatch":
                 stopwatch_gauge = ClockGauge(root, title=element.name, description='Elapsed Time', mode='stopwatch')
@@ -146,15 +155,20 @@ class CustomizationGaugeManager:
                 # Button to toggle the stopwatch start/pause
                 toggle_button = tk.Button(root, text="Start/Stop", command=stopwatch_gauge.toggle_stopwatch)
                 toggle_button.pack(pady=5)
+                stopwatch_gauge.resize(element.size * 400, element.size * 300)
+
             # Case for drawing the running time gauge
             case "Running Time":
                 running_time_gauge = ClockGauge(root, title=element.name, description='Video Time',
                                                 mode='running_time')
                 running_time_gauge.pack(padx=10, pady=10)
+                running_time_gauge.resize(element.size * 400, element.size * 300)
+
             # Case for drawing the on/off light
             case "On/off light":
                 light_gauge = LightIndicatorGauge(root, title=element.name)
                 light_gauge.pack(padx=10, pady=10)
+                light_gauge.resize(element.size * 400, element.size * 300)
 
             case _:
                 print("Gauge not found")

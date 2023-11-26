@@ -528,12 +528,12 @@ class GaugeCustomizationPanel(ttk.Frame):
 
         self.scale_float = tk.DoubleVar(value=0)
         self.gauge_scale_slider = ttk.Scale(self.size_frame,
-                                            command=lambda value: self.update_scale(),
                                             from_=0.5,
                                             to=2,
                                             length=200,
                                             orient='horizontal',
                                             variable=self.scale_float)
+        self.gauge_scale_slider.bind("<ButtonRelease-1>", self.update_scale)
 
         self.gauge_scale_slider.pack(side=tk.TOP)
 
@@ -570,7 +570,7 @@ class GaugeCustomizationPanel(ttk.Frame):
 
         # TODO: Add widgets to display statistics like min, max, average, etc.
 
-    def update_scale(self):
+    def update_scale(self, e):
         print("This is the epic number")
         print(self.scale_float.get())
         # Updates the size in a specific gauge
