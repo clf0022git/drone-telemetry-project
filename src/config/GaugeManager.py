@@ -67,7 +67,7 @@ class GaugeManager:
                     self.gauge_instance_list.append(gauge_instance)
 
                     gauge_instance.gauge = XPlotGauge(gauge_window, title=element.name)
-                    gauge_instance.gauge.set_bounds(x_bounds=(element.statistics_values.get('Minimum'), (element.statistics_values.get('Maximum'))))
+                    gauge_instance.gauge.set_bounds(y_bounds=(element.statistics_values.get('Minimum'), (element.statistics_values.get('Maximum'))))
 
                     gauge_instance.gauge.resize(element.size * 400, element.size * 300)
 
@@ -223,7 +223,7 @@ class GaugeManager:
 
                     gauge_instance.gauge = TextDisplayGauge(gauge_window, title=element.name)
 
-                    gauge_instance.gauge.resize(element.size * 400, element.size * 300)
+                    gauge_instance.gauge.resize(element.size, element.size)
 
                     if element.position == 0:
                         position = position_list.pop() - 1
@@ -241,7 +241,7 @@ class GaugeManager:
 
                     gauge_instance.gauge = NumberDisplayGauge(gauge_window, title=element.name)
 
-                    gauge_instance.gauge.resize(element.size * 400, element.size * 300)
+                    gauge_instance.gauge.resize(element.size, element.size)
 
                     if element.position == 0:
                         position = position_list.pop() - 1
@@ -315,10 +315,9 @@ class GaugeManager:
                     gauge_instance = GaugeInstance()
                     self.gauge_instance_list.append(gauge_instance)
 
-                    gauge_instance.gauge = LightIndicatorGauge(gauge_window, title=element.name,
-                                                               description='System Power')
+                    gauge_instance.gauge = LightIndicatorGauge(gauge_window, title=element.name)
 
-                    gauge_instance.gauge.resize(element.size * 400, element.size * 300)
+                    gauge_instance.gauge.resize(element.size * 200, element.size * 150)
 
                     if element.position == 0:
                         position = position_list.pop() - 1

@@ -34,7 +34,7 @@ class LightIndicatorGauge(GaugeBase):
         self.light_canvas.config(width=new_canvas_width, height=new_canvas_height)
 
         # Calculate new oval size and position
-        oval_size = min(new_canvas_width, new_canvas_height) * 0.8  # 80% of the smallest dimension
+        oval_size = min(new_canvas_width, new_canvas_height) * 0.4  # 40% of the smallest dimension
         oval_padding_x = (new_canvas_width - oval_size) / 2
         oval_padding_y = (new_canvas_height - oval_size) / 2
         new_oval_coords = (

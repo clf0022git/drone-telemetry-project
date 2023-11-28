@@ -14,6 +14,9 @@ class NumberDisplayGauge(GaugeBase):
         self.display_var.set(value)
         self.check_alarm(value)
 
+    def resize(self, width, height):
+        self.display_label.config(font=('Arial', int(24 * width)))
+
 
 # Example usage
 if __name__ == "__main__":

@@ -33,7 +33,7 @@ class CustomizationGaugeManager:
         match element.gauge_name:
             # Case for getting data and drawing the x-by-y plot
             case "X-by-Y-plot":
-                xy_plot_gauge = XYPlotGauge(root, title=element.name, description='Drone X-Y Plot',
+                xy_plot_gauge = XYPlotGauge(root, title=element.name,
                                             connect_dots=True)
                 xy_plot_gauge.pack(fill=tk.BOTH, expand=True)
 
@@ -47,7 +47,7 @@ class CustomizationGaugeManager:
             case "X-Plot":
                 x_plot_gauge = XPlotGauge(root, title=element.name, description='X values plotted over time')
                 x_plot_gauge.set_bounds(
-                    x_bounds=(element.statistics_values.get('Minimum'), (element.statistics_values.get('Maximum'))))
+                    y_bounds=(element.statistics_values.get('Minimum'), (element.statistics_values.get('Maximum'))))
                 x_plot_gauge.pack(fill=tk.BOTH, expand=True)
                 x_plot_gauge.resize(element.size *400, element.size*300)
                 print("Generate size?")
@@ -55,7 +55,7 @@ class CustomizationGaugeManager:
             # Case for getting the data and drawing the bar graph
             case "Bar":
                 # Initialize vertical bar gauge
-                v_bar_gauge = BarGauge(root, title=element.name, description='Vertical bar description',
+                v_bar_gauge = BarGauge(root, title=element.name,
                                        orientation='vertical')
                 v_bar_gauge.pack(padx=10, pady=10)
 
@@ -130,17 +130,17 @@ class CustomizationGaugeManager:
             # Case for getting data and drawing  the text display
             case "Text Display":
                 print(element.name)
-                text_gauge = TextDisplayGauge(root, title=element.name, description='Current Text')
+                text_gauge = TextDisplayGauge(root, title=element.name)
                 text_gauge.pack(padx=10, pady=10)
                 text_gauge.update_value("Sample Text")  # Update value example
-                text_gauge.resize(element.size * 400, element.size * 300)
+                text_gauge.resize(element.size, element.size)
 
             # Case for getting the data and drawing the number/character display
             case "Number or Character Display":
-                number_gauge = NumberDisplayGauge(root, title=element.name, description='km/h')
+                number_gauge = NumberDisplayGauge(root, title=element.name)
                 number_gauge.pack(padx=10, pady=10)
                 number_gauge.update_value(42)  # Update value example
-                number_gauge.resize(element.size * 400, element.size * 300)
+                number_gauge.resize(element.size, element.size)
 
             # Case for drawing the clock
             case "Clock":
@@ -168,7 +168,7 @@ class CustomizationGaugeManager:
             case "On/off light":
                 light_gauge = LightIndicatorGauge(root, title=element.name)
                 light_gauge.pack(padx=10, pady=10)
-                light_gauge.resize(element.size * 400, element.size * 300)
+                light_gauge.resize(element.size * 200, element.size * 150)
 
             case _:
                 print("Gauge not found")

@@ -23,6 +23,9 @@ class TextDisplayGauge(GaugeBase):
         else:
             raise ValueError("TextDisplayGauge can only display string values.")
 
+    def resize(self, width, height):
+        self.text_label.config(font=('Arial', int(24*width)))
+
 
 # Example usage
 if __name__ == "__main__":

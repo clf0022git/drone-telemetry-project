@@ -27,7 +27,8 @@ class FileManager:
                 'green_range': (gauge.green_range_low, gauge.green_range_high),
                 'yellow_range': (gauge.yellow_range_low, gauge.yellow_range_high),
                 'red_range': (gauge.red_range_low, gauge.red_range_high),
-                'position': gauge.position
+                'position': gauge.position,
+                'size': gauge.size
             }
             gauge_data.append(data)
 
@@ -61,6 +62,7 @@ class FileManager:
             gauge.red_range_low = data["red_range"][0]
             gauge.red_range_high = data["red_range"][1]
             gauge.position = data["position"]
+            gauge.size = data["size"]
             gauge_list.append(gauge)
 
         data_manager.user_selected_gauges_list = gauge_list

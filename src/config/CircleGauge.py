@@ -31,7 +31,7 @@ class CircleGauge(GaugeBase):
             number_radius = radius * 0.85  # Slightly smaller radius for numbers
         else:
             # Calculate the new radius based on the smaller of the width or height
-            radius = min(self.gauge_width, self.gauge_height) / 2 * 0.8
+            radius = min(self.gauge_width, self.gauge_height) / 2 * 0.4
             center_x, center_y = self.gauge_width / 2, self.gauge_height / 2
             number_radius = radius * 0.85  # Adjusted radius for numbers
 
@@ -132,7 +132,7 @@ class CircleGauge(GaugeBase):
             center_x = self.gauge_width / 2
             center_y = self.gauge_height / 2
             radius = min(self.gauge_width, self.gauge_height) / 2 * 0.8
-            needle_length = radius * 0.8
+            needle_length = radius * 0.4
 
         # Adjust the needle to point based on the value and number range
         start, end = self.number_range
