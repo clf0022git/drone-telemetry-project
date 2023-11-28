@@ -23,6 +23,31 @@ class LightIndicatorGauge(GaugeBase):
         """Toggle the light state."""
         self.update_value(not self.is_on)
 
+    def resize(self, width, height):
+        """Resize the gauge frame and adjust the canvas and oval size."""
+        # Resize the frame
+        self.config(width=width, height=height)
+
+        # Adjust the canvas size to fit the new frame size
+        new_canvas_width = width - 20
+        new_canvas_height = height - 20
+        self.light_canvas.config(width=new_canvas_width, height=new_canvas_height)
+
+        # Calculate new oval size and position
+        oval_size = min(new_canvas_width, new_canvas_height) * 0.8  # 80% of the smallest dimension
+        oval_padding_x = (new_canvas_width - oval_size) / 2
+        oval_padding_y = (new_canvas_height - oval_size) / 2
+        new_oval_coords = (
+            oval_padding_x, oval_padding_y,
+            oval_padding_x + oval_size, oval_padding_y + oval_size
+        )
+
+        # Update the oval's coordinates to scale it
+        self.light_canvas.coords(self.light, new_oval_coords)
+
+        # Ensure the layout updates
+        self.light_canvas.pack()
+
 
 # Example usage
 if __name__ == "__main__":
@@ -35,5 +60,7 @@ if __name__ == "__main__":
     # Button to toggle the light on/off
     toggle_button = tk.Button(root, text="Toggle Light", command=light_gauge.toggle_light)
     toggle_button.pack(pady=5)
+
+    #light_gauge.resize(500, 500)
 
     root.mainloop()
