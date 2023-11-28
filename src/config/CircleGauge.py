@@ -123,9 +123,16 @@ class CircleGauge(GaugeBase):
         """Draw the arrow on the gauge."""
         self.canvas.delete("needle")  # Remove the old needle
 
-        radius = 80
-        center_x, center_y = 100, 100
-        needle_length = radius * 0.8  # Length of the needle from the center of the gauge
+        if not self.resize_mode:
+            radius = 80
+            center_x, center_y = 100, 100
+            needle_length = radius * 0.8  # Length of the needle from the center of the gauge
+        else:
+            # Calculate the center and radius based on current gauge dimensions
+            center_x = self.gauge_width / 2
+            center_y = self.gauge_height / 2
+            radius = min(self.gauge_width, self.gauge_height) / 2 * 0.8
+            needle_length = radius * 0.8
 
         # Adjust the needle to point based on the value and number range
         start, end = self.number_range
@@ -169,6 +176,9 @@ class CircleGauge(GaugeBase):
         """Resize the gauge/frame and redraw the gauge elements."""
         # Update the frame size
         super().resize(width, height)
+
+        # Update the frame size
+        self.config(width=width, height=height)
 
         # Update the canvas size
         self.canvas.config(width=width, height=height)
