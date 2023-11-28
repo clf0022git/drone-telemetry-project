@@ -259,7 +259,7 @@ class GaugeManager:
 
                     gauge_instance.gauge = ClockGauge(gauge_window, title=element.name, description='CSV Timestamp', mode='clock_csv')
 
-                    gauge_instance.gauge.resize(element.size * 400, element.size * 300)
+                    gauge_instance.gauge.resize(element.size, element.size)
 
                     if element.position == 0:
                         position = position_list.pop() - 1
@@ -281,7 +281,7 @@ class GaugeManager:
                     gauge_instance.gauge = ClockGauge(gauge_window, title=element.name, description='Elapsed Time',
                                                       mode='stopwatch')
 
-                    gauge_instance.gauge.resize(element.size * 400, element.size * 300)
+                    gauge_instance.gauge.resize(element.size, element.size)
 
                     if element.position == 0:
                         position = position_list.pop() - 1
@@ -299,7 +299,7 @@ class GaugeManager:
                     gauge_instance.gauge = ClockGauge(gauge_window, title=element.name, description='Video Time',
                                                       mode='running_time')
 
-                    gauge_instance.gauge.resize(element.size * 400, element.size * 300)
+                    gauge_instance.gauge.resize(element.size, element.size)
 
                     if element.position == 0:
                         position = position_list.pop() - 1

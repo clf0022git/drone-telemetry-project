@@ -103,6 +103,9 @@ class ClockGauge(GaugeBase):
         else:
             raise ValueError("Invalid mode for ClockGauge.")
 
+    def resize(self, width, height):
+        self.time_label.config(font=('Arial', int(24 * width)))
+
     def reset_stopwatch(self):
         self.start_time = None
 

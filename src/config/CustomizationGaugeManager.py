@@ -146,7 +146,7 @@ class CustomizationGaugeManager:
             case "Clock":
                 clock_gauge = ClockGauge(root, title=element.name, description='Local Time')
                 clock_gauge.pack(padx=10, pady=10)
-                clock_gauge.resize(element.size * 400, element.size * 300)
+                clock_gauge.resize(element.size, element.size)
             # Case for drawing the stopwatch
             case "Stopwatch":
                 stopwatch_gauge = ClockGauge(root, title=element.name, description='Elapsed Time', mode='stopwatch')
@@ -155,14 +155,14 @@ class CustomizationGaugeManager:
                 # Button to toggle the stopwatch start/pause
                 toggle_button = tk.Button(root, text="Start/Stop", command=stopwatch_gauge.toggle_stopwatch)
                 toggle_button.pack(pady=5)
-                stopwatch_gauge.resize(element.size * 400, element.size * 300)
+                stopwatch_gauge.resize(element.size, element.size)
 
             # Case for drawing the running time gauge
             case "Running Time":
                 running_time_gauge = ClockGauge(root, title=element.name, description='Video Time',
                                                 mode='running_time')
                 running_time_gauge.pack(padx=10, pady=10)
-                running_time_gauge.resize(element.size * 400, element.size * 300)
+                running_time_gauge.resize(element.size, element.size)
 
             # Case for drawing the on/off light
             case "On/off light":
