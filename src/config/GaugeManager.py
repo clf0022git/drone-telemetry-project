@@ -51,6 +51,8 @@ class GaugeManager:
                     gauge_instance.gauge = XYPlotGauge(gauge_window, title=element.name)
                     gauge_instance.gauge.set_bounds(x_bounds=(element.statistics_values.get('Minimum'), (element.statistics_values.get('Maximum'))), y_bounds=(element.statistics_values_two.get('Minimum'), (element.statistics_values_two.get('Maximum'))))
 
+                    gauge_instance.gauge.resize(element.size * 400, element.size * 300)
+
                     if element.position == 0:
                         position = position_list.pop() - 1
                     else:
@@ -66,6 +68,8 @@ class GaugeManager:
 
                     gauge_instance.gauge = XPlotGauge(gauge_window, title=element.name)
                     gauge_instance.gauge.set_bounds(x_bounds=(element.statistics_values.get('Minimum'), (element.statistics_values.get('Maximum'))))
+
+                    gauge_instance.gauge.resize(element.size * 400, element.size * 300)
 
                     if element.position == 0:
                         position = position_list.pop() - 1
@@ -84,6 +88,8 @@ class GaugeManager:
                     gauge_instance.gauge.set_bounds(
                         y_bounds=(element.statistics_values.get('Minimum'), element.statistics_values.get('Maximum')))
 
+                    gauge_instance.gauge.resize(element.size * 400, element.size * 300)
+
                     if element.position == 0:
                         position = position_list.pop() - 1
                     else:
@@ -98,10 +104,21 @@ class GaugeManager:
                     gauge_instance = GaugeInstance()
                     self.gauge_instance_list.append(gauge_instance)
 
+                    step_interval = 1
+                    element_subtraction = element.statistics_values.get('Maximum') - element.statistics_values.get(
+                        'Minimum')
+                    if element_subtraction != 0:
+                        step_interval = element_subtraction / 2
+                        print("Step interval for 90")
+                        print(step_interval)
+
                     gauge_instance.gauge = CircleGauge(gauge_window, title=element.name, max_degree=90,
                                                        number_range=(element.statistics_values.get('Minimum'),
                                                                      element.statistics_values.get('Maximum')),
-                                                       number_step=1)
+                                                       number_step=step_interval)
+
+                    gauge_instance.gauge.resize(element.size * 400, element.size * 300)
+
                     if element.position == 0:
                         position = position_list.pop() - 1
                     else:
@@ -118,10 +135,19 @@ class GaugeManager:
                     gauge_instance = GaugeInstance()
                     self.gauge_instance_list.append(gauge_instance)
 
+                    step_interval = 1
+                    element_subtraction = element.statistics_values.get('Maximum') - element.statistics_values.get(
+                        'Minimum')
+                    if element_subtraction != 0:
+                        step_interval = element_subtraction / 5
+
                     gauge_instance.gauge = CircleGauge(gauge_window, title=element.name, max_degree=180,
                                                        number_range=(element.statistics_values.get('Minimum'),
                                                                      element.statistics_values.get('Maximum')),
-                                                       number_step=1)
+                                                       number_step=step_interval)
+
+                    gauge_instance.gauge.resize(element.size * 400, element.size * 300)
+
                     if element.position == 0:
                         position = position_list.pop() - 1
                     else:
@@ -138,10 +164,19 @@ class GaugeManager:
                     gauge_instance = GaugeInstance()
                     self.gauge_instance_list.append(gauge_instance)
 
+                    step_interval = 1
+                    element_subtraction = element.statistics_values.get('Maximum') - element.statistics_values.get(
+                        'Minimum')
+                    if element_subtraction != 0:
+                        step_interval = element_subtraction / 7
+
                     gauge_instance.gauge = CircleGauge(gauge_window, title=element.name, max_degree=270,
                                                        number_range=(element.statistics_values.get('Minimum'),
                                                                      element.statistics_values.get('Maximum')),
-                                                       number_step=1)
+                                                       number_step=step_interval)
+
+                    gauge_instance.gauge.resize(element.size * 400, element.size * 300)
+
                     if element.position == 0:
                         position = position_list.pop() - 1
                     else:
@@ -158,10 +193,18 @@ class GaugeManager:
                     gauge_instance = GaugeInstance()
                     self.gauge_instance_list.append(gauge_instance)
 
+                    step_interval = 1
+                    element_subtraction = element.statistics_values.get('Maximum') - element.statistics_values.get('Minimum')
+                    if element_subtraction != 0:
+                        step_interval = element_subtraction / 10
+
                     gauge_instance.gauge = CircleGauge(gauge_window, title=element.name, max_degree=360,
                                                        number_range=(element.statistics_values.get('Minimum'),
                                                                      element.statistics_values.get('Maximum')),
-                                                       number_step=1)
+                                                       number_step=step_interval)
+
+                    gauge_instance.gauge.resize(element.size * 400, element.size * 300)
+
                     if element.position == 0:
                         position = position_list.pop() - 1
                     else:
@@ -180,6 +223,8 @@ class GaugeManager:
 
                     gauge_instance.gauge = TextDisplayGauge(gauge_window, title=element.name)
 
+                    gauge_instance.gauge.resize(element.size * 400, element.size * 300)
+
                     if element.position == 0:
                         position = position_list.pop() - 1
                     else:
@@ -196,6 +241,8 @@ class GaugeManager:
 
                     gauge_instance.gauge = NumberDisplayGauge(gauge_window, title=element.name)
 
+                    gauge_instance.gauge.resize(element.size * 400, element.size * 300)
+
                     if element.position == 0:
                         position = position_list.pop() - 1
                     else:
@@ -211,6 +258,8 @@ class GaugeManager:
                     self.gauge_instance_list.append(gauge_instance)
 
                     gauge_instance.gauge = ClockGauge(gauge_window, title=element.name, description='CSV Timestamp', mode='clock_csv')
+
+                    gauge_instance.gauge.resize(element.size * 400, element.size * 300)
 
                     if element.position == 0:
                         position = position_list.pop() - 1
@@ -232,6 +281,8 @@ class GaugeManager:
                     gauge_instance.gauge = ClockGauge(gauge_window, title=element.name, description='Elapsed Time',
                                                       mode='stopwatch')
 
+                    gauge_instance.gauge.resize(element.size * 400, element.size * 300)
+
                     if element.position == 0:
                         position = position_list.pop() - 1
                     else:
@@ -247,6 +298,8 @@ class GaugeManager:
 
                     gauge_instance.gauge = ClockGauge(gauge_window, title=element.name, description='Video Time',
                                                       mode='running_time')
+
+                    gauge_instance.gauge.resize(element.size * 400, element.size * 300)
 
                     if element.position == 0:
                         position = position_list.pop() - 1
@@ -264,6 +317,8 @@ class GaugeManager:
 
                     gauge_instance.gauge = LightIndicatorGauge(gauge_window, title=element.name,
                                                                description='System Power')
+
+                    gauge_instance.gauge.resize(element.size * 400, element.size * 300)
 
                     if element.position == 0:
                         position = position_list.pop() - 1

@@ -468,6 +468,8 @@ class GaugeCustomizationPanel(ttk.Frame):
         self.red_frame.pack(side=tk.TOP)
         self.position_frame = tk.Frame(self.current_gauge_settings_frame)
         self.position_frame.pack(side=tk.TOP)
+        self.size_frame = tk.Frame(self.current_gauge_settings_frame)
+        self.size_frame.pack(side=tk.TOP)
 
         self.current_gauge_name_label = tk.Label(self.name_frame, font=("Roboto Medium", 10), text="Gauge Name:")
         self.current_gauge_name_label.pack(side=tk.LEFT)
@@ -520,6 +522,27 @@ class GaugeCustomizationPanel(ttk.Frame):
                                                command=self.option_menu)
         self.dropdown_position.pack()
 
+        # Slider that will handle size adjustments of gauges
+        self.slider_text = tk.Label(self.size_frame, text = "Gauge Size (0.5x-2x):", font=("Roboto Medium", 10))
+        self.slider_text.pack(side=tk.TOP)
+
+        self.scale_float = tk.DoubleVar(value=0)
+        self.gauge_scale_slider = ttk.Scale(self.size_frame,
+                                            from_=0.5,
+                                            to=2,
+                                            length=200,
+                                            orient='horizontal',
+                                            variable=self.scale_float)
+        self.gauge_scale_slider.bind("<ButtonRelease-1>", self.update_scale)
+
+        self.gauge_scale_slider.pack(side=tk.TOP)
+
+        # Progress bar to show how far along is the slider, may change to show number
+        self.gauge_scale_progress = ttk.Progressbar(self.size_frame,
+                                                    variable=self.scale_float,
+                                                    maximum=2)
+        self.gauge_scale_progress.pack(side=tk.TOP)
+
         # Frame that will hold the current way the gauge looks
 
         self.current_gauge_view = tk.Frame(self.current_gauge_view_and_settings)
@@ -546,6 +569,15 @@ class GaugeCustomizationPanel(ttk.Frame):
         self.display_gauge_manager = GaugeManager()  # Ryan's gauge manager
 
         # TODO: Add widgets to display statistics like min, max, average, etc.
+
+    def update_scale(self, e):
+        print("This is the epic number")
+        print(self.scale_float.get())
+        # Updates the size in a specific gauge
+        if len(self.data_manager.user_selected_gauges_list) != 0:
+            self.data_manager.user_selected_gauges_list[self.current_gauge_position].size = self.scale_float.get()
+
+            self.refresh_customization_gauge()
 
     def option_menu(self, number):
         print("Working")
@@ -646,6 +678,12 @@ class GaugeCustomizationPanel(ttk.Frame):
 
         self.current_gauge_name_entry.delete(0, 'end')
 
+    def refresh_customization_gauge(self):
+        if len(self.data_manager.user_selected_gauges_list) != 0:
+            for widget in self.current_gauge_view.winfo_children():
+                widget.destroy()
+            self.gauge_manager.draw_gauge(self.current_gauge_view,
+                                          self.data_manager.user_selected_gauges_list[self.current_gauge_position])
     def change_blue(self):
         """Only changes the blue range if it fits within the detected minimum and maximum and the blue high is above
         the blue low"""
