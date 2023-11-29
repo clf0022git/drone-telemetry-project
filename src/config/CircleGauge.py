@@ -90,7 +90,17 @@ class CircleGauge(GaugeBase):
                     self.canvas.create_text(x, y, text=str(num), font=('Arial', 8))
                 else:
                     if max_degree == 360:
-                        self.canvas.create_text(x, y + 20, text=str(num), font=('Arial', 8))
+                        if not self.resize_mode:
+                            self.canvas.create_text(x, y + 20, text=str(num), font=('Arial', 8))
+                        else:
+                            # Recalculate the position for the last number when resized
+                            # The last number in a 360-degree gauge is typically placed slightly below the bottom center
+                            # adjusted_x = center_x
+                            # adjusted_y = center_y - number_radius + 20
+                            # self.canvas.create_text(adjusted_x, adjusted_y, text=str(num), font=('Arial', 8))
+
+                            # I cannot get this to work, so I am going to omit the last number in the case of a resize
+                            pass
                     else:
                         self.canvas.create_text(x, y, text=str(num), font=('Arial', 8))
 
