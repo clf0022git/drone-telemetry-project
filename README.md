@@ -27,7 +27,6 @@ This project was created for Group 3’s CS 499 project in Fall 2023. Its purpos
 * Pandas: pip install pandas
 
 ## Program Files
-- - -
 This project contains a number of files, each of which contains or controls different aspects of the program’s functionality
 
 ### Config files
