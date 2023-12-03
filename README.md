@@ -22,6 +22,7 @@ This project was created for Group 3’s CS 499 project in Fall 2023. Its purpos
 3. Run the main.py file with Python version 3.12 or newer.
 
 ## Dependencies
+* Express install: `pip install -r requirements.txt`
 * Tkinter: pip install tk (should come pre-installed with Windows builds of Python)
 * VLC Media Player: pip install python-vlc (this only installs the Python bindings, you must install the media player separately)
 * Pandas: pip install pandas

@@ -1,18 +1,7 @@
 import math
-
 import numpy as np
 from numpy import sin, cos, pi
-import plotly.graph_objects as go
-import datetime as dt
-import datetime as datetime
-import tkinter as Tkinter
 import tkinter as tk
-import tk_tools
-from matplotlib import pyplot as plt
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-from matplotlib import style
-import matplotlib.animation as animation
-
 from src.config.BarGauge import BarGauge
 from src.config.CircleGauge import CircleGauge
 from src.config.ClockGauge import ClockGauge
@@ -23,8 +12,6 @@ from src.config.XPlotGauge import XPlotGauge
 from src.config.XYPlotGauge import XYPlotGauge
 from src.data.input import DataManager
 
-
-# from src.gui.window import GaugeWindow
 
 # Manager class for the gauges
 class CustomizationGaugeManager:
