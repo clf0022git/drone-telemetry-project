@@ -26,6 +26,33 @@ This project was created for Group 3’s CS 499 project in Fall 2023. Its purpos
 * VLC Media Player: pip install python-vlc (this only installs the Python bindings, you must install the media player separately)
 * Pandas: pip install pandas
 
+## Program Files
+- - -
+This project contains a number of files, each of which contains or controls different aspects of the program’s functionality
+
+### Config files
+* BarGauge.py: GaugeBase subclass containing functionality for the bar gauge
+* CircleGauge.py: GaugeBase subclass containing functionality for the circle gauge
+* ClockGauge.py: GaugeBase subclass containing functionality for the clock-based gauges (running time, stopwatch, clock)
+* CustomizationGaugeManager.py: Controls the display of gauge/graph examples in the GaugeCustomization panel
+* GaugeBase.py: Super class that defines base functionality and variables for all Gauge subclasses/files
+* GaugeManager.py: Controls the display, positioning, and updating of graph/gauge data
+* LightIndicatorGauge.py: GaugeBase subclass containing functionality for the on/off light gauge
+* NumberDisplayGauge.py: GaugeBase subclass containing functionality for the number display gauge
+* TextDisplayGauge.py: GaugeBase subclass containing functionality for the text display gauge
+* XPlotGauge.py: GaugeBase subclass containing functionality for the X-plot graph/gauge
+* XYPlotGauge.py: GaugeBase subclass containing functionality for the X-by-Y plot graph/gauge.
+### Data files
+* fileManager.py: Contains the functions for saving and loading all information (name, data, statistics, color range values) for each of the user-selected gauges
+* Input.py: Contains the DataManager class, which is used for parsing and storing information from user-selected data files. This also includes functionality for selecting and searching through data fields, checking the data types, and displaying the appropriate selectable gauge types. Selection of a gauge will store information about that gauge in an instance of the TemporaryGauge class.
+* Statistics.py: Contains the class used for calculating the statistics for a selected data type
+### GUI files
+* Panels.py: Contains all of the function classes and functions used to run the Configuration, GaugeCustomization, and Playback panels in our programs GUI.
+* Windows.py: This file contains the instantiation of our program’s main loop and spawns the main window used for the GUI
+### Playback files
+* Video.py: This file contains all of the functionality for running the video player
+
+
 ## Contributors
 * Owen Stinson
 * Chris Fechter
